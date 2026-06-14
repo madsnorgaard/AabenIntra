@@ -1,0 +1,13 @@
+name: 'AabenIntra Groups'
+description: 'Workspace groups with Document + Tip (tips & tricks) sharing, members-only by default.'
+type: 'Site'
+install:
+  - group
+  - gnode
+  - content_translation
+  - aabenintra_groups
+# The aabenintra_groups module builds the Workspace group type, the Document/Tip
+# content plugins, the Tip content type + fields, and the member role in its
+# install hook (group relationship plugins are not cleanly importable as plain
+# config). Apply AFTER aabenintra_content + aabenintra_i18n. Grant the site
+# administrator role 'administer group' + 'access group overview' post-apply.

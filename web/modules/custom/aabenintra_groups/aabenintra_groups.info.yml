@@ -1,0 +1,11 @@
+name: 'AabenIntra Groups'
+type: module
+description: 'Workspace group type, Document/Tip content plugins, Tip content type and member role for AabenIntra. Group plugins are set up in code because they are not cleanly importable as plain recipe config.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - group:group
+  - group:gnode
+  - drupal:node
+  - drupal:taxonomy

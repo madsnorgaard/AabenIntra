@@ -1,0 +1,24 @@
+name: 'AabenIntra Internationalisation'
+description: 'Bilingual EN/DA: Danish language, URL-prefix negotiation, content/config/interface translation, and shipped Danish translations of the AabenIntra UI strings.'
+type: 'Site'
+install:
+  - language
+  - locale
+  - content_translation
+  - config_translation
+  - aabenintra_i18n
+config:
+  actions:
+    system.site:
+      simpleConfigUpdate:
+        default_langcode: en
+# IMPORTANT (deploy note): installing the `language` module via a recipe does NOT
+# fully register its service container (the `path_processor_language` service is
+# missing), so URL language negotiation (/da) is inactive until the modules are
+# enabled via drush. Reliable sequence for a fresh tenant:
+#   drush en language locale content_translation config_translation -y
+#   drush language:add da
+#   drush recipe web/recipes/aabenintra_i18n   (ships content_settings + Danish .po)
+#   drush locale:update                        (core/contrib Danish interface)
+# then set URL-first negotiation via the language negotiator (see docs).
+# Config in config/ (content_settings, default_langcode) imports automatically.

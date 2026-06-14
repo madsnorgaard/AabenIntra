@@ -1,0 +1,144 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for AabenIntra Groups.
+ *
+ * Builds the Workspace group type, the Document/Tip content plugins, the member
+ * role and the Tip content type in code. Group relationship plugins trigger
+ * bundle-field creation that a recipe's plain config import cannot reproduce, so
+ * this runs programmatically and idempotently.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\group\Entity\Group;
+use Drupal\group\Entity\GroupRole;
+use Drupal\group\Entity\GroupType;
+use Drupal\node\Entity\NodeType;
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_groups_install(): void {
+  $etm = \Drupal::entityTypeManager();
+  $display_repo = \Drupal::service('entity_display.repository');
+
+  // --- Tip content type + fields ---
+  if (!NodeType::load('tip')) {
+    NodeType::create([
+      'type' => 'tip',
+      'name' => 'Tip',
+      'description' => 'A quick, crowd-sourced tip or trick shared with a group.',
+      'new_revision' => TRUE,
+      'preview_mode' => DRUPAL_OPTIONAL,
+    ])->save();
+  }
+  // Body (reuse core storage from the content recipe / standard).
+  if (FieldStorageConfig::loadByName('node', 'body') && !FieldConfig::loadByName('node', 'tip', 'body')) {
+    FieldConfig::create(['field_name' => 'body', 'entity_type' => 'node', 'bundle' => 'tip', 'label' => 'Body', 'translatable' => TRUE])->save();
+    $display_repo->getFormDisplay('node', 'tip')->setComponent('body', ['type' => 'text_textarea_with_summary'])->save();
+    $display_repo->getViewDisplay('node', 'tip')->setComponent('body', ['type' => 'text_default', 'label' => 'hidden'])->save();
+  }
+
+  $fields = [
+    'field_topic' => [
+      'type' => 'entity_reference', 'cardinality' => -1, 'label' => 'Topic',
+      'storage' => ['target_type' => 'taxonomy_term'],
+      'field' => ['handler' => 'default:taxonomy_term', 'handler_settings' => ['target_bundles' => ['topic' => 'topic']]],
+      'widget' => ['type' => 'options_buttons'], 'formatter' => ['type' => 'entity_reference_label', 'label' => 'inline'],
+    ],
+    'field_category' => [
+      'type' => 'list_string', 'cardinality' => 1, 'label' => 'Category',
+      'storage' => ['allowed_values' => ['how_to' => 'How-to', 'best_practice' => 'Best practice', 'troubleshooting' => 'Troubleshooting', 'snippet' => 'Snippet']],
+      'field' => [], 'widget' => ['type' => 'options_select'], 'formatter' => ['type' => 'list_default', 'label' => 'inline'],
+    ],
+    'field_attachments' => [
+      'type' => 'file', 'cardinality' => -1, 'label' => 'Attachments',
+      'storage' => ['uri_scheme' => 'public', 'target_type' => 'file'],
+      'field' => ['file_extensions' => 'pdf doc docx xls xlsx ppt pptx txt zip png jpg'],
+      'widget' => ['type' => 'file_generic'], 'formatter' => ['type' => 'file_default', 'label' => 'above'],
+    ],
+  ];
+  foreach ($fields as $name => $def) {
+    if (!FieldStorageConfig::loadByName('node', $name)) {
+      FieldStorageConfig::create(['field_name' => $name, 'entity_type' => 'node', 'type' => $def['type'], 'cardinality' => $def['cardinality'], 'settings' => $def['storage']])->save();
+    }
+    if (!FieldConfig::loadByName('node', 'tip', $name)) {
+      FieldConfig::create(['field_name' => $name, 'entity_type' => 'node', 'bundle' => 'tip', 'label' => $def['label'], 'settings' => $def['field']])->save();
+    }
+    $display_repo->getFormDisplay('node', 'tip')->setComponent($name, $def['widget'])->save();
+    $display_repo->getViewDisplay('node', 'tip')->setComponent($name, $def['formatter'])->save();
+  }
+
+  if (\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::service('content_translation.manager')->setEnabled('node', 'tip', TRUE);
+  }
+
+  // --- Workspace group type ---
+  $gt = GroupType::load('workspace');
+  if (!$gt) {
+    $gt = GroupType::create([
+      'id' => 'workspace',
+      'label' => 'Workspace',
+      'description' => 'A team or department workspace for sharing documents and tips.',
+      'creator_membership' => TRUE,
+    ]);
+    $gt->save();
+  }
+
+  // --- Content plugins (Document + Tip as group nodes) ---
+  // Wrapped: during recipe-time install the group_relationship entity schema may
+  // not be committed yet. If so, finalise with aabenintra_groups_install_plugins()
+  // (post-recipe drush step). Outside a recipe this succeeds immediately.
+  try {
+    aabenintra_groups_install_plugins();
+  }
+  catch (\Throwable $e) {
+    \Drupal::logger('aabenintra_groups')->warning('Group content plugins not yet installable during install (@msg). Run drush aabenintra_groups:install-plugins post-deploy.', ['@msg' => $e->getMessage()]);
+  }
+
+  aabenintra_groups_install_member_role();
+}
+
+/**
+ * Installs the Document + Tip group content plugins on the Workspace type.
+ *
+ * Idempotent. Safe to call again post-recipe once the group schema is ready.
+ */
+function aabenintra_groups_install_plugins(): void {
+  $gt = GroupType::load('workspace');
+  if (!$gt) {
+    return;
+  }
+  $grt_storage = \Drupal::entityTypeManager()->getStorage('group_relationship_type');
+  foreach (['group_node:document', 'group_node:tip'] as $plugin) {
+    $id = $grt_storage->getRelationshipTypeId('workspace', $plugin);
+    if (!$grt_storage->load($id)) {
+      $grt_storage->createFromPlugin($gt, $plugin)->save();
+    }
+  }
+  aabenintra_groups_install_member_role();
+}
+
+/**
+ * Creates the Workspace member role (insider scope) if missing.
+ */
+function aabenintra_groups_install_member_role(): void {
+  if (!GroupRole::load('workspace-member')) {
+    GroupRole::create([
+      'id' => 'workspace-member',
+      'label' => 'Member',
+      'group_type' => 'workspace',
+      'scope' => 'insider',
+      'global_role' => 'authenticated',
+      'permissions' => [
+        'view group',
+        'view group_node:document entity', 'create group_node:document entity', 'update own group_node:document entity',
+        'view group_node:tip entity', 'create group_node:tip entity', 'update own group_node:tip entity',
+      ],
+    ])->save();
+  }
+}
