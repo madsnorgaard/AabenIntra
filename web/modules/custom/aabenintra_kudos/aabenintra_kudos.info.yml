@@ -1,0 +1,11 @@
+name: 'AabenIntra Kudos'
+type: module
+description: 'Peer recognition: give kudos with a badge, shown on a recognition wall.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node
+  - drupal:user
+  - drupal:options
+  - aabenintra:aabenintra_social

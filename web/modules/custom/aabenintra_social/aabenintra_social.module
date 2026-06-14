@@ -32,10 +32,12 @@ function aabenintra_social_theme(): array {
 /**
  * Implements hook_ENTITY_TYPE_view() for nodes.
  *
- * Appends the reactions bar to the full view of bundles that carry comments.
+ * Appends the reactions bar to the full view of any social-enabled bundle
+ * (one carrying the shared field_comments field; story/document by default,
+ * plus anything else that opts in such as kudos).
  */
 function aabenintra_social_node_view(array &$build, NodeInterface $node, $display, string $view_mode): void {
-  if ($view_mode !== 'full' || !in_array($node->bundle(), _aabenintra_social_bundles(), TRUE)) {
+  if ($view_mode !== 'full' || !$node->hasField('field_comments')) {
     return;
   }
   /** @var \Drupal\aabenintra_social\Service\ReactionService $service */

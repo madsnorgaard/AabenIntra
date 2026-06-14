@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Recognition wall: recent kudos as cards.
+ */
+#}
+<div class="ai-kudos layout-container">
+  <div class="ai-kudos__head">
+    <h1 class="ai-greeting">{{ 'Recognition wall'|t }}</h1>
+    {% if can_give %}
+      <a class="button ai-kudos__give" href="{{ give_url }}">{{ 'Give kudos'|t }}</a>
+    {% endif %}
+  </div>
+  <p class="ai-kudos__intro">{{ 'Celebrate colleagues who made a difference.'|t }}</p>
+
+  <div class="ai-kudos__grid">
+    {% for c in cards %}
+      <article class="ai-kudos__card ai-kudos__card--{{ c.badge_key }}">
+        {% if c.badge %}<span class="ai-kudos__badge">{{ c.badge }}</span>{% endif %}
+        <p class="ai-kudos__line">
+          <strong>{{ c.giver }}</strong> {{ 'recognised'|t }}
+          {% if c.recipient_url %}<a href="{{ c.recipient_url }}"><strong>{{ c.recipient }}</strong></a>{% else %}<strong>{{ c.recipient }}</strong>{% endif %}
+        </p>
+        {% if c.message %}<p class="ai-kudos__message">{{ c.message }}</p>{% endif %}
+        <p class="ai-kudos__meta"><a href="{{ c.url }}">{{ c.created }}</a></p>
+      </article>
+    {% else %}
+      <p>{{ 'No kudos yet. Be the first to recognise a colleague.'|t }}</p>
+    {% endfor %}
+  </div>
+</div>

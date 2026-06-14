@@ -1,0 +1,7 @@
+aabenintra_kudos.wall:
+  path: '/kudos'
+  defaults:
+    _controller: '\Drupal\aabenintra_kudos\Controller\KudosController::wall'
+    _title: 'Recognition wall'
+  requirements:
+    _permission: 'access content'

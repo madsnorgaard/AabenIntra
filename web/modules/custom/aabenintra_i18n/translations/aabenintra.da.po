@@ -190,3 +190,22 @@ msgstr "Støtte"
 
 msgid "Comments"
 msgstr "Kommentarer"
+
+# Kudos / recognition wall
+msgid "Recognition wall"
+msgstr "Anerkendelsesvæg"
+
+msgid "Give kudos"
+msgstr "Giv ros"
+
+msgid "Celebrate colleagues who made a difference."
+msgstr "Fejr kolleger, der har gjort en forskel."
+
+msgid "recognised"
+msgstr "anerkendte"
+
+msgid "No kudos yet. Be the first to recognise a colleague."
+msgstr "Ingen anerkendelser endnu. Vær den første til at anerkende en kollega."
+
+msgid "Recognition"
+msgstr "Anerkendelse"

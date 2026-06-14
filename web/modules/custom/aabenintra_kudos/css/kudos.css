@@ -1,0 +1,50 @@
+/* Recognition wall. Uses theme tokens with safe fallbacks. */
+.ai-kudos { padding-block: var(--space-6, 2rem); }
+.ai-kudos__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4, 1rem); flex-wrap: wrap; }
+.ai-kudos__intro { color: var(--muted, #777); margin-bottom: var(--space-5, 1.5rem); }
+
+.ai-kudos__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--space-4, 1rem);
+}
+.ai-kudos__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-5, 1.5rem);
+  background: var(--paper-2, #fff);
+  border: 1px solid var(--line, #e7e1d6);
+  border-top: 4px solid var(--accent, #a8552f);
+  border-radius: var(--radius-l, 12px);
+}
+.ai-kudos__badge {
+  align-self: flex-start;
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent-tint, #f3e3d8);
+  color: var(--accent-ink, #8a4427);
+}
+.ai-kudos__line { margin: 0; color: var(--ink, #222); }
+.ai-kudos__line a { color: var(--accent-ink, #8a4427); text-decoration: none; }
+.ai-kudos__line a:hover { text-decoration: underline; }
+.ai-kudos__message {
+  margin: 0;
+  color: var(--ink-2, #444);
+  font-family: var(--font-display, serif);
+  font-size: var(--fs-l, 1.125rem);
+  line-height: 1.5;
+}
+.ai-kudos__meta { margin: 0; margin-top: auto; }
+.ai-kudos__meta a { color: var(--muted, #777); font-size: var(--fs-xs, 0.75rem); text-decoration: none; }
+
+/* Per-badge accent tints */
+.ai-kudos__card--teamwork { border-top-color: #0d9488; }
+.ai-kudos__card--innovation { border-top-color: #6d28d9; }
+.ai-kudos__card--helpfulness { border-top-color: #2563af; }
+.ai-kudos__card--leadership { border-top-color: #d97706; }
+.ai-kudos__card--customer_focus { border-top-color: #db2777; }

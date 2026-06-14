@@ -1,0 +1,159 @@
+<?php
+
+/**
+ * @file
+ * Install for AabenIntra Kudos: kudos node type, fields and displays.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\NodeType;
+
+/**
+ * Badge options for a kudos.
+ */
+function _aabenintra_kudos_badges(): array {
+  return [
+    'teamwork' => 'Teamwork',
+    'innovation' => 'Innovation',
+    'helpfulness' => 'Helpfulness',
+    'leadership' => 'Leadership',
+    'customer_focus' => 'Customer focus',
+  ];
+}
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_kudos_install(): void {
+  // Content type.
+  if (!NodeType::load('kudos')) {
+    NodeType::create([
+      'type' => 'kudos',
+      'name' => 'Kudos',
+      'description' => 'A piece of peer recognition for a colleague.',
+      'new_revision' => TRUE,
+      'display_submitted' => TRUE,
+      'preview_mode' => 1,
+    ])->save();
+  }
+
+  // field_recipient: who is being recognised.
+  if (!FieldStorageConfig::loadByName('node', 'field_recipient')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_recipient',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'user'],
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!FieldConfig::loadByName('node', 'kudos', 'field_recipient')) {
+    FieldConfig::create([
+      'field_name' => 'field_recipient',
+      'entity_type' => 'node',
+      'bundle' => 'kudos',
+      'label' => 'Recipient',
+      'required' => TRUE,
+      'settings' => [
+        'handler' => 'default:user',
+        'handler_settings' => ['include_anonymous' => FALSE],
+      ],
+    ])->save();
+  }
+
+  // field_badge: the recognition category.
+  if (!FieldStorageConfig::loadByName('node', 'field_badge')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_badge',
+      'entity_type' => 'node',
+      'type' => 'list_string',
+      'settings' => ['allowed_values' => _aabenintra_kudos_badges()],
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!FieldConfig::loadByName('node', 'kudos', 'field_badge')) {
+    FieldConfig::create([
+      'field_name' => 'field_badge',
+      'entity_type' => 'node',
+      'bundle' => 'kudos',
+      'label' => 'Badge',
+      'required' => TRUE,
+    ])->save();
+  }
+
+  // Reuse the body field for the praise message.
+  if (!FieldConfig::loadByName('node', 'kudos', 'body')) {
+    $body_storage = FieldStorageConfig::loadByName('node', 'body');
+    if ($body_storage) {
+      FieldConfig::create([
+        'field_name' => 'body',
+        'entity_type' => 'node',
+        'bundle' => 'kudos',
+        'label' => 'Message',
+      ])->save();
+    }
+  }
+
+  // Opt kudos into comments + reactions (shared field from aabenintra_social).
+  if (FieldStorageConfig::loadByName('node', 'field_comments') && !FieldConfig::loadByName('node', 'kudos', 'field_comments')) {
+    FieldConfig::create([
+      'field_name' => 'field_comments',
+      'entity_type' => 'node',
+      'bundle' => 'kudos',
+      'label' => 'Comments',
+      'default_value' => [[
+        'status' => 2,
+        'cid' => 0,
+        'last_comment_timestamp' => 0,
+        'last_comment_name' => '',
+        'last_comment_uid' => 0,
+        'comment_count' => 0,
+      ]],
+      'settings' => [
+        'default_mode' => 1,
+        'per_page' => 50,
+        'form_location' => 1,
+        'anonymous' => 0,
+        'preview' => 0,
+      ],
+    ])->save();
+  }
+
+  // Displays.
+  $repo = \Drupal::service('entity_display.repository');
+  $form = $repo->getFormDisplay('node', 'kudos', 'default');
+  $form->setComponent('field_recipient', ['type' => 'entity_reference_autocomplete', 'weight' => 0])
+    ->setComponent('field_badge', ['type' => 'options_select', 'weight' => 1])
+    ->setComponent('body', ['type' => 'text_textarea', 'weight' => 2])
+    ->removeComponent('field_comments')
+    ->save();
+
+  $view = $repo->getViewDisplay('node', 'kudos', 'default');
+  $view->setComponent('field_recipient', ['type' => 'entity_reference_label', 'label' => 'inline', 'weight' => 0])
+    ->setComponent('field_badge', ['type' => 'list_default', 'label' => 'inline', 'weight' => 1])
+    ->setComponent('body', ['type' => 'text_default', 'label' => 'hidden', 'weight' => 2])
+    ->setComponent('field_comments', ['type' => 'comment_default', 'weight' => 210])
+    ->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function aabenintra_kudos_uninstall(): void {
+  foreach (['field_recipient', 'field_badge', 'field_comments'] as $field) {
+    if ($config = FieldConfig::loadByName('node', 'kudos', $field)) {
+      $config->delete();
+    }
+  }
+  foreach (['field_recipient', 'field_badge'] as $field) {
+    if ($storage = FieldStorageConfig::loadByName('node', $field)) {
+      $storage->delete();
+    }
+  }
+  if ($type = NodeType::load('kudos')) {
+    $type->delete();
+  }
+}

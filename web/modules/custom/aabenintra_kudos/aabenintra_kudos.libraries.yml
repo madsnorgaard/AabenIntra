@@ -1,0 +1,5 @@
+wall:
+  version: VERSION
+  css:
+    component:
+      css/kudos.css: {}

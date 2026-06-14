@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Kudos: theme hook + automatic kudos title.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function aabenintra_kudos_theme(): array {
+  return [
+    'aabenintra_kudos_wall' => [
+      'variables' => ['cards' => [], 'total' => 0, 'give_url' => '', 'can_give' => FALSE],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node forms.
+ *
+ * Kudos titles are generated from the recipient, so the field is hidden and
+ * filled by an entity builder before validation.
+ */
+function aabenintra_kudos_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$node instanceof NodeInterface || $node->bundle() !== 'kudos') {
+    return;
+  }
+  if (isset($form['title'])) {
+    $form['title']['#access'] = FALSE;
+  }
+  $form['#entity_builders'][] = 'aabenintra_kudos_title_builder';
+}
+
+/**
+ * Entity builder: derives the kudos title from its recipient.
+ */
+function aabenintra_kudos_title_builder(string $entity_type, NodeInterface $node, array &$form, FormStateInterface $form_state): void {
+  $recipient = $node->get('field_recipient')->entity;
+  if ($recipient) {
+    $node->setTitle(t('Kudos to @name', ['@name' => $recipient->getDisplayName()]));
+  }
+  elseif ($node->label() === NULL || $node->label() === '') {
+    $node->setTitle(t('Kudos'));
+  }
+}
