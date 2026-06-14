@@ -34,13 +34,25 @@ final class DashboardController extends ControllerBase {
    */
   public function page(): array {
     $storage = $this->entityTypeManager()->getStorage('node');
-    $ids = $storage->getQuery()
+    $query = $storage->getQuery()
       ->accessCheck(TRUE)
       ->condition('type', 'story')
-      ->condition('status', 1)
-      ->sort('created', 'DESC')
-      ->range(0, 30)
-      ->execute();
+      ->condition('status', 1);
+
+    // Org-unit cascade: show org-wide posts (no unit) + posts targeted at the
+    // user's unit or any of its ancestors (a division post reaches its teams).
+    $account = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
+    if ($account && $account->hasField('field_primary_org_unit') && !$account->get('field_primary_org_unit')->isEmpty()) {
+      $unit_tid = (int) $account->get('field_primary_org_unit')->target_id;
+      $lineage = $this->entityTypeManager()->getStorage('taxonomy_term')->loadAllParents($unit_tid);
+      $unit_ids = array_map('intval', array_keys($lineage));
+      $org = $query->orConditionGroup()
+        ->notExists('field_org_unit')
+        ->condition('field_org_unit', $unit_ids, 'IN');
+      $query->condition($org);
+    }
+
+    $ids = $query->sort('created', 'DESC')->range(0, 30)->execute();
     $nodes = $storage->loadMultiple($ids);
 
     // Per-user personalisation: pins and explicit ordering.

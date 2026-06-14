@@ -6,6 +6,8 @@ dependencies:
     - field.field.node.story.field_audience
     - field.field.node.story.field_department
     - field.field.node.story.field_lead_image
+    - field.field.node.story.field_location
+    - field.field.node.story.field_org_unit
     - field.field.node.story.field_pinned
     - field.field.node.story.field_tile_size
     - field.field.node.story.field_topics
@@ -54,6 +56,18 @@ content:
     settings:
       media_types: {  }
     third_party_settings: {  }
+  field_location:
+    type: options_select
+    weight: 129
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_org_unit:
+    type: options_select
+    weight: 128
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   field_pinned:
     type: boolean_checkbox
     weight: 127
@@ -72,6 +86,13 @@ content:
     weight: 124
     region: content
     settings: {  }
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
     third_party_settings: {  }
   path:
     type: path
@@ -93,6 +114,11 @@ content:
     settings:
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  translation:
+    weight: 10
+    region: content
+    settings: {  }
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete

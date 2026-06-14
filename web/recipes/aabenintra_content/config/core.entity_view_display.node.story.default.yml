@@ -6,6 +6,8 @@ dependencies:
     - field.field.node.story.field_audience
     - field.field.node.story.field_department
     - field.field.node.story.field_lead_image
+    - field.field.node.story.field_location
+    - field.field.node.story.field_org_unit
     - field.field.node.story.field_pinned
     - field.field.node.story.field_tile_size
     - field.field.node.story.field_topics
@@ -51,6 +53,22 @@ content:
     third_party_settings: {  }
     weight: 102
     region: content
+  field_location:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_org_unit:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 108
+    region: content
   field_pinned:
     type: boolean
     label: inline
@@ -81,4 +99,5 @@ content:
     third_party_settings: {  }
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  langcode: true

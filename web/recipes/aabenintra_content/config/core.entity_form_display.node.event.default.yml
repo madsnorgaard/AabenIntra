@@ -5,6 +5,8 @@ dependencies:
     - field.field.node.event.body
     - field.field.node.event.field_department
     - field.field.node.event.field_event_date
+    - field.field.node.event.field_location
+    - field.field.node.event.field_org_unit
     - node.type.event
   module:
     - datetime
@@ -43,6 +45,25 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_location:
+    type: options_select
+    weight: 125
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_org_unit:
+    type: options_select
+    weight: 124
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  langcode:
+    type: language_select
+    weight: 2
+    region: content
+    settings:
+      include_locked: true
+    third_party_settings: {  }
   path:
     type: path
     weight: 30
@@ -63,6 +84,11 @@ content:
     settings:
       size: 60
       placeholder: ''
+    third_party_settings: {  }
+  translation:
+    weight: 10
+    region: content
+    settings: {  }
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete

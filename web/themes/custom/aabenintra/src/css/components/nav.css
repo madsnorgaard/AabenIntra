@@ -72,3 +72,19 @@
 }
 .ai-langswitch__link:hover { background: var(--accent-tint); color: var(--accent-ink); }
 .ai-langswitch__link.is-active { background: var(--accent-fill); color: var(--on-accent); }
+
+/* Organisation tree in the nav drawer (depth-indented) */
+.ai-nav__org { display: flex; flex-direction: column; }
+.ai-nav__org-item {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  color: var(--ink-2);
+  text-decoration: none;
+  border-radius: var(--radius-s);
+  font-size: var(--fs-s);
+}
+.ai-nav__org-item:hover { background: var(--accent-tint); color: var(--accent-ink); }
+.ai-nav__org-item--d0 { font-weight: var(--fw-semibold); color: var(--ink); }
+.ai-nav__org-item--d1 { padding-left: calc(var(--space-3) + 0.75rem); }
+.ai-nav__org-item--d2 { padding-left: calc(var(--space-3) + 1.5rem); }
+.ai-nav__org-item--d3 { padding-left: calc(var(--space-3) + 2.25rem); }

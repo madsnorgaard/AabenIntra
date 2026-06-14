@@ -33,6 +33,14 @@
       <h2 class="ai-nav__title">{{ 'Quick links'|t }}</h2>
       <nav class="ai-nav__menu" aria-label="{{ 'Quick links'|t }}">{{ aabenintra_quick_links }}</nav>
     {% endif %}
+    {% if aabenintra_org_tree %}
+      <h2 class="ai-nav__title">{{ 'Organisation'|t }}</h2>
+      <nav class="ai-nav__org" aria-label="{{ 'Organisation'|t }}">
+        {% for item in aabenintra_org_tree %}
+          <a href="{{ item.url }}" class="ai-nav__org-item ai-nav__org-item--d{{ item.depth }}">{{ item.name }}</a>
+        {% endfor %}
+      </nav>
+    {% endif %}
   </aside>
 
   <main class="ai-main" role="main">

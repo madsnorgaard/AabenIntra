@@ -8,3 +8,9 @@ services:
     arguments: ['@aabenintra_theme.preferences']
     tags:
       - { name: cache.context }
+
+  cache_context.aabenintra_user_groups:
+    class: Drupal\aabenintra_theme\Cache\UserGroupsHashContext
+    arguments: ['@current_user', '@database']
+    tags:
+      - { name: cache.context }

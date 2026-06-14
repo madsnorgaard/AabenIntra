@@ -77,61 +77,94 @@ function aabenintra_groups_install(): void {
     \Drupal::service('content_translation.manager')->setEnabled('node', 'tip', TRUE);
   }
 
-  // --- Workspace group type ---
-  $gt = GroupType::load('workspace');
-  if (!$gt) {
-    $gt = GroupType::create([
-      'id' => 'workspace',
-      'label' => 'Workspace',
-      'description' => 'A team or department workspace for sharing documents and tips.',
-      'creator_membership' => TRUE,
-    ]);
-    $gt->save();
-  }
+  // Create the collaboration group types + visibility field (config; safe during
+  // a recipe-time install).
+  aabenintra_groups_ensure_types();
 
-  // --- Content plugins (Document + Tip as group nodes) ---
-  // Wrapped: during recipe-time install the group_relationship entity schema may
-  // not be committed yet. If so, finalise with aabenintra_groups_install_plugins()
-  // (post-recipe drush step). Outside a recipe this succeeds immediately.
+  // Content plugins + member roles need the group schema committed, which a
+  // recipe-time install may defer - finalise via the drush command.
   try {
     aabenintra_groups_install_plugins();
   }
   catch (\Throwable $e) {
-    \Drupal::logger('aabenintra_groups')->warning('Group content plugins not yet installable during install (@msg). Run drush aabenintra_groups:install-plugins post-deploy.', ['@msg' => $e->getMessage()]);
+    \Drupal::logger('aabenintra_groups')->warning('Group plugins deferred (@msg). Run drush aabenintra_groups:install-plugins post-deploy.', ['@msg' => $e->getMessage()]);
   }
-
-  aabenintra_groups_install_member_role();
 }
 
 /**
- * Installs the Document + Tip group content plugins on the Workspace type.
+ * The collaboration group types: id => [label, description].
+ */
+function _aabenintra_groups_types(): array {
+  return [
+    'workspace' => ['Workspace', 'A team or department workspace for sharing documents and tips.'],
+    'community' => ['Community', 'A cross-organisation network or community of practice.'],
+  ];
+}
+
+/**
+ * Creates the group types + per-group visibility field (idempotent, config-only).
+ */
+function aabenintra_groups_ensure_types(): void {
+  $display_repo = \Drupal::service('entity_display.repository');
+  if (!FieldStorageConfig::loadByName('group', 'field_group_visibility')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_group_visibility',
+      'entity_type' => 'group',
+      'type' => 'list_string',
+      'cardinality' => 1,
+      'settings' => ['allowed_values' => ['open' => 'Open', 'closed' => 'Closed', 'secret' => 'Secret']],
+    ])->save();
+  }
+  foreach (_aabenintra_groups_types() as $id => [$label, $desc]) {
+    if (!GroupType::load($id)) {
+      GroupType::create(['id' => $id, 'label' => $label, 'description' => $desc, 'creator_membership' => TRUE])->save();
+    }
+    if (!FieldConfig::loadByName('group', $id, 'field_group_visibility')) {
+      FieldConfig::create([
+        'field_name' => 'field_group_visibility',
+        'entity_type' => 'group',
+        'bundle' => $id,
+        'label' => 'Visibility',
+        'default_value' => [['value' => 'closed']],
+      ])->save();
+      $display_repo->getFormDisplay('group', $id)->setComponent('field_group_visibility', ['type' => 'options_select'])->save();
+    }
+  }
+}
+
+/**
+ * Installs Document + Tip plugins + member role on each group type.
  *
  * Idempotent. Safe to call again post-recipe once the group schema is ready.
  */
 function aabenintra_groups_install_plugins(): void {
-  $gt = GroupType::load('workspace');
-  if (!$gt) {
-    return;
-  }
-  $grt_storage = \Drupal::entityTypeManager()->getStorage('group_relationship_type');
-  foreach (['group_node:document', 'group_node:tip'] as $plugin) {
-    $id = $grt_storage->getRelationshipTypeId('workspace', $plugin);
-    if (!$grt_storage->load($id)) {
-      $grt_storage->createFromPlugin($gt, $plugin)->save();
+  aabenintra_groups_ensure_types();
+  $grt = \Drupal::entityTypeManager()->getStorage('group_relationship_type');
+  foreach (array_keys(_aabenintra_groups_types()) as $type) {
+    $gt = GroupType::load($type);
+    if (!$gt) {
+      continue;
     }
+    foreach (['group_node:document', 'group_node:tip'] as $plugin) {
+      $rid = $grt->getRelationshipTypeId($type, $plugin);
+      if (!$grt->load($rid)) {
+        $grt->createFromPlugin($gt, $plugin)->save();
+      }
+    }
+    aabenintra_groups_install_member_role($type);
   }
-  aabenintra_groups_install_member_role();
 }
 
 /**
- * Creates the Workspace member role (insider scope) if missing.
+ * Creates a <type>-member role (insider scope) if missing.
  */
-function aabenintra_groups_install_member_role(): void {
-  if (!GroupRole::load('workspace-member')) {
+function aabenintra_groups_install_member_role(string $type = 'workspace'): void {
+  $rid = $type . '-member';
+  if (!GroupRole::load($rid)) {
     GroupRole::create([
-      'id' => 'workspace-member',
+      'id' => $rid,
       'label' => 'Member',
-      'group_type' => 'workspace',
+      'group_type' => $type,
       'scope' => 'insider',
       'global_role' => 'authenticated',
       'permissions' => [

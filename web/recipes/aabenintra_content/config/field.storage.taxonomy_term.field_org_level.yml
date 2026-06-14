@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_org_level
+field_name: field_org_level
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: organisation
+      label: Organisation
+    -
+      value: division
+      label: Division
+    -
+      value: department
+      label: Department
+    -
+      value: team
+      label: Team
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

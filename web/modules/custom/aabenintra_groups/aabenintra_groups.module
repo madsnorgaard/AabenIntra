@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Groups runtime hooks.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\group\Entity\GroupInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access() for group entities.
+ *
+ * Enforces per-group visibility: a "secret" group (and thus its page) is hidden
+ * from non-members (site group admins still see it). Open/closed nuances and
+ * join-request flows are handled separately (roadmap).
+ */
+function aabenintra_groups_group_access(GroupInterface $group, string $operation, AccountInterface $account): AccessResult {
+  if ($operation !== 'view') {
+    return AccessResult::neutral();
+  }
+  if (!$group->hasField('field_group_visibility') || $group->get('field_group_visibility')->isEmpty()) {
+    return AccessResult::neutral();
+  }
+  if ($group->get('field_group_visibility')->value !== 'secret') {
+    return AccessResult::neutral();
+  }
+  if ($account->hasPermission('administer group')) {
+    return AccessResult::neutral()->cachePerPermissions();
+  }
+  $is_member = $group->getMember($account) !== FALSE;
+  return AccessResult::forbiddenIf(!$is_member)
+    ->addCacheableDependency($group)
+    ->cachePerUser();
+}

@@ -5,6 +5,8 @@ dependencies:
     - field.field.node.event.body
     - field.field.node.event.field_department
     - field.field.node.event.field_event_date
+    - field.field.node.event.field_location
+    - field.field.node.event.field_org_unit
     - node.type.event
   module:
     - datetime
@@ -39,9 +41,26 @@ content:
     third_party_settings: {  }
     weight: 102
     region: content
+  field_location:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  field_org_unit:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 104
+    region: content
   links:
     settings: {  }
     third_party_settings: {  }
     weight: 100
     region: content
-hidden: {  }
+hidden:
+  langcode: true

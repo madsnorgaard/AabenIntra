@@ -5,6 +5,8 @@ dependencies:
     - field.field.node.document.body
     - field.field.node.document.field_department
     - field.field.node.document.field_document_file
+    - field.field.node.document.field_location
+    - field.field.node.document.field_org_unit
     - field.field.node.document.field_topics
     - node.type.document
   module:
@@ -38,6 +40,22 @@ content:
       use_description_as_link_text: true
     third_party_settings: {  }
     weight: 104
+    region: content
+  field_location:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  field_org_unit:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 105
     region: content
   field_topics:
     type: entity_reference_label

@@ -37,6 +37,30 @@ function aabenintra_preprocess_page(array &$variables): void {
   // Build the main + quick-links menus for the left nav drawer.
   $variables['aabenintra_main_menu'] = _aabenintra_build_menu('main');
   $variables['aabenintra_quick_links'] = _aabenintra_build_menu('quick_links');
+
+  // Build the organisation-unit tree for the left nav drawer.
+  $variables['aabenintra_org_tree'] = _aabenintra_org_tree();
+  $variables['#cache']['tags'][] = 'taxonomy_term_list:organisation';
+}
+
+/**
+ * Returns the organisation taxonomy as a flat, depth-tagged list (for the nav).
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function _aabenintra_org_tree(): array {
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $repository = \Drupal::service('entity.repository');
+  $items = [];
+  foreach ($storage->loadTree('organisation', 0, NULL, TRUE) as $term) {
+    $translated = $repository->getTranslationFromContext($term);
+    $items[] = [
+      'name' => $translated->label(),
+      'url' => $translated->toUrl()->toString(),
+      'depth' => (int) $term->depth,
+    ];
+  }
+  return $items;
 }
 
 /**

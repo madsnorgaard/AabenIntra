@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_org_unit
+    - node.type.story
+    - taxonomy.vocabulary.organisation
+id: node.story.field_org_unit
+field_name: field_org_unit
+entity_type: node
+bundle: story
+label: 'Organisation unit'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      organisation: organisation
+field_type: entity_reference

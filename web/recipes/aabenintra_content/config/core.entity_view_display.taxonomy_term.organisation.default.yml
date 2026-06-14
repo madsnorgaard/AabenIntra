@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.organisation.field_org_level
+    - taxonomy.vocabulary.organisation
+  module:
+    - options
+    - text
+id: taxonomy_term.organisation.default
+targetEntityType: taxonomy_term
+bundle: organisation
+mode: default
+content:
+  description:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_org_level:
+    type: list_default
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  langcode: true

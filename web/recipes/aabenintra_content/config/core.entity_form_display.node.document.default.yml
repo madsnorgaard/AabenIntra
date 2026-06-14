@@ -5,6 +5,8 @@ dependencies:
     - field.field.node.document.body
     - field.field.node.document.field_department
     - field.field.node.document.field_document_file
+    - field.field.node.document.field_location
+    - field.field.node.document.field_org_unit
     - field.field.node.document.field_topics
     - node.type.document
   module:
@@ -44,6 +46,18 @@ content:
     region: content
     settings:
       progress_indicator: throbber
+    third_party_settings: {  }
+  field_location:
+    type: options_select
+    weight: 126
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_org_unit:
+    type: options_select
+    weight: 125
+    region: content
+    settings: {  }
     third_party_settings: {  }
   field_topics:
     type: options_buttons
