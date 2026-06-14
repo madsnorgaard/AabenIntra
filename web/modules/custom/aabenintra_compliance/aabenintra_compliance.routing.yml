@@ -1,0 +1,27 @@
+aabenintra_compliance.acknowledge:
+  path: '/aabenintra/acknowledge/{node}'
+  defaults:
+    _controller: '\Drupal\aabenintra_compliance\Controller\AcknowledgeController::acknowledge'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+aabenintra_compliance.report:
+  path: '/admin/reports/mandatory-reads'
+  defaults:
+    _controller: '\Drupal\aabenintra_compliance\Controller\ReportController::report'
+    _title: 'Mandatory reading'
+  requirements:
+    _permission: 'access content overview'
+
+aabenintra_compliance.report_csv:
+  path: '/admin/reports/mandatory-reads/csv'
+  defaults:
+    _controller: '\Drupal\aabenintra_compliance\Controller\ReportController::csv'
+  requirements:
+    _permission: 'access content overview'

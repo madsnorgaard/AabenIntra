@@ -1,0 +1,4 @@
+services:
+  aabenintra_compliance.receipts:
+    class: Drupal\aabenintra_compliance\ReceiptService
+    arguments: ['@database', '@datetime.time']

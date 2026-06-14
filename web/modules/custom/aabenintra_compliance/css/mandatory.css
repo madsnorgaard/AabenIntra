@@ -1,0 +1,22 @@
+/* Mandatory-reading acknowledgement banner. Uses theme tokens when present. */
+.ai-mandatory {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  margin: 0 0 var(--space-5, 1.5rem);
+  padding: var(--space-4, 1rem) var(--space-5, 1.5rem);
+  background: var(--accent-tint, #faf0e8);
+  border: 1px solid var(--accent-line, #e0b9a3);
+  border-left: 4px solid var(--accent, #a8552f);
+  border-radius: var(--radius-m, 8px);
+  color: var(--ink, #24201c);
+}
+.ai-mandatory__label {
+  font-weight: var(--fw-semibold, 600);
+  color: var(--accent-ink, #8a4427);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--fs-s, 0.875rem);
+}
+.ai-mandatory .ai-mandatory__ack { margin-left: auto; }

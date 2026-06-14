@@ -1,0 +1,9 @@
+acknowledge:
+  version: VERSION
+  js:
+    js/acknowledge.js: { defer: true }
+  css:
+    component:
+      css/mandatory.css: {}
+  dependencies:
+    - core/drupalSettings

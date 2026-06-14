@@ -1,0 +1,8 @@
+name: 'AabenIntra Compliance'
+type: module
+description: 'Mandatory reading with acknowledgement receipts + compliance reporting for the AabenIntra intranet.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node

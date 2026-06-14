@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for AabenIntra Compliance: read-receipt table + field_mandatory.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_schema().
+ */
+function aabenintra_compliance_schema(): array {
+  return [
+    'aabenintra_read_receipt' => [
+      'description' => 'Records that a user acknowledged a mandatory node.',
+      'fields' => [
+        'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+        'nid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+        'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+        'langcode' => ['type' => 'varchar_ascii', 'length' => 12, 'not null' => TRUE, 'default' => ''],
+        'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      ],
+      'primary key' => ['id'],
+      'unique keys' => ['nid_uid_lang' => ['nid', 'uid', 'langcode']],
+      'indexes' => ['nid' => ['nid'], 'uid' => ['uid']],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_install().
+ *
+ * Adds the field_mandatory boolean to Story + Document.
+ */
+function aabenintra_compliance_install(): void {
+  if (!FieldStorageConfig::loadByName('node', 'field_mandatory')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_mandatory',
+      'entity_type' => 'node',
+      'type' => 'boolean',
+      'cardinality' => 1,
+    ])->save();
+  }
+  $display_repo = \Drupal::service('entity_display.repository');
+  foreach (['story', 'document'] as $bundle) {
+    if (!FieldConfig::loadByName('node', $bundle, 'field_mandatory')) {
+      FieldConfig::create([
+        'field_name' => 'field_mandatory',
+        'entity_type' => 'node',
+        'bundle' => $bundle,
+        'label' => 'Requires acknowledgement (mandatory reading)',
+      ])->save();
+      $display_repo->getFormDisplay('node', $bundle)
+        ->setComponent('field_mandatory', ['type' => 'boolean_checkbox', 'settings' => ['display_label' => TRUE]])
+        ->save();
+    }
+  }
+}

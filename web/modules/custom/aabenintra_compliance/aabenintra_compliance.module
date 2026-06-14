@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Compliance: mandatory-read acknowledgement banner.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for nodes.
+ *
+ * On a full-page view of a mandatory node the current user has not yet
+ * acknowledged, prepend an acknowledgement banner.
+ */
+function aabenintra_compliance_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display, string $view_mode): void {
+  if ($view_mode !== 'full') {
+    return;
+  }
+  if (!$node->hasField('field_mandatory') || empty($node->get('field_mandatory')->value)) {
+    return;
+  }
+  $account = \Drupal::currentUser();
+  if ($account->isAnonymous()) {
+    return;
+  }
+  $langcode = $node->language()->getId();
+  /** @var \Drupal\aabenintra_compliance\ReceiptService $receipts */
+  $receipts = \Drupal::service('aabenintra_compliance.receipts');
+  if ($receipts->hasRead((int) $node->id(), (int) $account->id(), $langcode)) {
+    return;
+  }
+
+  $build['aabenintra_mandatory'] = [
+    '#weight' => -100,
+    '#type' => 'container',
+    '#attributes' => ['class' => ['ai-mandatory'], 'data-ai-mandatory' => $node->id(), 'role' => 'alert'],
+    'text' => [
+      '#markup' => '<span class="ai-mandatory__label">' . t('Mandatory reading') . '</span> ' . t('Please confirm that you have read this.'),
+    ],
+    'button' => [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => t('I have read this'),
+      '#attributes' => [
+        'type' => 'button',
+        'class' => ['button', 'ai-mandatory__ack'],
+        'data-ai-ack' => $node->id(),
+      ],
+    ],
+    '#attached' => [
+      'library' => ['aabenintra_compliance/acknowledge'],
+      'drupalSettings' => [
+        'aabenintraCompliance' => [
+          'csrfToken' => \Drupal::csrfToken()->get('aabenintra_acknowledge'),
+        ],
+      ],
+    ],
+    // Per-user, and re-checked each request (acknowledgement is not cached).
+    '#cache' => ['contexts' => ['user'], 'max-age' => 0],
+  ];
+}
