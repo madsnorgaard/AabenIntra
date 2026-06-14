@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Activity: fan-out hooks that feed the activity log.
+ */
+
+declare(strict_types=1);
+
+use Drupal\aabenintra_activity\ActivityService;
+use Drupal\comment\CommentInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function aabenintra_activity_theme(): array {
+  return [
+    'aabenintra_activity_feed' => [
+      'variables' => ['groups' => [], 'empty' => FALSE, 'pager' => NULL],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for nodes.
+ */
+function aabenintra_activity_node_insert(NodeInterface $node): void {
+  if ($node->isPublished()) {
+    _aabenintra_activity_log_node($node);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for nodes.
+ *
+ * Logs only the unpublished -> published transition (publishing the content),
+ * not every later edit.
+ */
+function aabenintra_activity_node_update(NodeInterface $node): void {
+  if (!$node->isPublished()) {
+    return;
+  }
+  $original = method_exists($node, 'getOriginal') ? $node->getOriginal() : ($node->original ?? NULL);
+  if ($original instanceof NodeInterface && $original->isPublished()) {
+    return;
+  }
+  _aabenintra_activity_log_node($node);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for comments.
+ */
+function aabenintra_activity_comment_insert(CommentInterface $comment): void {
+  if ($comment->getCommentedEntityTypeId() !== 'node') {
+    return;
+  }
+  $node = $comment->getCommentedEntity();
+  if ($node instanceof NodeInterface) {
+    \Drupal::service('aabenintra_activity.activity')->logComment($node, $comment);
+  }
+}
+
+/**
+ * Logs a content node as a "published" (or "kudos") activity event.
+ */
+function _aabenintra_activity_log_node(NodeInterface $node): void {
+  if (!in_array($node->bundle(), ActivityService::BUNDLES, TRUE)) {
+    return;
+  }
+  $verb = $node->bundle() === 'kudos' ? 'kudos' : 'published';
+  $opts = [];
+  if ($verb === 'kudos' && $node->hasField('field_recipient') && !$node->get('field_recipient')->isEmpty()) {
+    $opts['target_uid'] = (int) $node->get('field_recipient')->target_id;
+  }
+  \Drupal::service('aabenintra_activity.activity')->logNode($node, $verb, $opts);
+}

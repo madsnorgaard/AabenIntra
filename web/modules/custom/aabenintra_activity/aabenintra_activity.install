@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * Install/schema for AabenIntra Activity.
+ *
+ * Creates the activity log table and adds an "Activity" link to the main menu.
+ */
+
+declare(strict_types=1);
+
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+
+/**
+ * Implements hook_schema().
+ */
+function aabenintra_activity_schema(): array {
+  // Columns: actor_uid (who acted), verb (published|commented|kudos),
+  // entity_id (subject node id - every row links to a node), ref_id (secondary
+  // id e.g. comment cid; 0 when n/a), target_uid (e.g. kudos recipient), bundle
+  // (subject node bundle), org_unit (org term id copied at log time; NULL =
+  // org-wide), gid (group id when group content; NULL otherwise).
+  $schema['aabenintra_activity'] = [
+    'description' => 'One row per activity event (content published, commented, kudos given).',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'actor_uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'verb' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE],
+      'entity_type' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'node'],
+      'entity_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'ref_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0],
+      'target_uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE],
+      'bundle' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => ''],
+      'org_unit' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE],
+      'gid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE],
+      'langcode' => ['type' => 'varchar_ascii', 'length' => 12, 'not null' => TRUE, 'default' => 'und'],
+      'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      // Makes hooks + backfill idempotent (merge, not duplicate insert).
+      'event' => ['verb', 'entity_type', 'entity_id', 'actor_uid', 'ref_id'],
+    ],
+    'indexes' => [
+      'created' => ['created'],
+      'org_unit' => ['org_unit'],
+      'gid' => ['gid'],
+      'actor' => ['actor_uid'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ *
+ * Adds a self-contained "Activity" link to the main menu so a fresh tenant
+ * gets the feed in the left navigation without a manual step.
+ */
+function aabenintra_activity_install(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  $existing = $storage->loadByProperties([
+    'link__uri' => 'internal:/activity',
+    'menu_name' => 'main',
+  ]);
+  if (!$existing) {
+    MenuLinkContent::create([
+      'title' => 'Activity',
+      'link' => ['uri' => 'internal:/activity'],
+      'menu_name' => 'main',
+      'weight' => -10,
+      'expanded' => FALSE,
+    ])->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function aabenintra_activity_uninstall(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  foreach ($storage->loadByProperties(['link__uri' => 'internal:/activity', 'menu_name' => 'main']) as $link) {
+    $link->delete();
+  }
+}

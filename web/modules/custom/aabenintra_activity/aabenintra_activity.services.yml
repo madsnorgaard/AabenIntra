@@ -1,0 +1,4 @@
+services:
+  aabenintra_activity.activity:
+    class: Drupal\aabenintra_activity\ActivityService
+    arguments: ['@database', '@datetime.time', '@entity_type.manager', '@cache_tags.invalidator']

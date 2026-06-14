@@ -252,3 +252,46 @@ msgstr "Ingen medlemmer endnu."
 
 msgid "Department"
 msgstr "Forvaltning"
+
+# Activity feed
+msgid "Activity"
+msgstr "Aktivitet"
+
+msgid "What is happening across your part of the organisation."
+msgstr "Hvad der sker i din del af organisationen."
+
+msgid "No activity yet."
+msgstr "Ingen aktivitet endnu."
+
+msgid "Today"
+msgstr "I dag"
+
+msgid "Yesterday"
+msgstr "I går"
+
+msgid "published"
+msgstr "offentliggjorde"
+
+msgid "commented on"
+msgstr "kommenterede"
+
+msgid "gave kudos to"
+msgstr "gav ros til"
+
+msgid "Someone"
+msgstr "Nogen"
+
+msgid "News"
+msgstr "Nyhed"
+
+msgid "Event"
+msgstr "Begivenhed"
+
+msgid "Document"
+msgstr "Dokument"
+
+msgid "Tip"
+msgstr "Tip"
+
+msgid "Kudos"
+msgstr "Ros"

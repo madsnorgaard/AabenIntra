@@ -1,0 +1,60 @@
+{#
+/**
+ * @file
+ * Activity feed: events grouped under day headings.
+ *
+ * Available variables:
+ * - groups: list of { label, items: [{ verb, action, actor, subject_title,
+ *   subject_url, bundle, bundle_label, recipient, time }] }.
+ * - empty: TRUE when there is no activity.
+ * - pager: pager render element.
+ */
+#}
+<div class="ai-activity layout-container">
+  <h1 class="ai-greeting">{{ 'Activity'|t }}</h1>
+  <p class="ai-activity__intro">{{ 'What is happening across your part of the organisation.'|t }}</p>
+
+  {% if empty %}
+    <p class="ai-activity__empty">{{ 'No activity yet.'|t }}</p>
+  {% endif %}
+
+  {% for group in groups %}
+    <section class="ai-activity__day">
+      <h2 class="ai-activity__day-label">{{ group.label }}</h2>
+      <ul class="ai-activity__list">
+        {% for item in group.items %}
+          <li class="ai-activity__item ai-activity__item--{{ item.verb }}">
+            <span class="ai-activity__avatar" aria-hidden="true">
+              {% if item.actor.photo %}<img src="{{ item.actor.photo }}" alt="">{% else %}{{ item.actor.initial }}{% endif %}
+            </span>
+            <div class="ai-activity__body">
+              <p class="ai-activity__line">
+                {% if item.actor.url %}
+                  <a class="ai-activity__who" href="{{ item.actor.url }}">{{ item.actor.name }}</a>
+                {% else %}
+                  <span class="ai-activity__who">{{ item.actor.name }}</span>
+                {% endif %}
+                <span class="ai-activity__action">{{ item.action }}</span>
+                {% if item.verb == 'kudos' and item.recipient %}
+                  {% if item.recipient.url %}
+                    <a href="{{ item.recipient.url }}">{{ item.recipient.name }}</a>
+                  {% else %}
+                    <span>{{ item.recipient.name }}</span>
+                  {% endif %}
+                {% else %}
+                  <a href="{{ item.subject_url }}">{{ item.subject_title }}</a>
+                {% endif %}
+              </p>
+              <p class="ai-activity__meta">
+                <span class="ai-badge ai-badge--ghost">{{ item.bundle_label }}</span>
+                <a class="ai-activity__time" href="{{ item.subject_url }}">{{ item.time }}</a>
+              </p>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+
+  {{ pager }}
+</div>

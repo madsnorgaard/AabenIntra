@@ -1,0 +1,7 @@
+aabenintra_activity.feed:
+  path: '/activity'
+  defaults:
+    _controller: '\Drupal\aabenintra_activity\Controller\ActivityFeedController::page'
+    _title: 'Activity'
+  requirements:
+    _permission: 'access content'

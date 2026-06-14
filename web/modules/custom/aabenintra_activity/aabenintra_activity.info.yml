@@ -1,0 +1,12 @@
+name: 'AabenIntra Activity'
+type: module
+description: 'A chronological activity feed surfacing new content, comments and kudos, scoped to the viewer''s organisation and groups.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:user
+  - drupal:comment
+  - drupal:menu_link_content
