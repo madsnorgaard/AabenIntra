@@ -1,0 +1,54 @@
+{#
+/**
+ * @file
+ * Story node, full view: editorial article layout.
+ * Renders meaningful fields explicitly, then dumps the remainder
+ * (mandatory-read banner, reactions, comments) via content|without().
+ */
+#}
+{% if view_mode != 'full' %}
+  {% include '@aabenintra/content/node--teaser.html.twig' %}
+{% else %}
+  {{ attach_library('aabenintra/node') }}
+  <article{{ attributes.addClass('ai-article', 'layout-container') }}>
+
+    {{ content.aabenintra_mandatory }}
+
+    {% if content.field_lead_image|render|trim %}
+      <figure class="ai-article__hero">{{ content.field_lead_image }}</figure>
+    {% endif %}
+
+    {{ title_prefix }}
+    <header class="ai-article__head">
+      {% if ai_topics %}
+        <div class="ai-article__eyebrow ai-pills">
+          {% for t in ai_topics %}
+            <a class="ai-badge" href="{{ t.url }}">{{ t.label }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <h1 class="ai-article__title">{{ label }}</h1>
+      <div class="ai-byline">
+        {% if author_name %}<span class="ai-byline__author">{{ author_name }}</span>{% endif %}
+        {% if date %}<time>{{ date }}</time>{% endif %}
+      </div>
+    </header>
+    {{ title_suffix }}
+
+    <div class="ai-article__body">{{ content.body }}</div>
+
+    {% set meta = ai_meta.department|merge(ai_meta.audience)|merge(ai_meta.location) %}
+    {% if meta %}
+      <div class="ai-article__meta">
+        <dl>
+          {% if ai_meta.department %}<dt>{{ 'Department'|t }}</dt><dd class="ai-pills">{% for m in ai_meta.department %}<a class="ai-badge ai-badge--ghost" href="{{ m.url }}">{{ m.label }}</a>{% endfor %}</dd>{% endif %}
+          {% if ai_meta.audience %}<dt>{{ 'Audience'|t }}</dt><dd class="ai-pills">{% for m in ai_meta.audience %}<a class="ai-badge ai-badge--ghost" href="{{ m.url }}">{{ m.label }}</a>{% endfor %}</dd>{% endif %}
+          {% if ai_meta.location %}<dt>{{ 'Location'|t }}</dt><dd class="ai-pills">{% for m in ai_meta.location %}<a class="ai-badge ai-badge--ghost" href="{{ m.url }}">{{ m.label }}</a>{% endfor %}</dd>{% endif %}
+        </dl>
+      </div>
+    {% endif %}
+
+    {{ content|without('field_lead_image', 'body', 'field_topics', 'field_department', 'field_audience', 'field_location', 'field_tile_size', 'field_pinned', 'aabenintra_mandatory', 'uid', 'created', 'links') }}
+
+  </article>
+{% endif %}

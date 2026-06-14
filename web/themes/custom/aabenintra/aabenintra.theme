@@ -5,7 +5,243 @@
  * Functions to support theming.
  */
 
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_node().
+ *
+ * Computes presentation-ready variables for the bundle-specific node templates
+ * (node--story/event/document/tip/kudos). Logic lives here so the Twig stays
+ * declarative. Referenced entities are resolved in the active language.
+ */
+function aabenintra_preprocess_node(array &$variables): void {
+  $node = $variables['node'];
+  $variables['ai_bundle'] = $node->bundle();
+  if (!in_array($variables['view_mode'], ['full', 'teaser'], TRUE)) {
+    return;
+  }
+  $repository = \Drupal::service('entity.repository');
+
+  // Referenced entities (taxonomy/users) -> [{label, url}], in active language.
+  $refs = static function (string $field) use ($node, $repository): array {
+    $out = [];
+    if ($node->hasField($field)) {
+      foreach ($node->get($field)->referencedEntities() as $entity) {
+        $translated = $repository->getTranslationFromContext($entity);
+        try {
+          $url = $translated->toUrl()->toString();
+        }
+        catch (\Exception $e) {
+          $url = NULL;
+        }
+        $out[] = ['label' => $translated->label(), 'url' => $url];
+      }
+    }
+    return $out;
+  };
+
+  // list_string field -> {key, label}.
+  $listValue = static function (string $field) use ($node): ?array {
+    if ($node->hasField($field) && !$node->get($field)->isEmpty()) {
+      $value = $node->get($field)->value;
+      $allowed = $node->get($field)->getFieldDefinition()
+        ->getFieldStorageDefinition()->getSetting('allowed_values');
+      return ['key' => $value, 'label' => $allowed[$value] ?? $value];
+    }
+    return NULL;
+  };
+
+  // file field -> [{url, name, size, ext}].
+  $files = static function (string $field) use ($node): array {
+    $out = [];
+    if ($node->hasField($field)) {
+      $generator = \Drupal::service('file_url_generator');
+      foreach ($node->get($field) as $item) {
+        $file = $item->entity;
+        if (!$file) {
+          continue;
+        }
+        $out[] = [
+          'url' => $generator->generateString($file->getFileUri()),
+          'name' => $file->getFilename(),
+          'size' => (string) ByteSizeMarkup::create((int) $file->getSize()),
+          'ext' => strtoupper(pathinfo($file->getFilename(), PATHINFO_EXTENSION)),
+        ];
+      }
+    }
+    return $out;
+  };
+
+  switch ($node->bundle()) {
+    case 'story':
+      $variables['ai_topics'] = $refs('field_topics');
+      $variables['ai_meta'] = [
+        'department' => $refs('field_department'),
+        'audience' => $refs('field_audience'),
+        'location' => $refs('field_location'),
+      ];
+      break;
+
+    case 'event':
+      if ($node->hasField('field_event_date') && !$node->get('field_event_date')->isEmpty()) {
+        $date = $node->get('field_event_date')->first()->date;
+        if ($date) {
+          $formatter = \Drupal::service('date.formatter');
+          $ts = $date->getTimestamp();
+          $variables['ai_event'] = [
+            'day' => $formatter->format($ts, 'custom', 'j'),
+            'month' => $formatter->format($ts, 'custom', 'M'),
+            'weekday' => $formatter->format($ts, 'custom', 'l'),
+            'time' => $formatter->format($ts, 'custom', 'H:i'),
+            'full' => $formatter->format($ts, 'long'),
+          ];
+        }
+      }
+      $variables['ai_meta'] = [
+        'department' => $refs('field_department'),
+        'location' => $refs('field_location'),
+      ];
+      break;
+
+    case 'document':
+      $variables['ai_files'] = $files('field_document_file');
+      $variables['ai_meta'] = [
+        'department' => $refs('field_department'),
+        'topics' => $refs('field_topics'),
+        'location' => $refs('field_location'),
+      ];
+      break;
+
+    case 'tip':
+      $variables['ai_category'] = $listValue('field_category');
+      $variables['ai_topics'] = $refs('field_topic');
+      $variables['ai_files'] = $files('field_attachments');
+      break;
+
+    case 'kudos':
+      $recipient = $refs('field_recipient');
+      $variables['ai_recipient'] = $recipient[0] ?? NULL;
+      $variables['ai_badge'] = $listValue('field_badge');
+      break;
+  }
+
+  // Teaser card: a short plain-text summary for the reusable .ai-card.
+  if ($variables['view_mode'] === 'teaser') {
+    $summary = '';
+    if ($node->hasField('body') && !$node->get('body')->isEmpty()) {
+      $body = $node->get('body')->first();
+      $raw = $body->summary ?: $body->value;
+      $summary = trim(preg_replace('/\s+/', ' ', strip_tags((string) $raw)));
+      if (mb_strlen($summary) > 160) {
+        $summary = mb_substr($summary, 0, 157) . '...';
+      }
+    }
+    $variables['ai_summary'] = $summary;
+    // A single eyebrow badge per bundle for the card.
+    $variables['ai_eyebrow'] = match ($node->bundle()) {
+      'tip' => $variables['ai_category']['label'] ?? NULL,
+      'kudos' => $variables['ai_badge']['label'] ?? NULL,
+      'story' => $variables['ai_topics'][0]['label'] ?? NULL,
+      default => NULL,
+    };
+  }
+}
+
+/**
+ * Implements hook_preprocess_group().
+ *
+ * Builds a real group landing page: header (visibility, member count,
+ * join/leave), description + cover image, themed Documents/Tips card lists and
+ * an .ai-person members grid. The default group page renders almost nothing.
+ */
+function aabenintra_preprocess_group(array &$variables): void {
+  $group = $variables['group'];
+  if (($variables['view_mode'] ?? 'full') !== 'full') {
+    return;
+  }
+  $repository = \Drupal::service('entity.repository');
+  $node_view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+
+  $variables['ai_title'] = $group->label();
+  $variables['ai_type_label'] = $group->getGroupType()->label();
+
+  // Visibility badge.
+  $visibility = $group->hasField('field_group_visibility') && !$group->get('field_group_visibility')->isEmpty()
+    ? $group->get('field_group_visibility')->value : NULL;
+  $labels = ['open' => t('Open'), 'closed' => t('Closed'), 'secret' => t('Secret')];
+  $variables['ai_visibility'] = $visibility ? ['key' => $visibility, 'label' => $labels[$visibility] ?? $visibility] : NULL;
+
+  // Description + cover image render arrays (display config only carries label).
+  if ($group->hasField('field_group_description') && !$group->get('field_group_description')->isEmpty()) {
+    $variables['ai_description'] = $group->get('field_group_description')->view(['label' => 'hidden']);
+  }
+  if ($group->hasField('field_group_image') && !$group->get('field_group_image')->isEmpty()) {
+    $variables['ai_cover'] = $group->get('field_group_image')->view([
+      'label' => 'hidden',
+      'type' => 'image',
+      'settings' => ['image_style' => 'large'],
+    ]);
+  }
+
+  // Documents + Tips, rendered as teaser cards (access-checked).
+  foreach (['document' => 'ai_documents', 'tip' => 'ai_tips'] as $bundle => $key) {
+    $cards = [];
+    foreach ($group->getRelationships('group_node:' . $bundle) as $relationship) {
+      $node = $relationship->getEntity();
+      if ($node && $node->access('view')) {
+        $cards[] = $node_view_builder->view($repository->getTranslationFromContext($node), 'teaser');
+      }
+    }
+    $variables[$key] = $cards;
+  }
+
+  // Members grid (reuse the .ai-person card shape from the directory).
+  $members = [];
+  $image_style = \Drupal::entityTypeManager()->getStorage('image_style')->load('thumbnail');
+  foreach ($group->getRelationships('group_membership') as $relationship) {
+    $account = $relationship->getEntity();
+    if (!$account) {
+      continue;
+    }
+    $photo = NULL;
+    if ($account->hasField('field_photo') && !$account->get('field_photo')->isEmpty()) {
+      $file = $account->get('field_photo')->entity;
+      if ($file && $image_style) {
+        $photo = $image_style->buildUrl($file->getFileUri());
+      }
+    }
+    $members[] = [
+      'name' => $account->getDisplayName(),
+      'title' => ($account->hasField('field_job_title') && !$account->get('field_job_title')->isEmpty()) ? $account->get('field_job_title')->value : '',
+      'photo' => $photo,
+      'initial' => mb_substr($account->getDisplayName(), 0, 1),
+      'url' => $account->toUrl()->toString(),
+    ];
+  }
+  $variables['ai_members'] = $members;
+  $variables['ai_member_count'] = count($members);
+
+  // Join / leave actions (gated by the group-permission-aware route access).
+  foreach (['join' => 'ai_join_url', 'leave' => 'ai_leave_url'] as $op => $var) {
+    try {
+      $url = Url::fromRoute('entity.group.' . $op, ['group' => $group->id()]);
+      if ($url->access()) {
+        $variables[$var] = $url->toString();
+      }
+    }
+    catch (\Exception $e) {
+      // Route may not exist for this configuration; skip.
+    }
+  }
+
+  // Invalidate when the group, its content or memberships change.
+  $variables['#cache']['tags'][] = 'node_list';
+  $variables['#cache']['contexts'][] = 'user';
+  foreach ($group->getCacheTags() as $tag) {
+    $variables['#cache']['tags'][] = $tag;
+  }
+}
 
 /**
  * Implements hook_preprocess_page().

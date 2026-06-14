@@ -1,0 +1,34 @@
+{#
+/**
+ * @file
+ * Tip node, full view: compact tip-and-trick card.
+ */
+#}
+{% if view_mode != 'full' %}
+  {% include '@aabenintra/content/node--teaser.html.twig' %}
+{% else %}
+  {{ attach_library('aabenintra/node') }}
+  <article{{ attributes.addClass('ai-tip', 'layout-container') }}>
+
+    {{ title_prefix }}
+    <div class="ai-tip__head">
+      {% if ai_category %}<span class="ai-badge">{{ ai_category.label }}</span>{% endif %}
+      {% for t in ai_topics %}<a class="ai-badge ai-badge--ghost" href="{{ t.url }}">{{ t.label }}</a>{% endfor %}
+    </div>
+    <h1 class="ai-tip__title">{{ label }}</h1>
+    {{ title_suffix }}
+
+    <div class="ai-tip__body">{{ content.body }}</div>
+
+    {% if ai_files %}
+      <ul class="ai-tip__files">
+        {% for f in ai_files %}
+          <li><a href="{{ f.url }}" download>↓ {{ f.name }} <span class="ai-doc__sub">({{ f.size }})</span></a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {{ content|without('field_category', 'field_topic', 'field_attachments', 'body', 'uid', 'created', 'links') }}
+
+  </article>
+{% endif %}

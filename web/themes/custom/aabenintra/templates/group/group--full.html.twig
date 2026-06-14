@@ -1,0 +1,74 @@
+{#
+/**
+ * @file
+ * Group landing page (full view): header, description, Documents, Tips, members.
+ * Most variables are computed in aabenintra_preprocess_group().
+ */
+#}
+<div{{ attributes.addClass('ai-group', 'layout-container') }}>
+
+  {% if ai_cover %}
+    <div class="ai-group__cover">{{ ai_cover }}</div>
+  {% endif %}
+
+  <header class="ai-group__header">
+    <div class="ai-group__heading">
+      <h1 class="ai-group__title">{{ ai_title }}</h1>
+      <div class="ai-group__tags">
+        <span class="ai-badge ai-badge--ghost">{{ ai_type_label }}</span>
+        {% if ai_visibility %}
+          <span class="ai-badge ai-badge--{{ ai_visibility.key == 'open' ? 'ok' : (ai_visibility.key == 'secret' ? 'danger' : 'warn') }}">{{ ai_visibility.label }}</span>
+        {% endif %}
+        <span class="ai-badge ai-badge--ghost">{{ ai_member_count }} {{ 'members'|t }}</span>
+      </div>
+    </div>
+    <div class="ai-group__actions">
+      {% if ai_join_url %}<a class="button" href="{{ ai_join_url }}">{{ 'Join group'|t }}</a>{% endif %}
+      {% if ai_leave_url %}<a class="button button--ghost" href="{{ ai_leave_url }}">{{ 'Leave group'|t }}</a>{% endif %}
+    </div>
+  </header>
+
+  {% if ai_description %}
+    <div class="ai-group__desc">{{ ai_description }}</div>
+  {% endif %}
+
+  <div class="ai-group__sections">
+    <section class="ai-group__section">
+      <h2 class="ai-group__section-title">{{ 'Documents'|t }}</h2>
+      {% if ai_documents %}
+        <div class="ai-card-grid">{% for card in ai_documents %}{{ card }}{% endfor %}</div>
+      {% else %}
+        <p class="ai-group__empty">{{ 'No documents shared yet.'|t }}</p>
+      {% endif %}
+    </section>
+
+    <section class="ai-group__section">
+      <h2 class="ai-group__section-title">{{ 'Tips'|t }}</h2>
+      {% if ai_tips %}
+        <div class="ai-card-grid">{% for card in ai_tips %}{{ card }}{% endfor %}</div>
+      {% else %}
+        <p class="ai-group__empty">{{ 'No tips shared yet.'|t }}</p>
+      {% endif %}
+    </section>
+
+    <section class="ai-group__section">
+      <h2 class="ai-group__section-title">{{ 'Members'|t }}</h2>
+      {% if ai_members %}
+        <div class="ai-people-grid">
+          {% for m in ai_members %}
+            <a class="ai-person" href="{{ m.url }}">
+              <span class="ai-person__avatar">
+                {% if m.photo %}<img src="{{ m.photo }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">{{ m.initial }}</span>{% endif %}
+              </span>
+              <span class="ai-person__name">{{ m.name }}</span>
+              {% if m.title %}<span class="ai-person__title">{{ m.title }}</span>{% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="ai-group__empty">{{ 'No members yet.'|t }}</p>
+      {% endif %}
+    </section>
+  </div>
+
+</div>

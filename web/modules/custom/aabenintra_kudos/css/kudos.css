@@ -42,9 +42,10 @@
 .ai-kudos__meta { margin: 0; margin-top: auto; }
 .ai-kudos__meta a { color: var(--muted, #777); font-size: var(--fs-xs, 0.75rem); text-decoration: none; }
 
-/* Per-badge accent tints */
-.ai-kudos__card--teamwork { border-top-color: #0d9488; }
-.ai-kudos__card--innovation { border-top-color: #6d28d9; }
-.ai-kudos__card--helpfulness { border-top-color: #2563af; }
-.ai-kudos__card--leadership { border-top-color: #d97706; }
-.ai-kudos__card--customer_focus { border-top-color: #db2777; }
+/* Per-badge accent tints (OKLCH hues, consistent with the shared .ai-badge--*
+   recognition colours; legible on both light and dark surfaces). */
+.ai-kudos__card--teamwork { border-top-color: oklch(56% 0.10 195); }
+.ai-kudos__card--innovation { border-top-color: oklch(52% 0.14 300); }
+.ai-kudos__card--helpfulness { border-top-color: oklch(54% 0.13 235); }
+.ai-kudos__card--leadership { border-top-color: oklch(64% 0.12 70); }
+.ai-kudos__card--customer_focus { border-top-color: oklch(54% 0.16 350); }

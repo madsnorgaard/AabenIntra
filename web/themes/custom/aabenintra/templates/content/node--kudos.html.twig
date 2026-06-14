@@ -1,0 +1,28 @@
+{#
+/**
+ * @file
+ * Kudos node, full view: peer-recognition card.
+ */
+#}
+{% if view_mode != 'full' %}
+  {% include '@aabenintra/content/node--teaser.html.twig' %}
+{% else %}
+  {{ attach_library('aabenintra/node') }}
+  <article{{ attributes.addClass('ai-kudos-node', 'layout-container') }}>
+    {{ title_prefix }}{{ title_suffix }}
+    <div class="ai-kudos-node__card">
+      {% if ai_badge %}<span class="ai-badge ai-badge--{{ ai_badge.key }}">{{ ai_badge.label }}</span>{% endif %}
+      {% if ai_recipient %}
+        <p class="ai-kudos-node__line">
+          {{ 'Recognition for'|t }}
+          <a href="{{ ai_recipient.url }}">{{ ai_recipient.label }}</a>
+        </p>
+      {% endif %}
+      <div class="ai-kudos-node__message">{{ content.body }}</div>
+      {% if author_name %}<p class="ai-kudos-node__byline">{{ 'From'|t }} {{ author_name }} · {{ date }}</p>{% endif %}
+    </div>
+
+    {{ content|without('field_recipient', 'field_badge', 'body', 'uid', 'created', 'links') }}
+
+  </article>
+{% endif %}

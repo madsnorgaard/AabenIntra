@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Generic node teaser card (.ai-card). Reused by group content lists, search
+ * and future activity feeds. Included by the bundle templates for non-full
+ * view modes, and used directly when nodes render in the 'teaser' view mode.
+ */
+#}
+<article{{ attributes.addClass('ai-card', 'node--type-' ~ node.bundle|clean_class) }}>
+  {% if content.field_lead_image|render|trim %}
+    <a class="ai-card__media" href="{{ url }}">{{ content.field_lead_image }}</a>
+  {% endif %}
+  <div class="ai-card__body">
+    {% if ai_eyebrow %}<div class="ai-card__eyebrow"><span class="ai-badge">{{ ai_eyebrow }}</span></div>{% endif %}
+    <h3 class="ai-card__title"><a href="{{ url }}" rel="bookmark">{{ label }}</a></h3>
+    {% if ai_recipient %}<p class="ai-card__summary">{{ 'For'|t }} {{ ai_recipient.label }}</p>{% endif %}
+    {% if ai_summary %}<p class="ai-card__summary">{{ ai_summary }}</p>{% endif %}
+    {% if date %}<div class="ai-card__meta">{{ date }}</div>{% endif %}
+  </div>
+</article>

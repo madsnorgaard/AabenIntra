@@ -1,0 +1,43 @@
+{#
+/**
+ * @file
+ * Event node, full view: date-led header.
+ */
+#}
+{% if view_mode != 'full' %}
+  {% include '@aabenintra/content/node--teaser.html.twig' %}
+{% else %}
+  {{ attach_library('aabenintra/node') }}
+  <article{{ attributes.addClass('ai-event', 'layout-container') }}>
+
+    {{ content.aabenintra_mandatory }}
+
+    {{ title_prefix }}
+    <header class="ai-event__header">
+      {% if ai_event %}
+        <div class="ai-event__datebox">
+          <span class="ai-event__day">{{ ai_event.day }}</span>
+          <span class="ai-event__month">{{ ai_event.month }}</span>
+        </div>
+      {% endif %}
+      <div class="ai-event__headings">
+        <h1 class="ai-event__title">{{ label }}</h1>
+        {% if ai_event %}
+          <p class="ai-event__when">{{ ai_event.full }}</p>
+        {% endif %}
+        {% set where = ai_meta.location|merge(ai_meta.department) %}
+        {% if where %}
+          <div class="ai-pills">
+            {% for m in where %}<a class="ai-badge ai-badge--ghost" href="{{ m.url }}">{{ m.label }}</a>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </header>
+    {{ title_suffix }}
+
+    <div class="ai-event__body">{{ content.body }}</div>
+
+    {{ content|without('field_event_date', 'body', 'field_department', 'field_org_unit', 'field_location', 'aabenintra_mandatory', 'uid', 'created', 'links') }}
+
+  </article>
+{% endif %}

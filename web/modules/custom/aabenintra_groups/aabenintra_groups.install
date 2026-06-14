@@ -115,6 +115,24 @@ function aabenintra_groups_ensure_types(): void {
       'settings' => ['allowed_values' => ['open' => 'Open', 'closed' => 'Closed', 'secret' => 'Secret']],
     ])->save();
   }
+  // Description + cover image so each group has a proper landing header.
+  if (!FieldStorageConfig::loadByName('group', 'field_group_description')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_group_description',
+      'entity_type' => 'group',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+  if (!FieldStorageConfig::loadByName('group', 'field_group_image')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_group_image',
+      'entity_type' => 'group',
+      'type' => 'image',
+      'cardinality' => 1,
+      'settings' => ['uri_scheme' => 'public', 'target_type' => 'file'],
+    ])->save();
+  }
   foreach (_aabenintra_groups_types() as $id => [$label, $desc]) {
     if (!GroupType::load($id)) {
       GroupType::create(['id' => $id, 'label' => $label, 'description' => $desc, 'creator_membership' => TRUE])->save();
@@ -129,7 +147,37 @@ function aabenintra_groups_ensure_types(): void {
       ])->save();
       $display_repo->getFormDisplay('group', $id)->setComponent('field_group_visibility', ['type' => 'options_select'])->save();
     }
+    if (!FieldConfig::loadByName('group', $id, 'field_group_description')) {
+      FieldConfig::create([
+        'field_name' => 'field_group_description',
+        'entity_type' => 'group',
+        'bundle' => $id,
+        'label' => 'Description',
+        'translatable' => TRUE,
+      ])->save();
+      $display_repo->getFormDisplay('group', $id)->setComponent('field_group_description', ['type' => 'text_textarea', 'weight' => 5])->save();
+    }
+    if (!FieldConfig::loadByName('group', $id, 'field_group_image')) {
+      FieldConfig::create([
+        'field_name' => 'field_group_image',
+        'entity_type' => 'group',
+        'bundle' => $id,
+        'label' => 'Cover image',
+        'settings' => ['file_extensions' => 'png jpg jpeg webp', 'alt_field' => TRUE, 'alt_field_required' => FALSE],
+      ])->save();
+      $display_repo->getFormDisplay('group', $id)->setComponent('field_group_image', ['type' => 'image_image', 'weight' => 6])->save();
+    }
+    if (\Drupal::moduleHandler()->moduleExists('content_translation')) {
+      \Drupal::service('content_translation.manager')->setEnabled('group', $id, TRUE);
+    }
   }
+}
+
+/**
+ * Add group description + cover-image fields to existing sites.
+ */
+function aabenintra_groups_update_10001(): void {
+  aabenintra_groups_ensure_types();
 }
 
 /**

@@ -209,3 +209,46 @@ msgstr "Ingen anerkendelser endnu. Vær den første til at anerkende en kollega.
 
 msgid "Recognition"
 msgstr "Anerkendelse"
+
+# Entity + group templates
+msgid "Audience"
+msgstr "Målgruppe"
+
+msgid "Download"
+msgstr "Hent"
+
+msgid "For"
+msgstr "Til"
+
+msgid "From"
+msgstr "Fra"
+
+msgid "Recognition for"
+msgstr "Anerkendelse til"
+
+msgid "Join group"
+msgstr "Bliv medlem"
+
+msgid "Leave group"
+msgstr "Forlad gruppe"
+
+msgid "Open"
+msgstr "Åben"
+
+msgid "Closed"
+msgstr "Lukket"
+
+msgid "Secret"
+msgstr "Hemmelig"
+
+msgid "No documents shared yet."
+msgstr "Ingen dokumenter delt endnu."
+
+msgid "No tips shared yet."
+msgstr "Ingen tips delt endnu."
+
+msgid "No members yet."
+msgstr "Ingen medlemmer endnu."
+
+msgid "Department"
+msgstr "Forvaltning"
