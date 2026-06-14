@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Reactions bar: one toggle button per reaction type with live counts.
+ *
+ * Variables:
+ * - nid: node id
+ * - types: map of reaction key => emoji
+ * - counts: map of reaction key => count
+ * - mine: the current user's reaction key, or null
+ * - total: total reaction count
+ */
+#}
+<div class="ai-reactions" data-nid="{{ nid }}" data-mine="{{ mine }}">
+  <div class="ai-reactions__bar" role="group" aria-label="{{ 'Reactions'|t }}">
+    {% for key, emoji in types %}
+      <button type="button"
+              class="ai-reactions__btn{{ mine == key ? ' is-active' : '' }}"
+              data-reaction="{{ key }}"
+              aria-pressed="{{ mine == key ? 'true' : 'false' }}"
+              title="{{ key|capitalize|t }}">
+        <span class="ai-reactions__emoji" aria-hidden="true">{{ emoji }}</span>
+        <span class="ai-reactions__count" data-count="{{ key }}">{{ counts[key] }}</span>
+      </button>
+    {% endfor %}
+  </div>
+  <span class="ai-reactions__total" aria-live="polite">
+    {{ total }} {{ 'reactions'|t }}
+  </span>
+</div>

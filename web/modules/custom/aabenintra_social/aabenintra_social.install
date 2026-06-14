@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * @file
+ * Install/schema for AabenIntra Social.
+ *
+ * Adds a threaded comment field to Story + Document and creates the custom
+ * reactions table.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_schema().
+ */
+function aabenintra_social_schema(): array {
+  $schema['aabenintra_reaction'] = [
+    'description' => 'One reaction per user per content entity.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'entity_type' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'node'],
+      'entity_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'reaction' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE],
+      'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'entity_user' => ['entity_type', 'entity_id', 'uid'],
+    ],
+    'indexes' => [
+      'entity' => ['entity_type', 'entity_id'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_social_install(): void {
+  // Ensure a single shared comment field storage exists (core 'comment' type).
+  if (!FieldStorageConfig::loadByName('node', 'field_comments')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_comments',
+      'entity_type' => 'node',
+      'type' => 'comment',
+      'settings' => ['comment_type' => 'comment'],
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  $form_display = \Drupal::service('entity_display.repository');
+  foreach (_aabenintra_social_bundles() as $bundle) {
+    if (!FieldConfig::loadByName('node', $bundle, 'field_comments')) {
+      FieldConfig::create([
+        'field_name' => 'field_comments',
+        'entity_type' => 'node',
+        'bundle' => $bundle,
+        'label' => 'Comments',
+        'default_value' => [[
+          'status' => 2,
+          'cid' => 0,
+          'last_comment_timestamp' => 0,
+          'last_comment_name' => '',
+          'last_comment_uid' => 0,
+          'comment_count' => 0,
+        ]],
+        'settings' => [
+          'default_mode' => 1,
+          'per_page' => 50,
+          'form_location' => 1,
+          'anonymous' => 0,
+          'preview' => 0,
+        ],
+      ])->save();
+    }
+    // Show comments at the bottom of full view; widget hidden on the node form
+    // (commenting happens inline below the rendered node).
+    // Weight 210 keeps comments below the body and all metadata fields
+    // (which sit at 100-109); the reactions bar renders just above at 200.
+    $form_display->getViewDisplay('node', $bundle, 'default')
+      ->setComponent('field_comments', ['type' => 'comment_default', 'weight' => 210])
+      ->save();
+    $form_display->getFormDisplay('node', $bundle, 'default')
+      ->removeComponent('field_comments')
+      ->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function aabenintra_social_uninstall(): void {
+  foreach (_aabenintra_social_bundles() as $bundle) {
+    if ($field = FieldConfig::loadByName('node', $bundle, 'field_comments')) {
+      $field->delete();
+    }
+  }
+  if ($storage = FieldStorageConfig::loadByName('node', 'field_comments')) {
+    $storage->delete();
+  }
+}

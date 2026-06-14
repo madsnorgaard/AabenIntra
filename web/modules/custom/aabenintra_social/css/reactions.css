@@ -1,0 +1,35 @@
+/* Reactions bar. Uses theme tokens with safe fallbacks. */
+.ai-reactions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  flex-wrap: wrap;
+  margin-block: var(--space-5, 1.5rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--line, #e7e1d6);
+}
+.ai-reactions__bar { display: flex; gap: var(--space-2, 0.5rem); flex-wrap: wrap; }
+.ai-reactions__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--line, #d8d2c7);
+  border-radius: 999px;
+  background: var(--paper-2, #fff);
+  color: var(--ink, #222);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--t-fast, .12s), background var(--t-fast, .12s), transform var(--t-fast, .12s);
+}
+.ai-reactions__btn:hover { border-color: var(--accent-line, #e0b9a3); transform: translateY(-1px); }
+.ai-reactions__btn:disabled { opacity: .6; cursor: default; }
+.ai-reactions__btn.is-active {
+  border-color: var(--accent, #a8552f);
+  background: var(--accent-tint, #f3e3d8);
+  color: var(--accent-ink, #8a4427);
+  font-weight: var(--fw-semibold, 600);
+}
+.ai-reactions__emoji { font-size: 1.05rem; line-height: 1; }
+.ai-reactions__count { font-size: var(--fs-s, 0.875rem); min-width: 1ch; text-align: center; }
+.ai-reactions__total { color: var(--muted, #777); font-size: var(--fs-s, 0.875rem); margin-left: auto; }

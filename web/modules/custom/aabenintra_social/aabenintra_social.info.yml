@@ -1,0 +1,10 @@
+name: 'AabenIntra Social'
+type: module
+description: 'Threaded comments and Facebook-style reactions on intranet content.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node
+  - drupal:comment
+  - drupal:user

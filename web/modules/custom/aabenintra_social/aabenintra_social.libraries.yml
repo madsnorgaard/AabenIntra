@@ -1,0 +1,11 @@
+reactions:
+  version: VERSION
+  css:
+    component:
+      css/reactions.css: {}
+  js:
+    js/reactions.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once

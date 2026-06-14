@@ -168,3 +168,25 @@ msgstr "Ingen kolleger har denne kompetence endnu."
 
 msgid "Email"
 msgstr "E-mail"
+
+# Social: reactions
+msgid "Reactions"
+msgstr "Reaktioner"
+
+msgid "reactions"
+msgstr "reaktioner"
+
+msgid "Like"
+msgstr "Synes godt om"
+
+msgid "Celebrate"
+msgstr "Fejr"
+
+msgid "Insightful"
+msgstr "Indsigtsfuld"
+
+msgid "Support"
+msgstr "Støtte"
+
+msgid "Comments"
+msgstr "Kommentarer"

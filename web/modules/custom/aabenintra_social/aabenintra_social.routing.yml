@@ -1,0 +1,12 @@
+aabenintra_social.react:
+  path: '/aabenintra/react/{node}/{reaction}'
+  defaults:
+    _controller: '\Drupal\aabenintra_social\Controller\ReactionController::toggle'
+  methods: [POST]
+  requirements:
+    _custom_access: '\Drupal\aabenintra_social\Controller\ReactionController::access'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node

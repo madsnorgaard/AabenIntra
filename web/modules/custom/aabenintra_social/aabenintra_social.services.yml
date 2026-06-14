@@ -1,0 +1,4 @@
+services:
+  aabenintra_social.reaction:
+    class: Drupal\aabenintra_social\Service\ReactionService
+    arguments: ['@database', '@datetime.time', '@cache_tags.invalidator']
