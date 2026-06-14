@@ -14,8 +14,8 @@
 
     {{ content.aabenintra_mandatory }}
 
-    {% if content.field_lead_image|render|trim %}
-      <figure class="ai-article__hero">{{ content.field_lead_image }}</figure>
+    {% if ai_hero %}
+      <figure class="ai-article__hero"><img src="{{ ai_hero.url }}" alt="{{ ai_hero.alt }}"></figure>
     {% endif %}
 
     {{ title_prefix }}

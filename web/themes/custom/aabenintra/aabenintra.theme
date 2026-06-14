@@ -81,6 +81,23 @@ function aabenintra_preprocess_node(array &$variables): void {
         'audience' => $refs('field_audience'),
         'location' => $refs('field_location'),
       ];
+      // Clean hero image straight from the referenced media (avoids the media
+      // entity's submitted-info/name chrome and duplicate rendering).
+      if ($node->hasField('field_lead_image') && !$node->get('field_lead_image')->isEmpty()) {
+        $media = $node->get('field_lead_image')->entity;
+        if ($media && $media->hasField('field_media_image') && !$media->get('field_media_image')->isEmpty()) {
+          $item = $media->get('field_media_image')->first();
+          $file = $item->entity;
+          if ($file) {
+            $style = \Drupal::entityTypeManager()->getStorage('image_style')->load('large');
+            $uri = $file->getFileUri();
+            $variables['ai_hero'] = [
+              'url' => $style ? $style->buildUrl($uri) : \Drupal::service('file_url_generator')->generateString($uri),
+              'alt' => $item->alt ?: '',
+            ];
+          }
+        }
+      }
       break;
 
     case 'event':

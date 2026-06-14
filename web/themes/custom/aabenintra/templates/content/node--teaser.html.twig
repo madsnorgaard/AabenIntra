@@ -7,8 +7,8 @@
  */
 #}
 <article{{ attributes.addClass('ai-card', 'node--type-' ~ node.bundle|clean_class) }}>
-  {% if content.field_lead_image|render|trim %}
-    <a class="ai-card__media" href="{{ url }}">{{ content.field_lead_image }}</a>
+  {% if ai_hero %}
+    <a class="ai-card__media" href="{{ url }}"><img src="{{ ai_hero.url }}" alt="{{ ai_hero.alt }}"></a>
   {% endif %}
   <div class="ai-card__body">
     {% if ai_eyebrow %}<div class="ai-card__eyebrow"><span class="ai-badge">{{ ai_eyebrow }}</span></div>{% endif %}
