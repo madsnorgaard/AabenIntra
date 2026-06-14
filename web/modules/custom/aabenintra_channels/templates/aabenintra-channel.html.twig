@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * A single channel: header + follow button + tagged content cards.
+ *
+ * Available variables:
+ * - name, description, tid, followers, following.
+ * - cards: list of { title, url, summary, eyebrow, image_url, following }.
+ * - pager: pager render element.
+ */
+#}
+<div class="ai-channel layout-container">
+  <header class="ai-channel__header">
+    <div class="ai-channel__heading">
+      <h1 class="ai-greeting">{{ name }}</h1>
+      {% if description %}<p class="ai-channel__desc">{{ description }}</p>{% endif %}
+    </div>
+    <button class="ai-follow{{ following ? ' is-following' : '' }}" type="button" data-topic="{{ tid }}" aria-pressed="{{ following ? 'true' : 'false' }}">
+      <span class="ai-follow__label">{{ following ? 'Following'|t : 'Follow'|t }}</span>
+      <span class="ai-follow__count" data-follow-count>{{ followers }}</span>
+    </button>
+  </header>
+
+  <div class="ai-card-grid">
+    {% for c in cards %}
+      <a class="ai-card" href="{{ c.url }}">
+        {% if c.image_url %}<span class="ai-card__media"><img src="{{ c.image_url }}" alt="" loading="lazy"></span>{% endif %}
+        <span class="ai-card__body">
+          {% if c.eyebrow %}<span class="ai-card__eyebrow"><span class="ai-badge ai-badge--ghost">{{ c.eyebrow }}</span></span>{% endif %}
+          <span class="ai-card__title">{{ c.title }}</span>
+          {% if c.summary %}<span class="ai-card__summary">{{ c.summary }}</span>{% endif %}
+        </span>
+      </a>
+    {% else %}
+      <p>{{ 'Nothing in this channel yet.'|t }}</p>
+    {% endfor %}
+  </div>
+
+  {{ pager }}
+</div>

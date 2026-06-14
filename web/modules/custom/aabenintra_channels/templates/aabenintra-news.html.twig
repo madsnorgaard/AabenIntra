@@ -1,0 +1,37 @@
+{#
+/**
+ * @file
+ * Targeted news: followed channels + org-wide recent, newest first.
+ *
+ * Available variables:
+ * - cards: list of { title, url, summary, eyebrow, image_url, following }.
+ * - empty: TRUE when there is nothing to show.
+ * - pager: pager render element.
+ */
+#}
+<div class="ai-news layout-container">
+  <h1 class="ai-greeting">{{ 'News'|t }}</h1>
+  <p class="ai-news__intro">{{ 'The latest from your channels and across the organisation.'|t }}</p>
+
+  {% if empty %}
+    <p class="ai-news__empty">{{ 'No news yet.'|t }}</p>
+  {% endif %}
+
+  <div class="ai-card-grid">
+    {% for c in cards %}
+      <a class="ai-card" href="{{ c.url }}">
+        {% if c.image_url %}<span class="ai-card__media"><img src="{{ c.image_url }}" alt="" loading="lazy"></span>{% endif %}
+        <span class="ai-card__body">
+          <span class="ai-card__eyebrow">
+            {% if c.eyebrow %}<span class="ai-badge ai-badge--ghost">{{ c.eyebrow }}</span>{% endif %}
+            {% if c.following %}<span class="ai-badge">{{ 'Following'|t }}</span>{% endif %}
+          </span>
+          <span class="ai-card__title">{{ c.title }}</span>
+          {% if c.summary %}<span class="ai-card__summary">{{ c.summary }}</span>{% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+
+  {{ pager }}
+</div>

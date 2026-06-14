@@ -1,0 +1,4 @@
+services:
+  aabenintra_channels.follow:
+    class: Drupal\aabenintra_channels\FollowService
+    arguments: ['@database', '@datetime.time', '@entity_type.manager', '@cache_tags.invalidator']

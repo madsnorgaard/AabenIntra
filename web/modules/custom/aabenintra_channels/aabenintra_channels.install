@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * @file
+ * Install/schema for AabenIntra Channels.
+ *
+ * Creates the follow table and adds Channels + News links to the main menu.
+ */
+
+declare(strict_types=1);
+
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+
+/**
+ * Implements hook_schema().
+ */
+function aabenintra_channels_schema(): array {
+  // Generic follow ledger: one row per user per followed thing. target_type is
+  // 'topic' today; people/groups can reuse the same table later.
+  $schema['aabenintra_follow'] = [
+    'description' => 'One row per user per followed entity (topic, later people/groups).',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'target_type' => ['type' => 'varchar_ascii', 'length' => 32, 'not null' => TRUE, 'default' => 'topic'],
+      'target_id' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'user_target' => ['uid', 'target_type', 'target_id'],
+    ],
+    'indexes' => [
+      'target' => ['target_type', 'target_id'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_channels_install(): void {
+  $links = [
+    ['/news', 'News', -9],
+    ['/channels', 'Channels', -8],
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  foreach ($links as [$path, $title, $weight]) {
+    $existing = $storage->loadByProperties(['link__uri' => 'internal:' . $path, 'menu_name' => 'main']);
+    if (!$existing) {
+      MenuLinkContent::create([
+        'title' => $title,
+        'link' => ['uri' => 'internal:' . $path],
+        'menu_name' => 'main',
+        'weight' => $weight,
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function aabenintra_channels_uninstall(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  foreach (['internal:/news', 'internal:/channels'] as $uri) {
+    foreach ($storage->loadByProperties(['link__uri' => $uri, 'menu_name' => 'main']) as $link) {
+      $link->delete();
+    }
+  }
+}

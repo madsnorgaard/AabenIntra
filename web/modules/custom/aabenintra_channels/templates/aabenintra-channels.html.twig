@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Channel directory: every topic as a followable card.
+ *
+ * Available variables:
+ * - channels: list of { tid, name, url, description, posts, followers, following }.
+ */
+#}
+<div class="ai-channels layout-container">
+  <h1 class="ai-greeting">{{ 'Channels'|t }}</h1>
+  <p class="ai-channels__intro">{{ 'Follow the topics you care about to tailor your news.'|t }}</p>
+
+  <div class="ai-card-grid">
+    {% for c in channels %}
+      <article class="ai-channel-card">
+        <a class="ai-channel-card__title" href="{{ c.url }}">{{ c.name }}</a>
+        {% if c.description %}<p class="ai-channel-card__desc">{{ c.description }}</p>{% endif %}
+        <p class="ai-channel-card__meta">{{ c.posts }} {{ 'posts'|t }}</p>
+        <button class="ai-follow{{ c.following ? ' is-following' : '' }}" type="button" data-topic="{{ c.tid }}" aria-pressed="{{ c.following ? 'true' : 'false' }}">
+          <span class="ai-follow__label">{{ c.following ? 'Following'|t : 'Follow'|t }}</span>
+          <span class="ai-follow__count" data-follow-count>{{ c.followers }}</span>
+        </button>
+      </article>
+    {% else %}
+      <p>{{ 'No channels yet.'|t }}</p>
+    {% endfor %}
+  </div>
+</div>

@@ -103,14 +103,19 @@ final class ActivityService {
   /**
    * Returns the activity visible to an account, newest first.
    *
+   * @param array<int,int> $extraNodeIds
+   *   Extra subject node ids to include regardless of org/group scope (e.g.
+   *   content in channels the user follows). Resolved by the caller so this
+   *   module stays independent of the channels module.
+   *
    * @return array{rows: array<int,object>, total: int}
    */
-  public function feed(AccountInterface $account, int $limit, int $offset): array {
+  public function feed(AccountInterface $account, int $limit, int $offset, array $extraNodeIds = []): array {
     $lineage = $this->orgLineage($account);
     $groupIds = $this->userGroupIds($account);
 
     $query = $this->database->select('aabenintra_activity', 'a')->fields('a');
-    $this->applyScope($query, $lineage, $groupIds);
+    $this->applyScope($query, $lineage, $groupIds, $extraNodeIds);
     // Count the full scoped set before paging (countQuery clones, leaving the
     // query reusable for the ranged fetch below).
     $total = (int) $query->countQuery()->execute()->fetchField();
@@ -203,8 +208,9 @@ final class ActivityService {
    *
    * @param array<int,int> $lineage
    * @param array<int,int> $groupIds
+   * @param array<int,int> $extraNodeIds
    */
-  private function applyScope(SelectInterface $query, array $lineage, array $groupIds): void {
+  private function applyScope(SelectInterface $query, array $lineage, array $groupIds, array $extraNodeIds = []): void {
     $scope = $query->orConditionGroup();
 
     // Non-group content, org-cascaded: org-wide (NULL) or in the user's lineage.
@@ -219,6 +225,11 @@ final class ActivityService {
     // Group content is visible only to members of that group.
     if ($groupIds) {
       $scope->condition('gid', $groupIds, 'IN');
+    }
+
+    // Followed channels: subject nodes the caller resolved as followed-topic.
+    if ($extraNodeIds) {
+      $scope->condition('entity_id', $extraNodeIds, 'IN');
     }
 
     $query->condition($scope);

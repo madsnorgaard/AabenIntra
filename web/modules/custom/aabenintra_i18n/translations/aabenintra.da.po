@@ -282,7 +282,7 @@ msgid "Someone"
 msgstr "Nogen"
 
 msgid "News"
-msgstr "Nyhed"
+msgstr "Nyheder"
 
 msgid "Event"
 msgstr "Begivenhed"
@@ -295,3 +295,34 @@ msgstr "Tip"
 
 msgid "Kudos"
 msgstr "Ros"
+
+# Channels / news
+msgid "Channels"
+msgstr "Kanaler"
+
+msgid "Follow"
+msgstr "Følg"
+
+msgid "Following"
+msgstr "Følger"
+
+msgid "followers"
+msgstr "følgere"
+
+msgid "posts"
+msgstr "indlæg"
+
+msgid "Follow the topics you care about to tailor your news."
+msgstr "Følg de emner, du interesserer dig for, og skræddersy dine nyheder."
+
+msgid "No channels yet."
+msgstr "Ingen kanaler endnu."
+
+msgid "Nothing in this channel yet."
+msgstr "Intet i denne kanal endnu."
+
+msgid "The latest from your channels and across the organisation."
+msgstr "Det nyeste fra dine kanaler og på tværs af organisationen."
+
+msgid "No news yet."
+msgstr "Ingen nyheder endnu."

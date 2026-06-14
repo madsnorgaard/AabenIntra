@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Channels (followable topics), channel pages, targeted news + follow button.
+   Token-driven (dark-mode + accent safe).
+   ========================================================================== */
+
+.ai-channels__intro,
+.ai-news__intro { color: var(--muted, #777); margin: 0 0 var(--space-5, 1.5rem); }
+.ai-news__empty { color: var(--muted, #777); }
+
+/* --- Channel directory card ---------------------------------------------- */
+.ai-channel-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-4, 1rem);
+  background: var(--paper-2, #fff);
+  border: 1px solid var(--line, #e7e1d6);
+  border-radius: var(--radius-l, 12px);
+}
+.ai-channel-card__title {
+  font-family: var(--font-display, serif);
+  font-size: var(--fs-l, 1.125rem);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--ink, #222);
+  text-decoration: none;
+}
+.ai-channel-card__title:hover { color: var(--accent-ink, #8a4427); }
+.ai-channel-card__desc { color: var(--ink-2, #444); font-size: var(--fs-s, 0.875rem); line-height: var(--lh-normal, 1.55); margin: 0; }
+.ai-channel-card__meta { color: var(--muted, #777); font-size: var(--fs-xs, 0.75rem); margin: 0 0 var(--space-2, 0.5rem); }
+
+/* --- Channel page header -------------------------------------------------- */
+.ai-channel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4, 1rem);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5, 1.5rem);
+}
+.ai-channel__heading { flex: 1 1 18rem; }
+.ai-channel__desc { color: var(--ink-2, #444); margin: var(--space-2, 0.5rem) 0 0; line-height: var(--lh-normal, 1.6); max-width: var(--measure, 66ch); }
+
+/* --- Follow button (shared) ---------------------------------------------- */
+.ai-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 0.35rem 0.85rem;
+  font-size: var(--fs-s, 0.875rem);
+  font-weight: var(--fw-medium, 500);
+  line-height: 1.4;
+  border: 1px solid var(--accent, #a8552f);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent-ink, #8a4427);
+  cursor: pointer;
+  transition: background var(--t-fast, .12s), color var(--t-fast, .12s), border-color var(--t-fast, .12s);
+}
+.ai-follow:hover { background: var(--accent-tint, #f3e3d8); }
+.ai-follow:disabled { opacity: 0.6; cursor: default; }
+/* Following = filled accent. */
+.ai-follow.is-following {
+  background: var(--accent, #a8552f);
+  border-color: var(--accent, #a8552f);
+  color: var(--on-accent, #fff);
+}
+.ai-follow__count {
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  background: rgb(0 0 0 / .08);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+.ai-follow.is-following .ai-follow__count { background: rgb(255 255 255 / .22); }

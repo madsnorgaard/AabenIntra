@@ -50,7 +50,15 @@ final class ActivityFeedController extends ControllerBase {
     $page = max(0, $page);
     $offset = $page * self::PER_PAGE;
 
-    $result = $this->activity->feed($this->currentUser(), self::PER_PAGE, $offset);
+    // Followed channels widen the feed beyond org + groups. Resolved here so
+    // this module stays independent of the channels module (optional dep).
+    $uid = (int) $this->currentUser()->id();
+    $extraNodeIds = [];
+    if (\Drupal::hasService('aabenintra_channels.follow')) {
+      $extraNodeIds = \Drupal::service('aabenintra_channels.follow')->nodeIdsForFollowedTopics($uid);
+    }
+
+    $result = $this->activity->feed($this->currentUser(), self::PER_PAGE, $offset, $extraNodeIds);
     $this->pagerManager->createPager($result['total'], self::PER_PAGE);
 
     return [
@@ -60,9 +68,11 @@ final class ActivityFeedController extends ControllerBase {
       '#pager' => ['#type' => 'pager'],
       '#attached' => ['library' => ['aabenintra/global']],
       '#cache' => [
-        'tags' => ['aabenintra_activity', 'node_list'],
+        'tags' => ['aabenintra_activity', 'node_list', 'aabenintra_follow:' . $uid],
+        // 'user' (not just the org/group hash) because the feed now also varies
+        // by the user's personal channel follows.
         'contexts' => [
-          'aabenintra_user_groups',
+          'user',
           'url.query_args:page',
           'languages:language_interface',
           'languages:language_content',

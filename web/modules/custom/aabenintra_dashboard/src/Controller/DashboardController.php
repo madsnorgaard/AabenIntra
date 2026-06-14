@@ -39,17 +39,31 @@ final class DashboardController extends ControllerBase {
       ->condition('type', 'story')
       ->condition('status', 1);
 
-    // Org-unit cascade: show org-wide posts (no unit) + posts targeted at the
-    // user's unit or any of its ancestors (a division post reaches its teams).
+    // Visibility: org-wide posts (no unit) + posts targeting the user's unit or
+    // any of its ancestors (a division post reaches its teams), PLUS stories in
+    // any channel (topic) the user follows - wherever they are posted.
     $account = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
+    $scope = $query->orConditionGroup();
+    $scoped = FALSE;
     if ($account && $account->hasField('field_primary_org_unit') && !$account->get('field_primary_org_unit')->isEmpty()) {
       $unit_tid = (int) $account->get('field_primary_org_unit')->target_id;
-      $lineage = $this->entityTypeManager()->getStorage('taxonomy_term')->loadAllParents($unit_tid);
-      $unit_ids = array_map('intval', array_keys($lineage));
+      $unit_ids = array_map('intval', array_keys($this->entityTypeManager()->getStorage('taxonomy_term')->loadAllParents($unit_tid)));
       $org = $query->orConditionGroup()
         ->notExists('field_org_unit')
         ->condition('field_org_unit', $unit_ids, 'IN');
-      $query->condition($org);
+      $scope->condition($org);
+      $scoped = TRUE;
+    }
+    // Followed channels (defensive: the channels module may not be installed).
+    if (\Drupal::hasService('aabenintra_channels.follow')) {
+      $followed = \Drupal::service('aabenintra_channels.follow')->followingIds((int) $this->currentUser()->id());
+      if ($followed) {
+        $scope->condition('field_topics', $followed, 'IN');
+        $scoped = TRUE;
+      }
+    }
+    if ($scoped) {
+      $query->condition($scope);
     }
 
     $ids = $query->sort('created', 'DESC')->range(0, 30)->execute();
@@ -90,7 +104,7 @@ final class DashboardController extends ControllerBase {
       '#tiles' => $tiles,
       '#attached' => ['library' => ['aabenintra/global']],
       '#cache' => [
-        'tags' => ['node_list:story'],
+        'tags' => ['node_list:story', 'aabenintra_follow:' . (int) $this->currentUser()->id()],
         'contexts' => ['user', 'languages:language_content', 'languages:language_interface'],
       ],
     ];

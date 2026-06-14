@@ -1,0 +1,8 @@
+follow:
+  version: VERSION
+  js:
+    js/follow.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once

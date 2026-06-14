@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Channels: theme hooks for the channel directory and news pages.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function aabenintra_channels_theme(): array {
+  return [
+    'aabenintra_channels' => [
+      'variables' => ['channels' => []],
+    ],
+    'aabenintra_channel' => [
+      'variables' => [
+        'name' => '',
+        'description' => NULL,
+        'tid' => 0,
+        'followers' => 0,
+        'following' => FALSE,
+        'cards' => [],
+        'pager' => NULL,
+      ],
+    ],
+    'aabenintra_news' => [
+      'variables' => ['cards' => [], 'empty' => FALSE, 'pager' => NULL],
+    ],
+  ];
+}

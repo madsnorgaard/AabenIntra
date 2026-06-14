@@ -1,0 +1,10 @@
+name: 'AabenIntra Channels'
+type: module
+description: 'Followable channels (topics), a channel directory and a targeted news feed.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:user

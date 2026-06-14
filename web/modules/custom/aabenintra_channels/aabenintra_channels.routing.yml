@@ -1,0 +1,41 @@
+aabenintra_channels.directory:
+  path: '/channels'
+  defaults:
+    _controller: '\Drupal\aabenintra_channels\Controller\ChannelsController::directory'
+    _title: 'Channels'
+  requirements:
+    _permission: 'access content'
+
+aabenintra_channels.news:
+  path: '/news'
+  defaults:
+    _controller: '\Drupal\aabenintra_channels\Controller\ChannelsController::news'
+    _title: 'News'
+  requirements:
+    _permission: 'access content'
+
+aabenintra_channels.channel:
+  path: '/channels/{taxonomy_term}'
+  defaults:
+    _controller: '\Drupal\aabenintra_channels\Controller\ChannelsController::channel'
+    _title: 'Channel'
+  requirements:
+    _permission: 'access content'
+    taxonomy_term: \d+
+  options:
+    parameters:
+      taxonomy_term:
+        type: 'entity:taxonomy_term'
+
+aabenintra_channels.follow:
+  path: '/aabenintra/follow/{taxonomy_term}'
+  defaults:
+    _controller: '\Drupal\aabenintra_channels\Controller\FollowController::toggle'
+  methods: [POST]
+  requirements:
+    _custom_access: '\Drupal\aabenintra_channels\Controller\FollowController::access'
+    taxonomy_term: \d+
+  options:
+    parameters:
+      taxonomy_term:
+        type: 'entity:taxonomy_term'
