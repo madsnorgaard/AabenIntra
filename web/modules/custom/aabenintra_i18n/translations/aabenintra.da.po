@@ -93,3 +93,78 @@ msgstr "Senest delt i dine grupper"
 
 msgid "Change language"
 msgstr "Skift sprog"
+
+# Directory
+msgid "People"
+msgstr "Medarbejdere"
+
+msgid "Search name or title"
+msgstr "Søg navn eller titel"
+
+msgid "Search"
+msgstr "Søg"
+
+msgid "Organisation unit"
+msgstr "Organisationsenhed"
+
+msgid "All units"
+msgstr "Alle enheder"
+
+msgid "Location"
+msgstr "Lokation"
+
+msgid "All locations"
+msgstr "Alle lokationer"
+
+msgid "Skill"
+msgstr "Kompetence"
+
+msgid "All skills"
+msgstr "Alle kompetencer"
+
+msgid "Filter"
+msgstr "Filtrér"
+
+msgid "people"
+msgstr "personer"
+
+msgid "No people found."
+msgstr "Ingen personer fundet."
+
+# Organisation chart
+msgid "Organisation chart"
+msgstr "Organisationsdiagram"
+
+msgid "members"
+msgstr "medlemmer"
+
+msgid "No organisation units yet."
+msgstr "Ingen organisationsenheder endnu."
+
+# Expertise finder
+msgid "Find an expert"
+msgstr "Find en ekspert"
+
+msgid "Browse skills across the organisation and find a colleague who can help."
+msgstr "Gennemse kompetencer på tværs af organisationen og find en kollega, der kan hjælpe."
+
+msgid "Search a skill, e.g. GDPR"
+msgstr "Søg en kompetence, fx GDPR"
+
+msgid "Search skills"
+msgstr "Søg kompetencer"
+
+msgid "Skills"
+msgstr "Kompetencer"
+
+msgid "No skills recorded yet."
+msgstr "Ingen kompetencer registreret endnu."
+
+msgid "Colleagues who know"
+msgstr "Kolleger der kender"
+
+msgid "No colleagues hold this skill yet."
+msgstr "Ingen kolleger har denne kompetence endnu."
+
+msgid "Email"
+msgstr "E-mail"

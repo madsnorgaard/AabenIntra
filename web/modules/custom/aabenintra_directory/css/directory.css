@@ -65,6 +65,44 @@
   color: var(--accent-ink, #8a4427);
 }
 
+/* Expertise finder: skill cloud + contactable expert cards */
+.ai-expertise__intro { color: var(--muted, #777); margin-bottom: var(--space-4, 1rem); }
+.ai-expertise__cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-6, 2rem);
+}
+.ai-tag--skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  font-size: var(--fs-s, 0.875rem);
+  text-decoration: none;
+  border: 1px solid var(--accent-line, #e0b9a3);
+  transition: background var(--t-fast, .12s), color var(--t-fast, .12s);
+}
+.ai-tag--skill:hover, .ai-tag--skill.is-selected {
+  background: var(--accent, #a8552f);
+  color: var(--paper, #fff);
+}
+.ai-tag__count {
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  background: rgb(0 0 0 / .08);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+.ai-tag--skill.is-selected .ai-tag__count, .ai-tag--skill:hover .ai-tag__count { background: rgb(255 255 255 / .25); }
+.ai-expertise__heading { display: flex; align-items: baseline; gap: var(--space-3, 0.75rem); flex-wrap: wrap; margin-bottom: var(--space-4, 1rem); }
+.ai-expertise__heading em { font-style: normal; color: var(--accent-ink, #8a4427); }
+.ai-person--contact { gap: var(--space-3, 0.75rem); }
+.ai-person__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-1, 0.25rem); text-decoration: none; color: inherit; }
+.ai-person__contact { display: flex; gap: var(--space-3, 0.75rem); flex-wrap: wrap; justify-content: center; }
+.ai-person__link { font-size: var(--fs-s, 0.875rem); color: var(--accent-ink, #8a4427); text-decoration: none; }
+.ai-person__link:hover { text-decoration: underline; }
+
 /* Org chart: indented nested tree with connectors */
 .ai-orgchart__list { list-style: none; margin: 0; padding-left: var(--space-5, 1.5rem); }
 .ai-orgchart > .ai-orgchart__list { padding-left: 0; }

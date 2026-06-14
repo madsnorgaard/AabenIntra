@@ -6,6 +6,14 @@ aabenintra_directory.directory:
   requirements:
     _permission: 'access content'
 
+aabenintra_directory.expertise:
+  path: '/experts'
+  defaults:
+    _controller: '\Drupal\aabenintra_directory\Controller\ExpertiseController::page'
+    _title: 'Find an expert'
+  requirements:
+    _permission: 'access content'
+
 aabenintra_directory.org_chart:
   path: '/org-chart'
   defaults:

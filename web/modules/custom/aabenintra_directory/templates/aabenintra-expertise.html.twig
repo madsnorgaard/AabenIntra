@@ -1,0 +1,52 @@
+{#
+/**
+ * @file
+ * Expertise finder: skill cloud + experts for the selected skill.
+ */
+#}
+<div class="ai-expertise layout-container">
+  <h1 class="ai-greeting">{{ 'Find an expert'|t }}</h1>
+  <p class="ai-expertise__intro">{{ 'Browse skills across the organisation and find a colleague who can help.'|t }}</p>
+
+  <form class="ai-directory__filters" method="get" role="search">
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ 'Search a skill, e.g. GDPR'|t }}" aria-label="{{ 'Search skills'|t }}">
+    <button type="submit" class="button">{{ 'Search'|t }}</button>
+  </form>
+
+  <div class="ai-expertise__cloud" role="list" aria-label="{{ 'Skills'|t }}">
+    {% for s in skills %}
+      <a class="ai-tag ai-tag--skill{{ s.selected ? ' is-selected' : '' }}" href="{{ s.url }}" role="listitem">
+        {{ s.name }}<span class="ai-tag__count">{{ s.count }}</span>
+      </a>
+    {% else %}
+      <p>{{ 'No skills recorded yet.'|t }}</p>
+    {% endfor %}
+  </div>
+
+  {% if selected_skill %}
+    <h2 class="ai-expertise__heading">
+      {{ 'Colleagues who know'|t }} <em>{{ selected_name }}</em>
+      <span class="ai-directory__count">{{ experts|length }} {{ 'people'|t }}</span>
+    </h2>
+    <div class="ai-directory__grid">
+      {% for p in experts %}
+        <div class="ai-person ai-person--contact">
+          <a class="ai-person__head" href="{{ p.url }}">
+            <span class="ai-person__avatar">
+              {% if p.photo %}<img src="{{ p.photo }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">{{ p.initial }}</span>{% endif %}
+            </span>
+            <span class="ai-person__name">{{ p.name }}</span>
+            {% if p.title %}<span class="ai-person__title">{{ p.title }}</span>{% endif %}
+            {% if p.unit %}<span class="ai-person__meta">{{ p.unit }}</span>{% endif %}
+          </a>
+          <span class="ai-person__contact">
+            {% if p.phone %}<a class="ai-person__link" href="tel:{{ p.phone|replace({' ': ''}) }}">{{ p.phone }}</a>{% endif %}
+            {% if p.email %}<a class="ai-person__link" href="mailto:{{ p.email }}">{{ 'Email'|t }}</a>{% endif %}
+          </span>
+        </div>
+      {% else %}
+        <p>{{ 'No colleagues hold this skill yet.'|t }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

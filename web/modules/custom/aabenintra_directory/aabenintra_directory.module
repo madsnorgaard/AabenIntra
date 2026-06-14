@@ -18,5 +18,8 @@ function aabenintra_directory_theme(): array {
     'aabenintra_org_chart' => [
       'variables' => ['tree' => []],
     ],
+    'aabenintra_expertise' => [
+      'variables' => ['skills' => [], 'experts' => [], 'selected_skill' => 0, 'selected_name' => '', 'q' => ''],
+    ],
   ];
 }
