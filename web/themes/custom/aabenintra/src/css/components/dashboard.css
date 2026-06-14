@@ -1,19 +1,36 @@
-/* Dashboard bento grid + Story tiles. Editorial Warm. */
+/* Dashboard bento grid + Story tiles. Editorial Warm.
+ *
+ * Grid math — one modular family so every row resolves cleanly:
+ *   12 columns; tile widths are multiples of 4 ONLY (4 / 8).
+ *     small + medium -> span 4   (standard card, three-up:  4+4+4 = 12)
+ *     large          -> span 8   (lead story, pairs with a 4: 8+4 = 12)
+ *   grid-auto-flow: dense backfills the 4-col companion beside any 8-col lead,
+ *   so the grid is gap-free for any sequence of sizes. Mixing a 6-span (the old
+ *   "large") with 4-span tiles never tiles to 12 — that was the ragged-row bug.
+ *
+ * Sizes are resolved server-side in DashboardController so the no-JS markup and
+ * the progressively-enhanced island agree.
+ */
 
 .ai-dashboard {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: var(--space-4);
+  grid-auto-flow: row dense;
+  gap: var(--space-5);
+  align-items: stretch;
 }
 
 @media (max-width: 60rem) {
-  .ai-dashboard { grid-template-columns: repeat(6, 1fr); }
+  .ai-dashboard { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 36rem) {
   .ai-dashboard { grid-template-columns: 1fr; }
 }
 
-/* Tile */
+/* Tile
+   - column span set per size below
+   - rows equalise tile heights automatically (align-items: stretch), so a
+     lead and its companion in the same row share a baseline. */
 .tile {
   display: flex;
   flex-direction: column;
@@ -21,25 +38,32 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-l);
   overflow: clip;
-  grid-column: span 4;            /* default medium */
-  min-height: 14rem;
+  grid-column: span 4;            /* default: standard card, three-up */
+  min-height: 15rem;
   transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
 }
 .tile:hover { border-color: var(--accent-line); box-shadow: var(--shadow-2); }
 
-.tile--small  { grid-column: span 3; min-height: 10rem; }
-.tile--medium { grid-column: span 4; }
-.tile--large  { grid-column: span 6; min-height: 20rem; }
+.tile--small   { grid-column: span 4; }
+.tile--medium  { grid-column: span 4; }
+.tile--large   { grid-column: span 8; min-height: 22rem; }
 
+/* Tablet: two-up. Lead goes full width, the rest pair up. */
 @media (max-width: 60rem) {
-  .tile--large { grid-column: span 6; }
-  .tile--medium { grid-column: span 3; }
-  .tile--small { grid-column: span 3; }
+  .tile,
+  .tile--small,
+  .tile--medium { grid-column: span 1; }
+  .tile--large { grid-column: 1 / -1; }
 }
+/* Phone: single column. */
 @media (max-width: 36rem) {
-  .tile, .tile--small, .tile--medium, .tile--large { grid-column: 1 / -1; }
+  .tile,
+  .tile--small,
+  .tile--medium,
+  .tile--large { grid-column: 1 / -1; }
 }
 
+/* === Media cards (have a lead image) ============================== */
 .tile__media {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -47,7 +71,7 @@
   overflow: clip;
 }
 .tile--large .tile__media { aspect-ratio: 21 / 9; }
-.tile__media img { width: 100%; height: 100%; object-fit: cover; }
+.tile__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .tile__body {
   display: flex;
@@ -56,6 +80,28 @@
   padding: var(--space-4) var(--space-5) var(--space-5);
   flex: 1;
 }
+
+/* === Text cards (no image) =======================================
+   Without a picture the body owns the whole tile. Centre the title block
+   vertically and mark the card with a hairline accent rule so the empty
+   space reads as deliberate composition, not a broken image slot. */
+.tile:not(:has(.tile__media)) {
+  background: var(--paper-3);
+}
+.tile:not(:has(.tile__media)) .tile__body {
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+}
+.tile:not(:has(.tile__media)) .tile__body::before {
+  content: "";
+  width: var(--space-6);
+  height: 2px;
+  background: var(--accent);
+  margin-bottom: var(--space-1);
+}
+/* In a text card the title carries the weight — bump it one step. */
+.tile:not(:has(.tile__media)):not(.tile--small) .tile__title { font-size: var(--fs-xl); }
 
 .tile__eyebrow {
   font-family: var(--font-body);
@@ -82,18 +128,23 @@
 .tile__summary {
   color: var(--ink-2);
   font-size: var(--fs-s);
+  line-height: var(--lh-snug);
   margin: 0;
 }
 .tile--small .tile__summary { display: none; }
 
 .tile__meta {
   margin-top: auto;
+  padding-top: var(--space-3);
   display: flex;
   gap: var(--space-3);
   align-items: center;
   color: var(--muted);
   font-size: var(--fs-xs);
 }
+/* Text cards centre their body, so the meta row sits with the content
+   rather than being pushed to the floor. */
+.tile:not(:has(.tile__media)) .tile__meta { margin-top: var(--space-2); }
 
 .tile__pin {
   margin-left: auto;
