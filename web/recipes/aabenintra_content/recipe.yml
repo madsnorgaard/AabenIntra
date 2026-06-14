@@ -1,0 +1,14 @@
+name: 'AabenIntra Content'
+description: 'Intranet content model: Story, Event and Document content types, the Department/Topic/Audience taxonomies, and their fields and displays.'
+type: 'Site'
+install:
+  - node
+  - taxonomy
+  - field
+  - text
+  - options
+  - datetime
+  - link
+# Apply AFTER aabenintra_media: Story's lead image references the Image media
+# type. Config in this recipe's config/ directory is imported automatically.
+# Reuses the core body field storage provided by the Standard recipe (base).

@@ -1,0 +1,84 @@
+/* Personalise panel - the user customisation surface (accent/dark/density). */
+
+.ai-personalise {
+  position: fixed;
+  top: 0; right: 0;
+  z-index: 100;
+  width: min(22rem, 92vw);
+  height: 100dvh;
+  background: var(--paper-3);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-5);
+  transform: translateX(100%);
+  transition: transform var(--t);
+  overflow-y: auto;
+}
+.ai-personalise.is-open { transform: translateX(0); }
+
+.ai-personalise__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  margin-bottom: var(--space-4);
+}
+
+.ai-personalise__group { margin-bottom: var(--space-5); }
+.ai-personalise__label {
+  display: block;
+  font-size: var(--fs-s);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Accent swatches */
+.ai-swatches { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ai-swatch {
+  width: 2rem; height: 2rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--t-fast), border-color var(--t-fast);
+}
+.ai-swatch:hover { transform: scale(1.1); }
+.ai-swatch[aria-pressed="true"] { border-color: var(--ink); transform: scale(1.1); }
+.ai-swatch[data-accent="clay"]   { background: oklch(56% 0.13 45); }
+.ai-swatch[data-accent="rust"]   { background: oklch(54% 0.15 35); }
+.ai-swatch[data-accent="gold"]   { background: oklch(64% 0.12 80); }
+.ai-swatch[data-accent="forest"] { background: oklch(52% 0.11 150); }
+.ai-swatch[data-accent="teal"]   { background: oklch(56% 0.10 195); }
+.ai-swatch[data-accent="ocean"]  { background: oklch(54% 0.13 235); }
+.ai-swatch[data-accent="ink"]    { background: oklch(48% 0.12 265); }
+.ai-swatch[data-accent="plum"]   { background: oklch(52% 0.14 320); }
+
+.ai-swatch--custom {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  background: conic-gradient(from 0deg, oklch(60% 0.2 0), oklch(60% 0.2 120), oklch(60% 0.2 240), oklch(60% 0.2 360));
+}
+.ai-swatch--custom input[type="color"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+
+/* Segmented toggle (scheme / density) */
+.ai-segment { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius-m); overflow: clip; }
+.ai-segment button {
+  font: inherit;
+  font-size: var(--fs-s);
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper-2);
+  color: var(--ink-2);
+  border: 0;
+  cursor: pointer;
+}
+.ai-segment button[aria-pressed="true"] { background: var(--accent-fill); color: var(--on-accent); }
+
+.ai-personalise__backdrop {
+  position: fixed; inset: 0; z-index: 99;
+  background: oklch(20% 0.02 60 / 0.3);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--t);
+}
+.ai-personalise__backdrop.is-open { opacity: 1; visibility: visible; }

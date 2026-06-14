@@ -1,0 +1,4 @@
+services:
+  aabenintra_demo.generator:
+    class: Drupal\aabenintra_demo\DemoContentGenerator
+    autowire: true

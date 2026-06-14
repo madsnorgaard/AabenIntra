@@ -1,0 +1,140 @@
+/* Dashboard bento grid + Story tiles. Editorial Warm. */
+
+.ai-dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 60rem) {
+  .ai-dashboard { grid-template-columns: repeat(6, 1fr); }
+}
+@media (max-width: 36rem) {
+  .ai-dashboard { grid-template-columns: 1fr; }
+}
+
+/* Tile */
+.tile {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  overflow: clip;
+  grid-column: span 4;            /* default medium */
+  min-height: 14rem;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
+}
+.tile:hover { border-color: var(--accent-line); box-shadow: var(--shadow-2); }
+
+.tile--small  { grid-column: span 3; min-height: 10rem; }
+.tile--medium { grid-column: span 4; }
+.tile--large  { grid-column: span 6; min-height: 20rem; }
+
+@media (max-width: 60rem) {
+  .tile--large { grid-column: span 6; }
+  .tile--medium { grid-column: span 3; }
+  .tile--small { grid-column: span 3; }
+}
+@media (max-width: 36rem) {
+  .tile, .tile--small, .tile--medium, .tile--large { grid-column: 1 / -1; }
+}
+
+.tile__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--accent-tint);
+  overflow: clip;
+}
+.tile--large .tile__media { aspect-ratio: 21 / 9; }
+.tile__media img { width: 100%; height: 100%; object-fit: cover; }
+
+.tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  flex: 1;
+}
+
+.tile__eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+.tile__title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  font-size: var(--fs-l);
+  margin: 0;
+}
+.tile--large .tile__title { font-size: var(--fs-2xl); }
+
+.tile__title a { color: var(--ink); text-decoration: none; }
+.tile__title a:hover { color: var(--accent-ink); }
+
+.tile__summary {
+  color: var(--ink-2);
+  font-size: var(--fs-s);
+  margin: 0;
+}
+.tile--small .tile__summary { display: none; }
+
+.tile__meta {
+  margin-top: auto;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.tile__pin {
+  margin-left: auto;
+  color: var(--accent-ink);
+}
+
+/* Pinned tiles get a subtle accent edge */
+.tile.is-pinned { border-color: var(--accent-line); }
+.tile.is-pinned::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: var(--accent);
+}
+
+/* Drag affordance when reordering is enabled */
+.ai-dashboard.is-reorderable .tile { cursor: grab; }
+.tile.is-dragging { opacity: 0.6; }
+
+/* Pin + drag controls */
+.tile__pinbtn {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: var(--fs-m);
+  line-height: 1;
+  color: var(--muted);
+  padding: var(--space-1);
+  border-radius: var(--radius-s);
+  transition: color var(--t-fast), transform var(--t-fast);
+}
+.tile__pinbtn:hover { color: var(--accent-ink); transform: scale(1.15); }
+.tile__pinbtn[aria-pressed="true"] { color: var(--accent-ink); }
+
+.tile__draghandle {
+  margin-left: auto;
+  color: var(--muted);
+  cursor: grab;
+  user-select: none;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.tile:hover .tile__draghandle { opacity: 0.7; }
+.tile.is-dragover { outline: 2px dashed var(--accent-line); outline-offset: 2px; }

@@ -1,0 +1,16 @@
+name: 'AabenIntra Demo Content'
+type: module
+description: 'Self-contained demo/sample intranet content for dev and staging. Do NOT enable in production.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+
+# Provides drush aabenintra:demo-seed and aabenintra:demo-clear.
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:media
+  - drupal:image
+  - drupal:user
+
+lifecycle: experimental

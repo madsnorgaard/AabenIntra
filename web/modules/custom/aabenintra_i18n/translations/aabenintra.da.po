@@ -1,0 +1,95 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AabenIntra 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: da\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Home"
+msgstr "Hjem"
+
+msgid "Personalise"
+msgstr "Tilpas"
+
+msgid "User tools"
+msgstr "Brugerværktøjer"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "Quick links"
+msgstr "Genveje"
+
+msgid "Accent colour"
+msgstr "Accentfarve"
+
+msgid "Appearance"
+msgstr "Udseende"
+
+msgid "Light"
+msgstr "Lys"
+
+msgid "Dark"
+msgstr "Mørk"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Density"
+msgstr "Tæthed"
+
+msgid "Comfortable"
+msgstr "Komfortabel"
+
+msgid "Compact"
+msgstr "Kompakt"
+
+msgid "Custom colour"
+msgstr "Brugerdefineret farve"
+
+msgid "Custom accent colour"
+msgstr "Brugerdefineret accentfarve"
+
+msgid "Pin to top"
+msgstr "Fastgør øverst"
+
+msgid "Drag to reorder"
+msgstr "Træk for at omarrangere"
+
+msgid "Pinned"
+msgstr "Fastgjort"
+
+msgid "No stories yet."
+msgstr "Ingen historier endnu."
+
+msgid "Good morning"
+msgstr "Godmorgen"
+
+msgid "Good afternoon"
+msgstr "God eftermiddag"
+
+msgid "Good evening"
+msgstr "God aften"
+
+msgid "Documents"
+msgstr "Dokumenter"
+
+msgid "Tips"
+msgstr "Tips"
+
+msgid "Members"
+msgstr "Medlemmer"
+
+msgid "About"
+msgstr "Om"
+
+msgid "Recently shared in your groups"
+msgstr "Senest delt i dine grupper"
+
+msgid "Change language"
+msgstr "Skift sprog"

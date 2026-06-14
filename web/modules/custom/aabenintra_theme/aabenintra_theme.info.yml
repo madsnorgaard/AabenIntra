@@ -1,0 +1,8 @@
+name: 'AabenIntra Theme Customisation'
+type: module
+description: 'Per-user theme preferences (accent, colour scheme, density, tile layout) for the AabenIntra intranet, stored in user.data and applied on first paint.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:user

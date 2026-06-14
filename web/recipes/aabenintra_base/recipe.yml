@@ -1,0 +1,39 @@
+name: 'AabenIntra Base'
+description: 'Base AabenIntra intranet platform: admin UX, roles, caching-ready, clean paths.'
+type: 'Site'
+recipes:
+  # Sensible Drupal baseline (text formats, media, comment, menus, views, etc.)
+  - core/recipes/standard
+
+install:
+  # Admin / editor experience
+  - gin
+  - gin_toolbar
+  - admin_toolbar
+  - admin_toolbar_tools
+  - environment_indicator
+  # Clean URLs
+  - pathauto
+  - token
+  # Layout Builder (used by the Page content type and dashboard work)
+  - layout_builder
+
+config:
+  actions:
+    system.site:
+      simpleConfigUpdate:
+        name: 'AabenIntra'
+        slogan: 'Your company, connected'
+    system.theme:
+      simpleConfigUpdate:
+        admin: 'gin'
+    # Make Gin the default admin experience for node forms.
+    node.settings:
+      simpleConfigUpdate:
+        use_admin_theme: true
+    gin.settings:
+      simpleConfigUpdate:
+        preset_accent_color: 'blue'
+        preset_focus_color: 'gin'
+        enable_darkmode: 'auto'
+        classic_toolbar: 'horizontal'

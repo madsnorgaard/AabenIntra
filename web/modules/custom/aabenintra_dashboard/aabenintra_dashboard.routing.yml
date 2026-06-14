@@ -1,0 +1,7 @@
+aabenintra_dashboard.page:
+  path: '/dashboard'
+  defaults:
+    _controller: '\Drupal\aabenintra_dashboard\Controller\DashboardController::page'
+    _title: 'Dashboard'
+  requirements:
+    _permission: 'access content'

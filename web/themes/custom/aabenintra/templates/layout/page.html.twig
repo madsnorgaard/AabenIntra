@@ -1,0 +1,83 @@
+{#
+/**
+ * @file
+ * AabenIntra page layout - intranet chrome (header, content, personalise panel).
+ */
+#}
+<div class="ai-page">
+  <header class="ai-header" role="banner">
+    <button type="button" class="ai-iconbtn" data-ai-nav-toggle aria-expanded="false" aria-controls="ai-nav" title="{{ 'Menu'|t }}" aria-label="{{ 'Menu'|t }}">☰</button>
+    <a class="ai-header__brand" href="{{ path('<front>') }}">
+      Aaben<span>Intra</span>
+    </a>
+    <div class="ai-header__spacer"></div>
+    <nav class="ai-header__actions" aria-label="{{ 'User tools'|t }}">
+      {% if aabenintra_langswitch %}
+        <div class="ai-langswitch" role="group" aria-label="{{ 'Change language'|t }}">
+          {% for l in aabenintra_langswitch %}
+            <a href="{{ l.url }}" class="ai-langswitch__link{{ l.active ? ' is-active' : '' }}" lang="{{ l.langcode }}" hreflang="{{ l.langcode }}"{{ l.active ? ' aria-current="true"' : '' }}>{{ l.label }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <a class="ai-iconbtn" href="/dashboard" title="{{ 'Home'|t }}" aria-label="{{ 'Home'|t }}">⌂</a>
+      <button type="button" class="ai-iconbtn" data-ai-personalise-toggle aria-expanded="false" aria-controls="ai-personalise" title="{{ 'Personalise'|t }}" aria-label="{{ 'Personalise'|t }}">◐</button>
+    </nav>
+  </header>
+
+  {# Left navigation drawer - the collapsible main menu + quick links. #}
+  <div class="ai-nav__backdrop" data-ai-nav-backdrop></div>
+  <aside id="ai-nav" class="ai-nav" data-ai-nav aria-label="{{ 'Navigation'|t }}">
+    <h2 class="ai-nav__title">{{ 'Menu'|t }}</h2>
+    <nav class="ai-nav__menu" aria-label="{{ 'Menu'|t }}">{{ aabenintra_main_menu }}</nav>
+    {% if aabenintra_quick_links %}
+      <h2 class="ai-nav__title">{{ 'Quick links'|t }}</h2>
+      <nav class="ai-nav__menu" aria-label="{{ 'Quick links'|t }}">{{ aabenintra_quick_links }}</nav>
+    {% endif %}
+  </aside>
+
+  <main class="ai-main" role="main">
+    <a id="main-content" tabindex="-1"></a>
+    {{ page.content }}
+  </main>
+
+  {% if page.footer %}
+    <footer class="ai-footer" role="contentinfo">
+      <div class="layout-container">{{ page.footer }}</div>
+    </footer>
+  {% endif %}
+
+  {# Personalise panel - the per-user customisation surface. #}
+  <div class="ai-personalise__backdrop" data-ai-personalise-backdrop></div>
+  <aside id="ai-personalise" class="ai-personalise" data-ai-personalise aria-label="{{ 'Personalise'|t }}">
+    <h2 class="ai-personalise__title">{{ 'Personalise'|t }}</h2>
+
+    <div class="ai-personalise__group">
+      <span class="ai-personalise__label">{{ 'Accent colour'|t }}</span>
+      <div class="ai-swatches">
+        {% for accent in ['clay', 'rust', 'gold', 'forest', 'teal', 'ocean', 'ink', 'plum'] %}
+          <button type="button" class="ai-swatch" data-accent="{{ accent }}" aria-pressed="false" aria-label="{{ accent|capitalize }}"></button>
+        {% endfor %}
+        <label class="ai-swatch ai-swatch--custom" title="{{ 'Custom colour'|t }}">
+          <input type="color" value="#a8552f" aria-label="{{ 'Custom accent colour'|t }}">
+        </label>
+      </div>
+    </div>
+
+    <div class="ai-personalise__group">
+      <span class="ai-personalise__label">{{ 'Appearance'|t }}</span>
+      <div class="ai-segment" data-ai-segment="color_scheme" role="group" aria-label="{{ 'Appearance'|t }}">
+        <button type="button" data-value="light" aria-pressed="false">{{ 'Light'|t }}</button>
+        <button type="button" data-value="dark" aria-pressed="false">{{ 'Dark'|t }}</button>
+        <button type="button" data-value="auto" aria-pressed="false">{{ 'Auto'|t }}</button>
+      </div>
+    </div>
+
+    <div class="ai-personalise__group">
+      <span class="ai-personalise__label">{{ 'Density'|t }}</span>
+      <div class="ai-segment" data-ai-segment="density" role="group" aria-label="{{ 'Density'|t }}">
+        <button type="button" data-value="comfortable" aria-pressed="false">{{ 'Comfortable'|t }}</button>
+        <button type="button" data-value="compact" aria-pressed="false">{{ 'Compact'|t }}</button>
+      </div>
+    </div>
+  </aside>
+</div>

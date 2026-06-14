@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Dashboard module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function aabenintra_dashboard_theme(): array {
+  return [
+    'aabenintra_dashboard' => [
+      'variables' => [
+        'greeting' => '',
+        'tiles' => [],
+      ],
+    ],
+  ];
+}

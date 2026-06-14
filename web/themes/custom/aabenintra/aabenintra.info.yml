@@ -1,0 +1,27 @@
+name: AabenIntra
+type: theme
+'base theme': stable9
+version: 1.0.0
+libraries:
+  - aabenintra/base
+  - aabenintra/messages
+  - core/normalize
+  - aabenintra/global
+libraries-extend:
+  user/drupal.user:
+    - aabenintra/user
+  core/drupal.dropbutton:
+    - aabenintra/dropbutton
+  core/drupal.dialog:
+    - aabenintra/dialog
+  file/drupal.file:
+    - aabenintra/file
+  core/drupal.item-list:
+    - aabenintra/item-list
+  core/drupal.progress:
+    - aabenintra/progress
+  core/drupal.tablesort:
+    - aabenintra/drupal.tablesort
+description: 'AabenIntra intranet front-end theme - Editorial Warm, with per-user customisation.'
+core_version_requirement: ^11
+generator: 'starterkit_theme:11.3.11'

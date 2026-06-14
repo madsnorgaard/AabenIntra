@@ -1,0 +1,74 @@
+/* Left slide-out navigation drawer + language switcher. Mirrors the personalise drawer. */
+
+.ai-nav {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  width: min(20rem, 88vw);
+  height: 100dvh;
+  background: var(--paper-3);
+  border-right: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-5);
+  transform: translateX(-100%);
+  transition: transform var(--t);
+  overflow-y: auto;
+}
+.ai-nav.is-open { transform: translateX(0); }
+
+.ai-nav__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-l);
+  margin: var(--space-4) 0 var(--space-2);
+}
+.ai-nav__title:first-child { margin-top: 0; }
+
+.ai-nav__menu .menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ai-nav__menu .menu .menu { padding-left: var(--space-3); }
+.ai-nav__menu .menu-item { margin: 0; }
+.ai-nav__menu a {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.ai-nav__menu a:hover { background: var(--accent-tint); color: var(--accent-ink); }
+.ai-nav__menu a.is-active,
+.ai-nav__menu .menu-item--active-trail > a {
+  color: var(--accent-ink);
+  font-weight: var(--fw-semibold);
+}
+
+.ai-nav__backdrop {
+  position: fixed; inset: 0; z-index: 99;
+  background: oklch(20% 0.02 60 / 0.3);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--t);
+}
+.ai-nav__backdrop.is-open { opacity: 1; visibility: visible; }
+
+/* Language switcher in the header */
+.ai-langswitch {
+  display: inline-flex;
+  gap: 1px;
+  background: var(--line);
+  border-radius: var(--radius-m);
+  overflow: clip;
+  margin-right: var(--space-2);
+}
+.ai-langswitch__link {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  color: var(--ink-2);
+  background: var(--paper-2);
+}
+.ai-langswitch__link:hover { background: var(--accent-tint); color: var(--accent-ink); }
+.ai-langswitch__link.is-active { background: var(--accent-fill); color: var(--on-accent); }

@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: tile_medium
+label: 'Tile Medium'
+effects:
+  3734b7c8-7936-4d89-8b88-02a1477ee516:
+    uuid: 3734b7c8-7936-4d89-8b88-02a1477ee516
+    id: focal_point_scale_and_crop
+    weight: 0
+    data:
+      width: 900
+      height: 600
+      crop_type: focal_point

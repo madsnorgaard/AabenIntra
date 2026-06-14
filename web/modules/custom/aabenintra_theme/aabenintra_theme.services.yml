@@ -1,0 +1,10 @@
+services:
+  aabenintra_theme.preferences:
+    class: Drupal\aabenintra_theme\PreferencesService
+    arguments: ['@user.data', '@current_user']
+
+  cache_context.aabenintra_user_prefs:
+    class: Drupal\aabenintra_theme\Cache\UserPreferencesHashContext
+    arguments: ['@aabenintra_theme.preferences']
+    tags:
+      - { name: cache.context }

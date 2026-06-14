@@ -1,0 +1,11 @@
+name: 'AabenIntra Internationalisation'
+type: module
+description: 'Ships Danish (da) translations of AabenIntra custom UI strings so a fresh tenant is bilingual out of the box.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:locale
+  - drupal:language
+  - drupal:content_translation
+  - drupal:config_translation

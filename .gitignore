@@ -1,0 +1,32 @@
+# Composer-managed code (rebuilt from composer.json/lock)
+/vendor/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+/drush/Commands/contrib/
+
+# Scaffolded files
+/web/sites/*/files/
+/web/sites/*/private/
+/web/sites/*/settings.local.php
+/web/.htaccess
+/web/robots.txt
+/web/index.php
+/web/update.php
+/web/autoload.php
+
+# Environment / secrets
+.env
+/web/sites/*/settings.ddev.php
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Theme build deps (dist/ IS committed - it is the production transport)
+web/themes/custom/*/node_modules/
+
+# DDEV-generated site settings (provided per environment)
+/web/sites/*/settings.php

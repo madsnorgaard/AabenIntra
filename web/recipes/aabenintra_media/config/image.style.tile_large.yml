@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: tile_large
+label: 'Tile Large'
+effects:
+  72b064c3-102f-4824-8852-1056e489a3c3:
+    uuid: 72b064c3-102f-4824-8852-1056e489a3c3
+    id: focal_point_scale_and_crop
+    weight: 0
+    data:
+      width: 1200
+      height: 800
+      crop_type: focal_point

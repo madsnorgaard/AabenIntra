@@ -1,0 +1,15 @@
+aabenintra_theme.preferences_get:
+  path: '/aabenintra/preferences'
+  defaults:
+    _controller: '\Drupal\aabenintra_theme\Controller\PreferencesController::get'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'
+
+aabenintra_theme.preferences_patch:
+  path: '/aabenintra/preferences'
+  defaults:
+    _controller: '\Drupal\aabenintra_theme\Controller\PreferencesController::patch'
+  methods: [PATCH]
+  requirements:
+    _permission: 'access content'

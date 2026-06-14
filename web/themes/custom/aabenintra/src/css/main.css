@@ -1,0 +1,12 @@
+/* AabenIntra front-end theme entry. Built by Vite into dist/main.css. */
+
+/* Self-hosted variable fonts (no external CDN). */
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/inter";
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./components/nav.css";
+@import "./components/dashboard.css";
+@import "./components/personalise.css";

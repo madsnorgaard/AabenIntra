@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra per-user theme customisation: applies prefs on first paint.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_html().
+ *
+ * Emits the saved per-user preferences as data-attributes + an inline --accent
+ * on <html> so the chosen accent/scheme/density apply on first paint (no flash),
+ * varying the render cache only by a hash of those prefs.
+ */
+function aabenintra_theme_preprocess_html(array &$variables): void {
+  /** @var \Drupal\aabenintra_theme\PreferencesService $prefsService */
+  $prefsService = \Drupal::service('aabenintra_theme.preferences');
+  $prefs = $prefsService->getAll();
+
+  $variables['html_attributes']->setAttribute('data-accent', $prefs['accent']);
+  $variables['html_attributes']->setAttribute('data-color-scheme', $prefs['color_scheme']);
+  $variables['html_attributes']->setAttribute('data-density', $prefs['density']);
+  $variables['html_attributes']->setAttribute('data-nav', !empty($prefs['nav_collapsed']) ? 'collapsed' : 'open');
+
+  if ($prefs['accent'] === 'custom' && !empty($prefs['accent_custom'])) {
+    // accent_custom is validated as #rrggbb by PreferencesService.
+    $variables['html_attributes']->setAttribute('style', '--accent: ' . $prefs['accent_custom']);
+  }
+
+  $variables['#cache']['contexts'][] = 'aabenintra_user_prefs';
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Hands the front-end JS its initial prefs, the save endpoint and a CSRF token.
+ */
+function aabenintra_theme_page_attachments(array &$attachments): void {
+  if (!\Drupal::currentUser()->hasPermission('access content')) {
+    return;
+  }
+  /** @var \Drupal\aabenintra_theme\PreferencesService $prefsService */
+  $prefsService = \Drupal::service('aabenintra_theme.preferences');
+
+  $attachments['#attached']['drupalSettings']['aabenintra'] = [
+    'prefs' => $prefsService->getAll(),
+    'endpoint' => Url::fromRoute('aabenintra_theme.preferences_patch')->toString(),
+    'csrfToken' => \Drupal::csrfToken()->get('aabenintra_theme_prefs'),
+  ];
+  // The CSRF token is per-session, so vary this page output accordingly.
+  $attachments['#cache']['contexts'][] = 'user';
+}

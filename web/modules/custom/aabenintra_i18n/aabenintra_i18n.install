@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for AabenIntra Internationalisation.
+ */
+
+declare(strict_types=1);
+
+use Drupal\locale\Gettext;
+
+/**
+ * Implements hook_install().
+ *
+ * Imports the bundled Danish translations of AabenIntra's custom UI strings so
+ * a fresh tenant is bilingual without any manual import step.
+ */
+function aabenintra_i18n_install(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('locale')) {
+    return;
+  }
+  $path = \Drupal::service('extension.list.module')->getPath('aabenintra_i18n') . '/translations/aabenintra.da.po';
+  if (!is_file($path)) {
+    return;
+  }
+  $file = new \stdClass();
+  $file->filename = basename($path);
+  $file->uri = $path;
+  $file->langcode = 'da';
+  Gettext::fileToDatabase($file, [
+    'langcode' => 'da',
+    'customized' => LOCALE_CUSTOMIZED,
+    'overwrite_options' => ['not_customized' => TRUE, 'customized' => TRUE],
+  ]);
+}

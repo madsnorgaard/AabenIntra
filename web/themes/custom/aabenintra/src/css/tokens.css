@@ -1,0 +1,158 @@
+/**
+ * AabenIntra design tokens - "Editorial Warm".
+ *
+ * Single source of truth. Colours are OKLCH; the user-chosen accent is a single
+ * seed (--accent) and every shade is derived from it with CSS relative colour,
+ * so any hue stays contrast-safe without JS colour maths.
+ * Per-user/per-tenant overrides arrive as data-attributes + an inline --accent
+ * on <html> (see the aabenintra_theme module's preprocess_html).
+ */
+
+:root {
+  /* === Warm paper palette (light) === */
+  --paper: oklch(98% 0.008 85);          /* page background */
+  --paper-2: oklch(95.5% 0.012 85);      /* raised surfaces / tiles */
+  --paper-3: oklch(99.5% 0.004 85);      /* cards on tinted bg */
+  --ink: oklch(24% 0.018 60);            /* primary text */
+  --ink-2: oklch(38% 0.016 60);          /* secondary text */
+  --muted: oklch(54% 0.012 60);          /* captions / meta */
+  --line: oklch(86% 0.01 70);            /* hairline borders */
+  --line-soft: oklch(91% 0.008 70);
+
+  /* === Accent (seed; default warm clay). Overridden per user/tenant. === */
+  --accent: oklch(56% 0.13 45);
+
+  /* Derived from --accent via relative colour (contrast-safe by construction) */
+  --accent-ink: oklch(from var(--accent) min(l, 0.46) c h);     /* accent as text on paper - AA */
+  --accent-hover: oklch(from var(--accent) calc(l - 0.06) c h);
+  --accent-fill: oklch(from var(--accent) 0.47 c h);            /* button bg; white text passes AA */
+  --accent-fill-hover: oklch(from var(--accent) 0.41 c h);
+  --accent-tint: oklch(from var(--accent) 0.96 calc(c * 0.3) h); /* subtle wash */
+  --accent-line: oklch(from var(--accent) 0.84 calc(c * 0.45) h);
+  --on-accent: oklch(99% 0.005 85);
+
+  /* === Feedback === */
+  --ok: oklch(52% 0.13 150);
+  --warn: oklch(64% 0.13 75);
+  --danger: oklch(54% 0.18 25);
+
+  /* === Typography === */
+  --font-display: "Newsreader Variable", Newsreader, Georgia, "Times New Roman", serif;
+  --font-body: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-xs: 0.75rem;
+  --fs-s: 0.875rem;
+  --fs-m: 1rem;
+  --fs-l: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+  --fs-4xl: 3rem;
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-normal: 1.55;
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* === Spacing (4px base) === */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+
+  /* === Shape & elevation (restrained, editorial) === */
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --shadow-1: 0 1px 2px oklch(24% 0.02 60 / 0.06), 0 1px 1px oklch(24% 0.02 60 / 0.04);
+  --shadow-2: 0 4px 12px oklch(24% 0.02 60 / 0.08), 0 2px 4px oklch(24% 0.02 60 / 0.05);
+
+  /* === Layout === */
+  --header-h: 4rem;
+  --content-max: 72rem;
+  --measure: 66ch;
+
+  /* === Motion === */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 120ms var(--ease);
+  --t: 200ms var(--ease);
+
+  color-scheme: light;
+}
+
+/* === Dark mode (elevation via lightness, warm, not pure black) === */
+@media (prefers-color-scheme: dark) {
+  :root[data-color-scheme="auto"] {
+    --paper: oklch(18% 0.012 70);
+    --paper-2: oklch(22% 0.013 70);
+    --paper-3: oklch(25% 0.013 70);
+    --ink: oklch(92% 0.012 80);
+    --ink-2: oklch(78% 0.012 80);
+    --muted: oklch(64% 0.012 80);
+    --line: oklch(34% 0.012 70);
+    --line-soft: oklch(28% 0.012 70);
+    --accent-ink: oklch(from var(--accent) max(l, 0.78) calc(c * 0.85) h);
+    --accent-fill: oklch(from var(--accent) 0.62 c h);
+    --accent-fill-hover: oklch(from var(--accent) 0.68 c h);
+    --accent-tint: oklch(from var(--accent) 0.28 calc(c * 0.4) h);
+    --accent-line: oklch(from var(--accent) 0.4 calc(c * 0.5) h);
+    --on-accent: oklch(16% 0.01 70);
+    --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.4);
+    --shadow-2: 0 6px 18px oklch(0% 0 0 / 0.45);
+    color-scheme: dark;
+  }
+}
+
+:root[data-color-scheme="dark"] {
+  --paper: oklch(18% 0.012 70);
+  --paper-2: oklch(22% 0.013 70);
+  --paper-3: oklch(25% 0.013 70);
+  --ink: oklch(92% 0.012 80);
+  --ink-2: oklch(78% 0.012 80);
+  --muted: oklch(64% 0.012 80);
+  --line: oklch(34% 0.012 70);
+  --line-soft: oklch(28% 0.012 70);
+  --accent-ink: oklch(from var(--accent) max(l, 0.78) calc(c * 0.85) h);
+  --accent-fill: oklch(from var(--accent) 0.62 c h);
+  --accent-fill-hover: oklch(from var(--accent) 0.68 c h);
+  --accent-tint: oklch(from var(--accent) 0.28 calc(c * 0.4) h);
+  --accent-line: oklch(from var(--accent) 0.4 calc(c * 0.5) h);
+  --on-accent: oklch(16% 0.01 70);
+  --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.4);
+  --shadow-2: 0 6px 18px oklch(0% 0 0 / 0.45);
+  color-scheme: dark;
+}
+
+/* === Accent presets (each just re-seeds --accent) === */
+:root[data-accent="clay"]   { --accent: oklch(56% 0.13 45); }
+:root[data-accent="rust"]   { --accent: oklch(54% 0.15 35); }
+:root[data-accent="gold"]   { --accent: oklch(64% 0.12 80); }
+:root[data-accent="forest"] { --accent: oklch(52% 0.11 150); }
+:root[data-accent="teal"]   { --accent: oklch(56% 0.10 195); }
+:root[data-accent="ocean"]  { --accent: oklch(54% 0.13 235); }
+:root[data-accent="ink"]    { --accent: oklch(48% 0.12 265); }
+:root[data-accent="plum"]   { --accent: oklch(52% 0.14 320); }
+
+/* === Density (whitespace only; never font size) === */
+:root[data-density="compact"] {
+  --space-3: 0.5rem;
+  --space-4: 0.75rem;
+  --space-5: 1rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --header-h: 3.25rem;
+}
+
+/* === Reduced motion === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

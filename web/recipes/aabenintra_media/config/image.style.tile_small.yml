@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: tile_small
+label: 'Tile Small'
+effects:
+  aba99f8e-2d75-4252-b58c-e0cea9de6b1c:
+    uuid: aba99f8e-2d75-4252-b58c-e0cea9de6b1c
+    id: focal_point_scale_and_crop
+    weight: 0
+    data:
+      width: 600
+      height: 600
+      crop_type: focal_point

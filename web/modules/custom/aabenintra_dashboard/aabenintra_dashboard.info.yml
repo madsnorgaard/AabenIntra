@@ -1,0 +1,10 @@
+name: 'AabenIntra Dashboard'
+type: module
+description: 'Personalized tile dashboard for the AabenIntra intranet.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:node
+  - drupal:image
+  - aabenintra:aabenintra_theme

@@ -1,0 +1,13 @@
+name: 'AabenIntra Media'
+description: 'Media types and responsive image handling: the Image media type, focal point, and small/medium/large tile image styles.'
+type: 'Site'
+install:
+  - media
+  - media_library
+  - image
+  - crop
+  - focal_point
+  - responsive_image
+  - easy_responsive_images
+# Config in this recipe's config/ directory (the Image media type, its source
+# field + displays, and the tile_* image styles) is imported automatically.

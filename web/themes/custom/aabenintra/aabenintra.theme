@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Builds language-switch links (EN/DA) for the header so users can change
+ * language anywhere. Each link points at the current route in that language,
+ * which the URL negotiator prefixes correctly (/ vs /da).
+ */
+function aabenintra_preprocess_page(array &$variables): void {
+  $manager = \Drupal::languageManager();
+  if (!$manager->isMultilingual()) {
+    return;
+  }
+  $current = $manager->getCurrentLanguage()->getId();
+  $links = [];
+  foreach ($manager->getLanguages() as $langcode => $language) {
+    $links[] = [
+      'langcode' => $langcode,
+      'label' => strtoupper($langcode),
+      'title' => $language->getName(),
+      'url' => Url::fromRoute('<current>', [], ['language' => $language])->toString(),
+      'active' => $langcode === $current,
+    ];
+  }
+  $variables['aabenintra_langswitch'] = $links;
+  $variables['#cache']['contexts'][] = 'languages:language_interface';
+  $variables['#cache']['contexts'][] = 'url.path';
+
+  // Build the main + quick-links menus for the left nav drawer.
+  $variables['aabenintra_main_menu'] = _aabenintra_build_menu('main');
+  $variables['aabenintra_quick_links'] = _aabenintra_build_menu('quick_links');
+}
+
+/**
+ * Builds a render array for a menu (used in the left nav drawer).
+ */
+function _aabenintra_build_menu(string $menu_name): array {
+  $tree_service = \Drupal::menuTree();
+  $parameters = new \Drupal\Core\Menu\MenuTreeParameters();
+  $parameters->setMinDepth(1)->setMaxDepth(2)->onlyEnabledLinks();
+  $tree = $tree_service->load($menu_name, $parameters);
+  $tree = $tree_service->transform($tree, [
+    ['callable' => 'menu.default_tree_manipulators:checkAccess'],
+    ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
+  ]);
+  return $tree_service->build($tree);
+}
+
+/**
+ * Implements hook_preprocess_image_widget().
+ */
+function aabenintra_preprocess_image_widget(array &$variables): void {
+  $data = &$variables['data'];
+
+  // This prevents image widget templates from rendering preview container HTML
+  // to users that do not have permission to access these previews.
+  // @todo revisit in https://drupal.org/node/953034
+  // @todo revisit in https://drupal.org/node/3114318
+  if (isset($data['preview']['#access']) && $data['preview']['#access'] === FALSE) {
+    unset($data['preview']);
+  }
+}
