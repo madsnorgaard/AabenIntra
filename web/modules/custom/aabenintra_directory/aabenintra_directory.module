@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Directory: theme hooks.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function aabenintra_directory_theme(): array {
+  return [
+    'aabenintra_directory' => [
+      'variables' => ['people' => [], 'filters' => [], 'query' => [], 'total' => 0],
+    ],
+    'aabenintra_org_chart' => [
+      'variables' => ['tree' => []],
+    ],
+  ];
+}

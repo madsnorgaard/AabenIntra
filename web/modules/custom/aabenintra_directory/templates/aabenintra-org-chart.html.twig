@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Organisation chart: recursive org-unit tree with member counts.
+ */
+#}
+{% macro branch(nodes) %}
+  {% import _self as m %}
+  <ul class="ai-orgchart__list">
+    {% for n in nodes %}
+      <li class="ai-orgchart__node ai-orgchart__node--{{ n.level }}">
+        <a class="ai-orgchart__card" href="{{ n.url }}">
+          <span class="ai-orgchart__name">{{ n.name }}</span>
+          <span class="ai-orgchart__count">{{ n.count }} {{ 'members'|t }}</span>
+        </a>
+        {% if n.children %}{{ m.branch(n.children) }}{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% import _self as m %}
+<div class="ai-orgchart layout-container">
+  <h1 class="ai-greeting">{{ 'Organisation chart'|t }}</h1>
+  {% if tree %}
+    {{ m.branch(tree) }}
+  {% else %}
+    <p>{{ 'No organisation units yet.'|t }}</p>
+  {% endif %}
+</div>

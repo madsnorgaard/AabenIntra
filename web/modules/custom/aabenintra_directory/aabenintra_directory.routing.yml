@@ -1,0 +1,15 @@
+aabenintra_directory.directory:
+  path: '/directory'
+  defaults:
+    _controller: '\Drupal\aabenintra_directory\Controller\DirectoryController::page'
+    _title: 'People'
+  requirements:
+    _permission: 'access content'
+
+aabenintra_directory.org_chart:
+  path: '/org-chart'
+  defaults:
+    _controller: '\Drupal\aabenintra_directory\Controller\OrgChartController::page'
+    _title: 'Organisation chart'
+  requirements:
+    _permission: 'access content'

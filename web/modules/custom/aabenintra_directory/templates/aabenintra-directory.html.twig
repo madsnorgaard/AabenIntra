@@ -1,0 +1,51 @@
+{#
+/**
+ * @file
+ * Employee directory: filter form + people cards.
+ */
+#}
+<div class="ai-directory layout-container">
+  <h1 class="ai-greeting">{{ 'People'|t }}</h1>
+
+  <form class="ai-directory__filters" method="get" role="search">
+    <input type="search" name="q" value="{{ query.q }}" placeholder="{{ 'Search name or title'|t }}" aria-label="{{ 'Search'|t }}">
+    <select name="unit" aria-label="{{ 'Organisation unit'|t }}">
+      <option value="">{{ 'All units'|t }}</option>
+      {% for tid, label in filters.units %}
+        <option value="{{ tid }}"{{ query.unit == tid ? ' selected' : '' }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="location" aria-label="{{ 'Location'|t }}">
+      <option value="">{{ 'All locations'|t }}</option>
+      {% for tid, label in filters.locations %}
+        <option value="{{ tid }}"{{ query.location == tid ? ' selected' : '' }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="skill" aria-label="{{ 'Skill'|t }}">
+      <option value="">{{ 'All skills'|t }}</option>
+      {% for tid, label in filters.skills %}
+        <option value="{{ tid }}"{{ query.skill == tid ? ' selected' : '' }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="button">{{ 'Filter'|t }}</button>
+  </form>
+
+  <p class="ai-directory__count">{{ total }} {{ 'people'|t }}</p>
+
+  <div class="ai-directory__grid">
+    {% for p in people %}
+      <a class="ai-person" href="{{ p.url }}">
+        <span class="ai-person__avatar">
+          {% if p.photo %}<img src="{{ p.photo }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">{{ p.initial }}</span>{% endif %}
+        </span>
+        <span class="ai-person__name">{{ p.name }}</span>
+        {% if p.title %}<span class="ai-person__title">{{ p.title }}</span>{% endif %}
+        {% if p.unit %}<span class="ai-person__meta">{{ p.unit }}</span>{% endif %}
+        {% if p.location %}<span class="ai-person__meta">{{ p.location }}</span>{% endif %}
+        {% if p.skills %}<span class="ai-person__skills">{% for s in p.skills %}<span class="ai-tag">{{ s }}</span>{% endfor %}</span>{% endif %}
+      </a>
+    {% else %}
+      <p>{{ 'No people found.'|t }}</p>
+    {% endfor %}
+  </div>
+</div>

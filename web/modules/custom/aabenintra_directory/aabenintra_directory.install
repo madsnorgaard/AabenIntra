@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * Install hooks: skills vocabulary + employee profile fields on the user entity.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\taxonomy\Entity\Vocabulary;
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_directory_install(): void {
+  if (!Vocabulary::load('skills')) {
+    Vocabulary::create(['vid' => 'skills', 'name' => 'Skills'])->save();
+  }
+
+  $display_repo = \Drupal::service('entity_display.repository');
+
+  $fields = [
+    'field_job_title' => [
+      'type' => 'string', 'cardinality' => 1, 'label' => 'Job title', 'storage' => [],
+      'field' => [], 'widget' => ['type' => 'string_textfield'], 'formatter' => ['type' => 'string', 'label' => 'hidden'],
+    ],
+    'field_phone' => [
+      'type' => 'telephone', 'cardinality' => 1, 'label' => 'Phone', 'storage' => [],
+      'field' => [], 'widget' => ['type' => 'telephone_default'], 'formatter' => ['type' => 'telephone_link', 'label' => 'inline'],
+    ],
+    'field_skills' => [
+      'type' => 'entity_reference', 'cardinality' => -1, 'label' => 'Skills',
+      'storage' => ['target_type' => 'taxonomy_term'],
+      'field' => ['handler' => 'default:taxonomy_term', 'handler_settings' => ['target_bundles' => ['skills' => 'skills'], 'auto_create' => TRUE]],
+      'widget' => ['type' => 'entity_reference_autocomplete_tags'], 'formatter' => ['type' => 'entity_reference_label', 'label' => 'inline'],
+    ],
+    'field_photo' => [
+      'type' => 'image', 'cardinality' => 1, 'label' => 'Photo',
+      'storage' => ['uri_scheme' => 'public', 'target_type' => 'file', 'default_image' => []],
+      'field' => ['file_directory' => 'avatars', 'alt_field' => FALSE, 'alt_field_required' => FALSE],
+      'widget' => ['type' => 'image_image'], 'formatter' => ['type' => 'image', 'label' => 'hidden'],
+    ],
+  ];
+
+  foreach ($fields as $name => $def) {
+    if (!FieldStorageConfig::loadByName('user', $name)) {
+      FieldStorageConfig::create([
+        'field_name' => $name,
+        'entity_type' => 'user',
+        'type' => $def['type'],
+        'cardinality' => $def['cardinality'],
+        'settings' => $def['storage'],
+      ])->save();
+    }
+    if (!FieldConfig::loadByName('user', 'user', $name)) {
+      FieldConfig::create([
+        'field_name' => $name,
+        'entity_type' => 'user',
+        'bundle' => 'user',
+        'label' => $def['label'],
+        'settings' => $def['field'],
+      ])->save();
+    }
+    $display_repo->getFormDisplay('user', 'user')->setComponent($name, $def['widget'])->save();
+    $display_repo->getViewDisplay('user', 'user')->setComponent($name, $def['formatter'])->save();
+  }
+}

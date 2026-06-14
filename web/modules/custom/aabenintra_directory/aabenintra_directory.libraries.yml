@@ -1,0 +1,5 @@
+directory:
+  version: VERSION
+  css:
+    component:
+      css/directory.css: {}

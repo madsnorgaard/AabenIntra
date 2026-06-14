@@ -1,0 +1,11 @@
+name: 'AabenIntra Directory'
+type: module
+description: 'Employee profiles, a searchable people directory, and the organisation chart for the AabenIntra intranet.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:user
+  - drupal:taxonomy
+  - drupal:image
+  - drupal:telephone
