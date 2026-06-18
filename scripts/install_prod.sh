@@ -36,6 +36,14 @@ fi
 echo "==> Applying recipes: base -> media -> content"
 $DRUSH recipe "$RECIPES/aabenintra_base"
 $DRUSH recipe "$RECIPES/aabenintra_media"
+# The content recipe owns the user form/view displays (it adds the org-unit +
+# location fields from the structure model). A fresh minimal+standard install
+# already created user.user.default displays (with user_picture), which differ
+# from the recipe's, and recipes refuse to overwrite differing config. The
+# recipe's versions are authoritative (they include user_picture too), so drop
+# the pre-existing ones first and let the recipe install its own.
+$DRUSH config:delete core.entity_form_display.user.user.default || true
+$DRUSH config:delete core.entity_view_display.user.user.default || true
 $DRUSH recipe "$RECIPES/aabenintra_content"
 
 echo "==> i18n (modules via drush, then recipe ships config + Danish .po)"

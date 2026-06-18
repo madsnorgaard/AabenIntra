@@ -12,6 +12,9 @@ RUN set -eux; \
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
+# Recipe application and Drupal generally need more than the stock 128M.
+RUN echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/zz-memory.ini
+
 # Writable directories for the public files, JS assets, and the translations
 # imported at install time.
 RUN mkdir -p /opt/drupal/web/sites/default/files \
