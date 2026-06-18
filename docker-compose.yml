@@ -1,0 +1,97 @@
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+  mail:
+    external: true
+    name: mail_internal
+
+services:
+  aabenintra_db:
+    image: mariadb:11
+    container_name: aabenintra_db
+    env_file:
+    - .env
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - internal
+
+  drupal:
+    container_name: aabenintra_drupal
+    env_file:
+    - .env
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: always
+    working_dir: /opt/drupal
+    volumes:
+      - ./web/modules/custom:/opt/drupal/web/modules/custom
+      - ./web/themes/custom:/opt/drupal/web/themes/custom
+      - ./web/recipes:/opt/drupal/web/recipes
+      - ./scripts:/opt/drupal/scripts
+      - drupal_files:/opt/drupal/web/sites/default/files
+      - ./data/private:/opt/drupal/private
+      - ./backups:/opt/drupal/backups
+      - ./settings.php:/opt/drupal/web/sites/default/settings.php
+      - ./services.prod.yml:/opt/drupal/web/sites/default/services.yml
+    environment:
+      COMPOSER_MEMORY_LIMIT: "2G"
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 3306
+      HASH_SALT: ${HASH_SALT}
+      REDIS_HOST: ${REDIS_HOST}
+      SMTP_HOST: ${SMTP_HOST:-mail.madsnorgaard.net}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_PROTOCOL: ${SMTP_PROTOCOL:-tls}
+      SMTP_USER: ${SMTP_USER:-mads@madsnorgaard.net}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM:-mads@madsnorgaard.net}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aabenintra_drupal.rule=Host(`aabenintra.fenixnordic.solutions`)"
+      - "traefik.http.routers.aabenintra_drupal.tls.certresolver=lets-encrypt"
+      - "traefik.http.services.aabenintra_drupal.loadbalancer.server.port=80"
+    networks:
+      - internal
+      - web
+      - mail
+    depends_on:
+      - aabenintra_db
+      - aabenintra_redis
+
+  aabenintra_redis:
+    image: library/redis:latest
+    container_name: aabenintra_redis
+    volumes:
+      - ./data/redis:/data
+    command: ["redis-server"]
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+volumes:
+  drupal_files:

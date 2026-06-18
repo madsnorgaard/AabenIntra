@@ -1,0 +1,39 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_recreate:
+        description: 'Force recreate containers'
+        type: boolean
+        default: false
+      run_updb:
+        description: 'Run drush post-deploy (updb). Leave OFF for the very first install.'
+        type: boolean
+        default: false
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          repository: madsnorgaard/contabo-infrastructure
+          event-type: deploy
+          # AabenIntra is built from recipes + module hook_install, NOT config
+          # sync, so the post-deploy must NOT run `drush cim` (it would delete
+          # active config). skip_cim makes the pipeline run cr+updb only.
+          client-payload: |
+            {
+              "project_dir": "aabenintra.fenixnordic.solutions",
+              "project_type": "drupal",
+              "drupal_service": "drupal",
+              "repo_name": "AabenIntra",
+              "force_recreate": "${{ inputs.force_recreate || false }}",
+              "run_updb": "${{ inputs.run_updb || false }}",
+              "skip_cim": "true"
+            }
