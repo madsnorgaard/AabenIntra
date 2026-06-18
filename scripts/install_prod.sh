@@ -17,6 +17,9 @@
 set -euo pipefail
 
 cd /opt/drupal
+# Ensure the composer bin dir is on PATH regardless of how this script is
+# invoked (a login shell, e.g. `bash -lc`, resets PATH and drops vendor/bin).
+export PATH="/opt/drupal/vendor/bin:$PATH"
 DRUSH="drush --yes"
 RECIPES=/opt/drupal/web/recipes
 
