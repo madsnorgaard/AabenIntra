@@ -301,6 +301,51 @@ function aabenintra_preprocess_page(array &$variables): void {
 }
 
 /**
+ * Implements hook_preprocess_views_view().
+ *
+ * Gives the taxonomy-term listing page a branded hero (term name, colour,
+ * description and post count) so /taxonomy/term/N reads as a real category
+ * landing page rather than a bare list of teasers.
+ */
+function aabenintra_preprocess_views_view(array &$variables): void {
+  $view = $variables['view'];
+  if ($view->id() !== 'taxonomy_term') {
+    return;
+  }
+  $tid = $view->args[0] ?? NULL;
+  if (!$tid || !is_numeric($tid)) {
+    return;
+  }
+  $term = \Drupal\taxonomy\Entity\Term::load((int) $tid);
+  if (!$term) {
+    return;
+  }
+  $term = \Drupal::service('entity.repository')->getTranslationFromContext($term);
+  $colors = \Drupal::service('aabenintra_theme.term_color');
+  $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($term->bundle());
+
+  $description = NULL;
+  if (!$term->get('description')->isEmpty()) {
+    $description = [
+      '#type' => 'processed_text',
+      '#text' => $term->getDescription(),
+      '#format' => $term->get('description')->format ?: 'basic_html',
+    ];
+  }
+
+  $variables['ai_term'] = [
+    'name' => $term->label(),
+    'vocabulary' => $vocabulary?->label(),
+    'color' => $colors->color($term),
+    'icon' => $colors->icon($term),
+    'description' => $description,
+    'count' => count($view->result),
+    'feed_url' => Url::fromUserInput('/taxonomy/term/' . $tid . '/feed')->toString(),
+  ];
+  $variables['#cache']['tags'][] = 'taxonomy_term:' . $tid;
+}
+
+/**
  * Returns a vocabulary's top-level terms with colour + icon (for the nav).
  *
  * @return array<int,array<string,mixed>>

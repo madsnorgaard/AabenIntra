@@ -11,5 +11,6 @@
 @import "./components/dashboard.css";
 @import "./components/personalise.css";
 @import "./components/entity.css";
+@import "./components/term.css";
 @import "./components/activity.css";
 @import "./components/channels.css";

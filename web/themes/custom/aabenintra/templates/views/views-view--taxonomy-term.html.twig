@@ -1,0 +1,71 @@
+{#
+/**
+ * @file
+ * Taxonomy-term listing page: a branded category landing.
+ *
+ * Adds a colour-coded term hero (name, vocabulary, description, post count and
+ * the RSS subscribe link) above the content grid. `ai_term` is built in
+ * aabenintra_preprocess_views_view().
+ *
+ * @see template_preprocess_views_view()
+ */
+#}
+{%
+  set classes = [
+    'view',
+    'view-' ~ id|clean_class,
+    'view-id-' ~ id,
+    'view-display-id-' ~ display_id,
+    'ai-term-page',
+    dom_id ? 'js-view-dom-id-' ~ dom_id,
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {% if ai_term %}
+    <header class="ai-term-hero" style="--term-accent: {{ ai_term.color }}">
+      <div class="ai-term-hero__inner layout-container">
+        {% if ai_term.vocabulary %}
+          <p class="ai-term-hero__eyebrow">
+            {% if ai_term.icon %}<span class="ai-term-hero__icon" aria-hidden="true">{{ ai_term.icon }}</span>{% else %}<span class="ai-term-hero__dot" aria-hidden="true"></span>{% endif %}
+            {{ ai_term.vocabulary }}
+          </p>
+        {% endif %}
+        <h1 class="ai-term-hero__title">{{ ai_term.name }}</h1>
+        {% if ai_term.description %}
+          <div class="ai-term-hero__desc">{{ ai_term.description }}</div>
+        {% endif %}
+        <div class="ai-term-hero__meta">
+          <span class="ai-term-hero__count">{{ ai_term.count }} {{ ai_term.count == 1 ? 'post'|t : 'posts'|t }}</span>
+          {% if ai_term.feed_url %}<a class="ai-term-hero__subscribe" href="{{ ai_term.feed_url }}">{{ 'Subscribe'|t }}</a>{% endif %}
+        </div>
+      </div>
+    </header>
+  {% endif %}
+
+  <div class="ai-term-page__body layout-container">
+    {% if header %}
+      <div class="view-header">{{ header }}</div>
+    {% endif %}
+    {% if exposed %}
+      <div class="view-filters">{{ exposed }}</div>
+    {% endif %}
+    {% if attachment_before %}
+      <div class="attachment attachment-before">{{ attachment_before }}</div>
+    {% endif %}
+
+    {% if rows %}
+      <div class="view-content ai-card-grid">{{ rows }}</div>
+    {% elseif empty %}
+      <div class="view-empty">{{ empty }}</div>
+    {% endif %}
+
+    {% if pager %}{{ pager }}{% endif %}
+    {% if attachment_after %}
+      <div class="attachment attachment-after">{{ attachment_after }}</div>
+    {% endif %}
+    {% if more %}{{ more }}{% endif %}
+    {% if footer %}
+      <div class="view-footer">{{ footer }}</div>
+    {% endif %}
+  </div>
+</div>
