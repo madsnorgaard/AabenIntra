@@ -20,7 +20,7 @@ final class PreferencesService {
   private const MODULE = 'aabenintra_theme';
   private const NAME = 'prefs';
 
-  public const ACCENTS = ['clay', 'rust', 'gold', 'forest', 'teal', 'ocean', 'ink', 'plum', 'custom'];
+  public const ACCENTS = ['sky', 'clay', 'rust', 'gold', 'forest', 'teal', 'ocean', 'ink', 'plum', 'custom'];
   public const SCHEMES = ['light', 'dark', 'auto'];
   public const DENSITIES = ['comfortable', 'compact'];
 
@@ -36,7 +36,7 @@ final class PreferencesService {
    */
   public function defaults(): array {
     return [
-      'accent' => 'clay',
+      'accent' => 'sky',
       'accent_custom' => '',
       'color_scheme' => 'auto',
       'density' => 'comfortable',

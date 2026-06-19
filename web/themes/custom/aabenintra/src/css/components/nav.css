@@ -17,9 +17,13 @@
 .ai-nav.is-open { transform: translateX(0); }
 
 .ai-nav__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-l);
-  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: var(--space-5) 0 var(--space-2);
 }
 .ai-nav__title:first-child { margin-top: 0; }
 
@@ -41,13 +45,27 @@
 .ai-nav__menu a:hover { background: var(--accent-tint); color: var(--accent-ink); }
 .ai-nav__menu a.is-active,
 .ai-nav__menu .menu-item--active-trail > a {
+  position: relative;
+  background: var(--accent-tint);
   color: var(--accent-ink);
   font-weight: var(--fw-semibold);
+}
+.ai-nav__menu a.is-active::before,
+.ai-nav__menu .menu-item--active-trail > a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 1.1em;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent-fill);
 }
 
 .ai-nav__backdrop {
   position: fixed; inset: 0; z-index: 99;
-  background: oklch(20% 0.02 60 / 0.3);
+  background: oklch(20% 0.02 255 / 0.3);
   opacity: 0; visibility: hidden;
   transition: opacity var(--t);
 }
@@ -88,3 +106,28 @@
 .ai-nav__org-item--d1 { padding-left: calc(var(--space-3) + 0.75rem); }
 .ai-nav__org-item--d2 { padding-left: calc(var(--space-3) + 1.5rem); }
 .ai-nav__org-item--d3 { padding-left: calc(var(--space-3) + 2.25rem); }
+
+/* Colour-coded, browsable term nav (departments) */
+.ai-nav__terms { display: flex; flex-direction: column; gap: 1px; }
+.ai-nav__term {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: var(--fs-s);
+  transition: background var(--t-fast);
+}
+.ai-nav__term:hover {
+  background: color-mix(in oklab, var(--term-accent) 12%, transparent);
+}
+.ai-nav__term-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--term-accent, var(--accent));
+  flex: none;
+}
+.ai-nav__term-icon { font-size: 1em; line-height: 1; flex: none; width: 1.1em; text-align: center; }

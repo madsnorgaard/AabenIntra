@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\aabenintra_dashboard\Controller;
 
 use Drupal\aabenintra_theme\PreferencesService;
+use Drupal\aabenintra_theme\TermColor;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -20,12 +21,14 @@ final class DashboardController extends ControllerBase {
   public function __construct(
     private readonly PreferencesService $preferences,
     private readonly EntityRepositoryInterface $entityRepository,
+    private readonly TermColor $termColor,
   ) {}
 
   public static function create(ContainerInterface $container): self {
     return new self(
       $container->get('aabenintra_theme.preferences'),
       $container->get('entity.repository'),
+      $container->get('aabenintra_theme.term_color'),
     );
   }
 
@@ -150,9 +153,16 @@ final class DashboardController extends ControllerBase {
     }
 
     $department = '';
+    $eyebrow_color = TermColor::slot(NULL);
+    $eyebrow_icon = NULL;
     if ($node->hasField('field_department') && !$node->get('field_department')->isEmpty()) {
       $term = $node->get('field_department')->entity;
-      $department = $term ? $term->label() : '';
+      if ($term) {
+        $term = $this->entityRepository->getTranslationFromContext($term);
+        $department = $term->label();
+        $eyebrow_color = $this->termColor->color($term);
+        $eyebrow_icon = $this->termColor->icon($term);
+      }
     }
 
     return [
@@ -163,6 +173,8 @@ final class DashboardController extends ControllerBase {
       'image_url' => $image_url,
       'image_alt' => $image_alt,
       'eyebrow' => $department,
+      'eyebrow_color' => $eyebrow_color,
+      'eyebrow_icon' => $eyebrow_icon,
       'size' => $size,
       'pinned' => $pinned,
     ];

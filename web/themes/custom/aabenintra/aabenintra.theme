@@ -294,6 +294,32 @@ function aabenintra_preprocess_page(array &$variables): void {
   // Build the organisation-unit tree for the left nav drawer.
   $variables['aabenintra_org_tree'] = _aabenintra_org_tree();
   $variables['#cache']['tags'][] = 'taxonomy_term_list:organisation';
+
+  // Browsable, colour-coded department nav for the left drawer.
+  $variables['aabenintra_term_nav'] = _aabenintra_term_nav('department');
+  $variables['#cache']['tags'][] = 'taxonomy_term_list:department';
+}
+
+/**
+ * Returns a vocabulary's top-level terms with colour + icon (for the nav).
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function _aabenintra_term_nav(string $vid): array {
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $repository = \Drupal::service('entity.repository');
+  $colors = \Drupal::service('aabenintra_theme.term_color');
+  $items = [];
+  foreach ($storage->loadTree($vid, 0, 1, TRUE) as $term) {
+    $translated = $repository->getTranslationFromContext($term);
+    $items[] = [
+      'name' => $translated->label(),
+      'url' => $translated->toUrl()->toString(),
+      'color' => $colors->color($translated),
+      'icon' => $colors->icon($translated),
+    ];
+  }
+  return $items;
 }
 
 /**

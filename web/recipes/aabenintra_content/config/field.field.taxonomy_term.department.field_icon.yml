@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_icon
+    - taxonomy.vocabulary.department
+id: taxonomy_term.department.field_icon
+field_name: field_icon
+entity_type: taxonomy_term
+bundle: department
+label: 'Icon'
+description: 'Optional short icon (emoji or 1-2 chars) shown next to this term in navigation.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

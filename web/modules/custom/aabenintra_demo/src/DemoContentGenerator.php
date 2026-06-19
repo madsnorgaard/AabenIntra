@@ -26,14 +26,19 @@ final class DemoContentGenerator {
   private const STATE_KEY = 'aabenintra_demo.created';
 
   /**
-   * Demo departments: machine label => hero colour (RGB).
+   * Demo departments: label => [hero RGB, brand colour (hex)].
+   *
+   * The hex is written to each term's field_color so the showcase shows distinct,
+   * fresh category colours; the RGB drives the generated hero-image background.
+   * Icons are left to editors (field_icon) since emoji glyphs render unevenly
+   * across clients - the colour dot is the robust default.
    */
   private const DEPARTMENTS = [
-    'People & Culture' => [37, 99, 175],
-    'IT & Digital' => [13, 148, 136],
-    'Finance' => [109, 40, 217],
-    'Marketing' => [219, 39, 119],
-    'Operations' => [217, 119, 6],
+    'People & Culture' => ['rgb' => [13, 148, 136], 'color' => '#0d9488'],
+    'IT & Digital' => ['rgb' => [37, 99, 235], 'color' => '#2563eb'],
+    'Finance' => ['rgb' => [124, 58, 237], 'color' => '#7c3aed'],
+    'Marketing' => ['rgb' => [219, 39, 119], 'color' => '#db2777'],
+    'Operations' => ['rgb' => [217, 119, 6], 'color' => '#d97706'],
   ];
 
   private const TOPICS = [
@@ -67,7 +72,11 @@ final class DemoContentGenerator {
   public function seed(): array {
     $created = $this->emptyLedger();
 
-    $departments = $this->createTerms('department', array_keys(self::DEPARTMENTS), $created);
+    $deptAttributes = [];
+    foreach (self::DEPARTMENTS as $name => $meta) {
+      $deptAttributes[$name] = ['field_color' => $meta['color']];
+    }
+    $departments = $this->createTerms('department', array_keys(self::DEPARTMENTS), $created, $deptAttributes);
     $topics = $this->createTerms('topic', self::TOPICS, $created);
     $audiences = $this->createTerms('audience', self::AUDIENCES, $created);
     $authors = $this->createUsers($created);
@@ -76,7 +85,7 @@ final class DemoContentGenerator {
       $deptName = $story['department'];
       $mediaId = NULL;
       if ($story['tile'] !== 'small') {
-        $mediaId = $this->createImageMedia($story['title'], self::DEPARTMENTS[$deptName], $created);
+        $mediaId = $this->createImageMedia($story['title'], self::DEPARTMENTS[$deptName]['rgb'], $created);
       }
       $values = [
         'type' => 'story',
@@ -149,11 +158,16 @@ final class DemoContentGenerator {
    * @return array<string,int>
    *   Term name => term id.
    */
-  private function createTerms(string $vid, array $names, array &$ledger): array {
+  private function createTerms(string $vid, array $names, array &$ledger, array $attributes = []): array {
     $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $map = [];
     foreach ($names as $name) {
       $term = $storage->create(['vid' => $vid, 'name' => $name]);
+      foreach (($attributes[$name] ?? []) as $field => $value) {
+        if ($term->hasField($field)) {
+          $term->set($field, $value);
+        }
+      }
       $term->save();
       $map[$name] = (int) $term->id();
       $this->track($ledger, 'taxonomy_term', (int) $term->id());

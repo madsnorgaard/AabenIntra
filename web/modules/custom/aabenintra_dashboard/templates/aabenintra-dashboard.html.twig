@@ -17,14 +17,14 @@
 
   <div class="ai-dashboard" data-ai-dashboard>
     {% for tile in tiles %}
-      <article class="tile tile--{{ tile.size }}{{ tile.pinned ? ' is-pinned' : '' }}" data-tile-id="{{ tile.id }}">
+      <article class="tile tile--{{ tile.size }}{{ tile.pinned ? ' is-pinned' : '' }}" data-tile-id="{{ tile.id }}"{% if tile.eyebrow_color %} style="--tile-accent: {{ tile.eyebrow_color }}"{% endif %}>
         {% if tile.image_url %}
           <a class="tile__media" href="{{ tile.url }}" tabindex="-1" aria-hidden="true">
             <img src="{{ tile.image_url }}" alt="{{ tile.image_alt }}" loading="lazy">
           </a>
         {% endif %}
         <div class="tile__body">
-          {% if tile.eyebrow %}<span class="tile__eyebrow">{{ tile.eyebrow }}</span>{% endif %}
+          {% if tile.eyebrow %}<span class="tile__eyebrow">{% if tile.eyebrow_icon %}<span class="tile__eyebrow-icon" aria-hidden="true">{{ tile.eyebrow_icon }}</span>{% else %}<span class="tile__eyebrow-dot" aria-hidden="true"></span>{% endif %}{{ tile.eyebrow }}</span>{% endif %}
           <h2 class="tile__title"><a href="{{ tile.url }}">{{ tile.title }}</a></h2>
           {% if tile.summary %}<p class="tile__summary">{{ tile.summary }}</p>{% endif %}
           <div class="tile__meta">

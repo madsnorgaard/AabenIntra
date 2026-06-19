@@ -33,6 +33,17 @@
       <h2 class="ai-nav__title">{{ 'Quick links'|t }}</h2>
       <nav class="ai-nav__menu" aria-label="{{ 'Quick links'|t }}">{{ aabenintra_quick_links }}</nav>
     {% endif %}
+    {% if aabenintra_term_nav %}
+      <h2 class="ai-nav__title">{{ 'Browse'|t }}</h2>
+      <nav class="ai-nav__terms" aria-label="{{ 'Browse categories'|t }}">
+        {% for item in aabenintra_term_nav %}
+          <a href="{{ item.url }}" class="ai-nav__term" style="--term-accent: {{ item.color }}">
+            {% if item.icon %}<span class="ai-nav__term-icon" aria-hidden="true">{{ item.icon }}</span>{% else %}<span class="ai-nav__term-dot" aria-hidden="true"></span>{% endif %}
+            {{ item.name }}
+          </a>
+        {% endfor %}
+      </nav>
+    {% endif %}
     {% if aabenintra_org_tree %}
       <h2 class="ai-nav__title">{{ 'Organisation'|t }}</h2>
       <nav class="ai-nav__org" aria-label="{{ 'Organisation'|t }}">
@@ -62,11 +73,11 @@
     <div class="ai-personalise__group">
       <span class="ai-personalise__label">{{ 'Accent colour'|t }}</span>
       <div class="ai-swatches">
-        {% for accent in ['clay', 'rust', 'gold', 'forest', 'teal', 'ocean', 'ink', 'plum'] %}
+        {% for accent in ['sky', 'clay', 'rust', 'gold', 'forest', 'teal', 'ocean', 'ink', 'plum'] %}
           <button type="button" class="ai-swatch" data-accent="{{ accent }}" aria-pressed="false" aria-label="{{ accent|capitalize }}"></button>
         {% endfor %}
         <label class="ai-swatch ai-swatch--custom" title="{{ 'Custom colour'|t }}">
-          <input type="color" value="#a8552f" aria-label="{{ 'Custom accent colour'|t }}">
+          <input type="color" value="#2563af" aria-label="{{ 'Custom accent colour'|t }}">
         </label>
       </div>
     </div>

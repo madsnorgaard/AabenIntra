@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Install/update routines for AabenIntra theme customisation.
+ *
+ * Seeds a sensible default main menu so a fresh tenant is never empty, and (for
+ * sites installed before per-term colours existed) creates the term colour/icon
+ * fields and back-fills the demo department colours.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+
+/**
+ * Default main-menu structure (title => internal path), in display order.
+ */
+function _aabenintra_theme_default_menu_links(): array {
+  return [
+    'Home' => '/dashboard',
+    'News' => '/news',
+    'Channels' => '/channels',
+    'People' => '/directory',
+    'Activity' => '/activity',
+    'Kudos' => '/kudos',
+  ];
+}
+
+/**
+ * Creates the default main-menu links if they are not already present.
+ */
+function _aabenintra_theme_seed_menu(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  $weight = 0;
+  foreach (_aabenintra_theme_default_menu_links() as $title => $path) {
+    $uri = 'internal:' . $path;
+    $existing = $storage->loadByProperties(['menu_name' => 'main', 'link__uri' => $uri]);
+    if (!$existing) {
+      $storage->create([
+        'title' => $title,
+        'link' => ['uri' => $uri],
+        'menu_name' => 'main',
+        'weight' => $weight,
+        'expanded' => TRUE,
+      ])->save();
+    }
+    $weight++;
+  }
+}
+
+/**
+ * Ensures the term colour/icon fields exist (for sites predating them).
+ */
+function _aabenintra_theme_ensure_term_fields(): void {
+  $storages = [
+    'field_color' => ['max' => 7, 'bundles' => ['department', 'topic', 'audience', 'location'], 'label' => 'Colour'],
+    'field_icon' => ['max' => 16, 'bundles' => ['department', 'topic'], 'label' => 'Icon'],
+  ];
+  foreach ($storages as $name => $def) {
+    if (!FieldStorageConfig::loadByName('taxonomy_term', $name)) {
+      FieldStorageConfig::create([
+        'field_name' => $name,
+        'entity_type' => 'taxonomy_term',
+        'type' => 'string',
+        'settings' => ['max_length' => $def['max']],
+        'cardinality' => 1,
+      ])->save();
+    }
+    foreach ($def['bundles'] as $bundle) {
+      if (!FieldConfig::loadByName('taxonomy_term', $bundle, $name)) {
+        FieldConfig::create([
+          'field_name' => $name,
+          'entity_type' => 'taxonomy_term',
+          'bundle' => $bundle,
+          'label' => $def['label'],
+        ])->save();
+      }
+    }
+  }
+}
+
+/**
+ * Back-fills colour/icon onto existing demo department terms (idempotent).
+ */
+function _aabenintra_theme_seed_department_colors(): void {
+  $map = [
+    'People & Culture' => '#0d9488',
+    'IT & Digital' => '#2563eb',
+    'Finance' => '#7c3aed',
+    'Marketing' => '#db2777',
+    'Operations' => '#d97706',
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  foreach ($map as $name => $color) {
+    foreach ($storage->loadByProperties(['vid' => 'department', 'name' => $name]) as $term) {
+      if ($term->hasField('field_color') && $term->get('field_color')->isEmpty()) {
+        $term->set('field_color', $color);
+        $term->save();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_theme_install(): void {
+  _aabenintra_theme_seed_menu();
+}
+
+/**
+ * Add term colour/icon fields, seed department colours and the default menu.
+ */
+function aabenintra_theme_update_9001(): void {
+  _aabenintra_theme_ensure_term_fields();
+  _aabenintra_theme_seed_department_colors();
+  _aabenintra_theme_seed_menu();
+}
