@@ -43,6 +43,7 @@
 }
 .ai-swatch:hover { transform: scale(1.1); }
 .ai-swatch[aria-pressed="true"] { border-color: var(--ink); transform: scale(1.1); }
+.ai-swatch[data-accent="sky"]    { background: oklch(56% 0.13 235); }
 .ai-swatch[data-accent="clay"]   { background: oklch(56% 0.13 45); }
 .ai-swatch[data-accent="rust"]   { background: oklch(54% 0.15 35); }
 .ai-swatch[data-accent="gold"]   { background: oklch(64% 0.12 80); }

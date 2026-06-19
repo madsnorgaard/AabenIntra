@@ -1,26 +1,29 @@
 /**
- * AabenIntra design tokens - "Editorial Warm".
+ * AabenIntra design tokens - "Fresh Air".
  *
  * Single source of truth. Colours are OKLCH; the user-chosen accent is a single
  * seed (--accent) and every shade is derived from it with CSS relative colour,
  * so any hue stays contrast-safe without JS colour maths.
  * Per-user/per-tenant overrides arrive as data-attributes + an inline --accent
  * on <html> (see the aabenintra_theme module's preprocess_html).
+ *
+ * The out-of-the-box default is intentionally cool and bright ("fresh") so a new
+ * tenant/visitor sees a clean sky-blue intranet before changing any preference.
  */
 
 :root {
-  /* === Warm paper palette (light) === */
-  --paper: oklch(98% 0.008 85);          /* page background */
-  --paper-2: oklch(95.5% 0.012 85);      /* raised surfaces / tiles */
-  --paper-3: oklch(99.5% 0.004 85);      /* cards on tinted bg */
-  --ink: oklch(24% 0.018 60);            /* primary text */
-  --ink-2: oklch(38% 0.016 60);          /* secondary text */
-  --muted: oklch(54% 0.012 60);          /* captions / meta */
-  --line: oklch(86% 0.01 70);            /* hairline borders */
-  --line-soft: oklch(91% 0.008 70);
+  /* === Cool paper palette (light) === */
+  --paper: oklch(99% 0.002 250);         /* page background - near-white, faintly cool */
+  --paper-2: oklch(96.5% 0.004 250);     /* raised surfaces / tiles */
+  --paper-3: oklch(99.8% 0.001 250);     /* cards on tinted bg */
+  --ink: oklch(24% 0.012 255);           /* primary text - cool charcoal */
+  --ink-2: oklch(38% 0.011 255);         /* secondary text */
+  --muted: oklch(54% 0.009 255);         /* captions / meta */
+  --line: oklch(88% 0.007 250);          /* hairline borders */
+  --line-soft: oklch(93% 0.005 250);
 
-  /* === Accent (seed; default warm clay). Overridden per user/tenant. === */
-  --accent: oklch(56% 0.13 45);
+  /* === Accent (seed; default fresh sky blue). Overridden per user/tenant. === */
+  --accent: oklch(56% 0.13 235);
 
   /* Derived from --accent via relative colour (contrast-safe by construction) */
   --accent-ink: oklch(from var(--accent) min(l, 0.46) c h);     /* accent as text on paper - AA */
@@ -88,14 +91,14 @@
 /* === Dark mode (elevation via lightness, warm, not pure black) === */
 @media (prefers-color-scheme: dark) {
   :root[data-color-scheme="auto"] {
-    --paper: oklch(18% 0.012 70);
-    --paper-2: oklch(22% 0.013 70);
-    --paper-3: oklch(25% 0.013 70);
-    --ink: oklch(92% 0.012 80);
-    --ink-2: oklch(78% 0.012 80);
-    --muted: oklch(64% 0.012 80);
-    --line: oklch(34% 0.012 70);
-    --line-soft: oklch(28% 0.012 70);
+    --paper: oklch(18% 0.014 255);
+    --paper-2: oklch(22% 0.016 255);
+    --paper-3: oklch(25% 0.017 255);
+    --ink: oklch(92% 0.01 250);
+    --ink-2: oklch(78% 0.01 250);
+    --muted: oklch(64% 0.011 250);
+    --line: oklch(34% 0.014 255);
+    --line-soft: oklch(28% 0.014 255);
     --accent-ink: oklch(from var(--accent) max(l, 0.78) calc(c * 0.85) h);
     --accent-fill: oklch(from var(--accent) 0.62 c h);
     --accent-fill-hover: oklch(from var(--accent) 0.68 c h);
@@ -109,14 +112,14 @@
 }
 
 :root[data-color-scheme="dark"] {
-  --paper: oklch(18% 0.012 70);
-  --paper-2: oklch(22% 0.013 70);
-  --paper-3: oklch(25% 0.013 70);
-  --ink: oklch(92% 0.012 80);
-  --ink-2: oklch(78% 0.012 80);
-  --muted: oklch(64% 0.012 80);
-  --line: oklch(34% 0.012 70);
-  --line-soft: oklch(28% 0.012 70);
+  --paper: oklch(18% 0.014 255);
+  --paper-2: oklch(22% 0.016 255);
+  --paper-3: oklch(25% 0.017 255);
+  --ink: oklch(92% 0.01 250);
+  --ink-2: oklch(78% 0.01 250);
+  --muted: oklch(64% 0.011 250);
+  --line: oklch(34% 0.014 255);
+  --line-soft: oklch(28% 0.014 255);
   --accent-ink: oklch(from var(--accent) max(l, 0.78) calc(c * 0.85) h);
   --accent-fill: oklch(from var(--accent) 0.62 c h);
   --accent-fill-hover: oklch(from var(--accent) 0.68 c h);
@@ -129,6 +132,7 @@
 }
 
 /* === Accent presets (each just re-seeds --accent) === */
+:root[data-accent="sky"]    { --accent: oklch(56% 0.13 235); }   /* default - fresh sky blue */
 :root[data-accent="clay"]   { --accent: oklch(56% 0.13 45); }
 :root[data-accent="rust"]   { --accent: oklch(54% 0.15 35); }
 :root[data-accent="gold"]   { --accent: oklch(64% 0.12 80); }

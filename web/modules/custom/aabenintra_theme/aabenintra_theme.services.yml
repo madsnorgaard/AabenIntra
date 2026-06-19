@@ -3,6 +3,9 @@ services:
     class: Drupal\aabenintra_theme\PreferencesService
     arguments: ['@user.data', '@current_user']
 
+  aabenintra_theme.term_color:
+    class: Drupal\aabenintra_theme\TermColor
+
   cache_context.aabenintra_user_prefs:
     class: Drupal\aabenintra_theme\Cache\UserPreferencesHashContext
     arguments: ['@aabenintra_theme.preferences']
