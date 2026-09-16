@@ -44,7 +44,8 @@
             "drupal/core-recipe-unpack": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "php-http/discovery": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "symfony/runtime": true
         },
         "audit": {
             "block-insecure": false
