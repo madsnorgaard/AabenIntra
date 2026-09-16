@@ -1315,16 +1315,16 @@
         },
         {
             "name": "drupal/core-recipe-unpack",
-            "version": "11.3.11",
+            "version": "11.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-recipe-unpack.git",
-                "reference": "bcd7f0416d6197f684bb4f2e52374821e937fb64"
+                "reference": "6328365d870f9545ec8f953a9c16f6a628fc5e46"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core-recipe-unpack/zipball/bcd7f0416d6197f684bb4f2e52374821e937fb64",
-                "reference": "bcd7f0416d6197f684bb4f2e52374821e937fb64",
+                "url": "https://api.github.com/repos/drupal/core-recipe-unpack/zipball/6328365d870f9545ec8f953a9c16f6a628fc5e46",
+                "reference": "6328365d870f9545ec8f953a9c16f6a628fc5e46",
                 "shasum": ""
             },
             "require": {
@@ -1336,7 +1336,10 @@
             },
             "type": "composer-plugin",
             "extra": {
-                "class": "Drupal\\Composer\\Plugin\\RecipeUnpack\\Plugin"
+                "class": "Drupal\\Composer\\Plugin\\RecipeUnpack\\Plugin",
+                "branch-alias": {
+                    "dev-main": "11.x-dev"
+                }
             },
             "autoload": {
                 "psr-4": {
@@ -1353,9 +1356,9 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-recipe-unpack/tree/11.3.11"
+                "source": "https://github.com/drupal/core-recipe-unpack/tree/11.4.7"
             },
-            "time": "2025-10-28T11:20:22+00:00"
+            "time": "2026-01-07T19:00:53+00:00"
         },
         {
             "name": "drupal/core-recommended",
