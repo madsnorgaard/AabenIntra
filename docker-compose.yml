@@ -9,7 +9,7 @@ networks:
 
 services:
   aabenintra_db:
-    image: mariadb:11
+    image: mariadb:13
     container_name: aabenintra_db
     env_file:
     - .env
