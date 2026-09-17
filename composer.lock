@@ -1613,17 +1613,17 @@
         },
         {
             "name": "drupal/easy_responsive_images",
-            "version": "1.5.0",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/easy_responsive_images.git",
-                "reference": "1.5.0"
+                "reference": "1.6.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/easy_responsive_images-1.5.0.zip",
-                "reference": "1.5.0",
-                "shasum": "e1ed6ba462fe5d0b6dccefc1af0d6856bc2f6599"
+                "url": "https://ftp.drupal.org/files/projects/easy_responsive_images-1.6.0.zip",
+                "reference": "1.6.0",
+                "shasum": "3cc4787a0c30a9e0c12a3aacbe2341db0609e12f"
             },
             "require": {
                 "drupal/core": "^10 || ^11"
@@ -1631,8 +1631,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "1.5.0",
-                    "datestamp": "1752844115",
+                    "version": "1.6.0",
+                    "datestamp": "1787693754",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
