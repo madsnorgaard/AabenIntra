@@ -10,9 +10,9 @@ on:
         type: boolean
         default: false
       run_updb:
-        description: 'Run drush post-deploy (updb). Leave OFF for the very first install.'
+        description: 'Run drush post-deploy (DB snapshot + updb + cr). Turn OFF only for the very first install.'
         type: boolean
-        default: false
+        default: true
 
 jobs:
   trigger-deploy:
@@ -27,6 +27,10 @@ jobs:
           # AabenIntra is built from recipes + module hook_install, NOT config
           # sync, so the post-deploy must NOT run `drush cim` (it would delete
           # active config). skip_cim makes the pipeline run cr+updb only.
+          # Pushes to main always run the post-deploy step so security updates
+          # with pending DB updates are applied and a pre-deploy DB snapshot
+          # is taken; it was previously off by default, so the Oct 14 2026
+          # core 11.4.10 deploy ran without updb or a rollback snapshot.
           client-payload: |
             {
               "project_dir": "aabenintra.fenixnordic.solutions",
@@ -34,6 +38,6 @@ jobs:
               "drupal_service": "drupal",
               "repo_name": "AabenIntra",
               "force_recreate": "${{ inputs.force_recreate || false }}",
-              "run_updb": "${{ inputs.run_updb || false }}",
+              "run_updb": "${{ github.event_name == 'push' || inputs.run_updb }}",
               "skip_cim": "true"
             }
