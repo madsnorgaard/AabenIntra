@@ -50,3 +50,7 @@ milestones tracked in the GitHub issues.
 ## License
 
 GPL-2.0-or-later (required for Drupal code).
+
+## Author
+
+Mads Nørgaard, senior developer and DevOps engineer (Drupal, Nuxt). [madsnorgaard.net](https://madsnorgaard.net)
