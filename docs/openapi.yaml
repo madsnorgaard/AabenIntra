@@ -1,0 +1,445 @@
+openapi: 3.1.0
+info:
+  title: AabenIntra internal endpoints
+  version: 0.1.0
+  summary: Private JSON endpoints used by the AabenIntra islands, plus the compliance CSV export.
+  description: |
+    AabenIntra is a server-rendered Drupal 11 intranet. These endpoints are
+    called from the browser by the progressive-enhancement islands described
+    in docs/ISLANDS.md. They are **unversioned and private**: they ship in the
+    same release as the JavaScript that calls them and carry no compatibility
+    promise to other consumers (see docs/API.md, "Versioning policy").
+
+    There is no public API, JSON:API is not enabled, and `/api/dashboard/tiles`
+    (issue #36) does not exist. A future public API lives under `/api/v1`.
+
+    All endpoints require the Drupal session cookie of a logged-in user.
+    Mutating endpoints also require an `X-CSRF-Token` header minted
+    server-side for that endpoint's key and delivered in `drupalSettings`.
+  license:
+    name: GPL-2.0-or-later
+    identifier: GPL-2.0-or-later
+  contact:
+    name: AabenIntra issues
+    url: https://github.com/madsnorgaard/AabenIntra/issues
+
+servers:
+  - url: https://{tenant_host}
+    description: One container per tenant; each tenant has its own hostname.
+    variables:
+      tenant_host:
+        default: aabenintra.fenixnordic.solutions
+        description: The tenant's hostname (reference tenant shown).
+
+tags:
+  - name: channels
+    description: Followable channels (aabenintra_channels).
+  - name: social
+    description: Reactions on content (aabenintra_social).
+  - name: compliance
+    description: Mandatory reading and acknowledgement receipts (aabenintra_compliance).
+  - name: preferences
+    description: Per-user theme preferences (aabenintra_theme).
+
+security:
+  - sessionCookie: []
+
+paths:
+  /aabenintra/follow/{taxonomy_term}:
+    post:
+      tags: [channels]
+      summary: Toggle following a channel (topic term)
+      description: |
+        Follows the topic if the current user does not follow it, unfollows it
+        otherwise, and returns the new state. Idempotent at the storage level
+        (merge on `uid, target_type, target_id`). Invalidates the
+        `aabenintra_channels`, `aabenintra_follow:{uid}` and
+        `aabenintra_activity` cache tags.
+
+        Route: `aabenintra_channels.follow`. Access: any authenticated user.
+        CSRF key: `aabenintra_channels_follow` (delivered as
+        `drupalSettings.aabenintraChannels.csrfToken`).
+      operationId: toggleFollow
+      security:
+        - sessionCookie: []
+          csrfToken: []
+      parameters:
+        - $ref: '#/components/parameters/taxonomyTermId'
+      responses:
+        '200':
+          description: New follow state and follower count.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowState'
+              example: { following: true, followers: 12 }
+        '403':
+          $ref: '#/components/responses/ForbiddenHtml'
+        '404':
+          $ref: '#/components/responses/NotFoundHtml'
+
+  /aabenintra/react/{node}/{reaction}:
+    post:
+      tags: [social]
+      summary: Toggle the current user's reaction on a node
+      description: |
+        One reaction per user per node. Posting the user's current reaction
+        removes it (`mine` becomes `null`); posting a different one switches to
+        it. An unknown `reaction` value is ignored and the unchanged state is
+        returned with 200. Invalidates the node's cache tags.
+
+        Route: `aabenintra_social.react`. Access: authenticated **and**
+        `view` access on the node. CSRF key: `aabenintra_social_react`
+        (`drupalSettings.aabenintraSocial.csrfToken`).
+      operationId: toggleReaction
+      security:
+        - sessionCookie: []
+          csrfToken: []
+      parameters:
+        - $ref: '#/components/parameters/nodeId'
+        - name: reaction
+          in: path
+          required: true
+          description: Reaction key. Values outside the enum are accepted by the route but ignored.
+          schema:
+            type: string
+            enum: [like, celebrate, insightful, support]
+      responses:
+        '200':
+          description: Fresh per-reaction counts and the current user's reaction.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionState'
+              example:
+                counts: { like: 3, celebrate: 0, insightful: 1, support: 0 }
+                mine: like
+        '403':
+          $ref: '#/components/responses/ForbiddenHtml'
+        '404':
+          $ref: '#/components/responses/NotFoundHtml'
+
+  /aabenintra/acknowledge/{node}:
+    post:
+      tags: [compliance]
+      summary: Record that the current user has read a mandatory node
+      description: |
+        Writes a read receipt keyed on `nid, uid, langcode` where `langcode` is
+        the language of the node translation being viewed. Idempotent: repeating
+        the call updates the timestamp only. For an anonymous session the
+        receipt is not written but the response is still `200 {"ok": true}`.
+
+        Route: `aabenintra_compliance.acknowledge`. Access: `access content`
+        permission. CSRF key: `aabenintra_acknowledge`
+        (`drupalSettings.aabenintraCompliance.csrfToken`).
+      operationId: acknowledgeMandatoryRead
+      security:
+        - sessionCookie: []
+          csrfToken: []
+      parameters:
+        - $ref: '#/components/parameters/nodeId'
+      responses:
+        '200':
+          description: Receipt recorded (or no-op for anonymous).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcknowledgeResult'
+              example: { ok: true, nid: 42 }
+        '403':
+          description: Missing or invalid CSRF token (JSON), or route access denied (HTML).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example: { error: Invalid CSRF token }
+            text/html:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFoundHtml'
+
+  /aabenintra/preferences:
+    get:
+      tags: [preferences]
+      summary: Read the current user's effective theme preferences
+      description: |
+        Returns built-in defaults merged with the user's stored overrides from
+        `user.data` (module `aabenintra_theme`, key `prefs`). Anonymous
+        sessions receive the defaults.
+
+        Route: `aabenintra_theme.preferences_get`. Access: `access content`.
+      operationId: getPreferences
+      responses:
+        '200':
+          description: Effective preferences.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+        '403':
+          $ref: '#/components/responses/ForbiddenHtml'
+    patch:
+      tags: [preferences]
+      summary: Merge a preferences patch for the current user
+      description: |
+        The body is a partial preferences object. Keys are filtered through a
+        strict allow-list and values are validated; unknown keys and invalid
+        values are dropped silently. The response is the full effective
+        object after the merge, which the client re-applies. The theme sends
+        one debounced request carrying the complete current state, so there is
+        no read-modify-write race.
+
+        For an anonymous session nothing is stored and the defaults are
+        returned.
+
+        Route: `aabenintra_theme.preferences_patch`. Access: `access content`.
+        CSRF key: `aabenintra_theme_prefs` (`drupalSettings.aabenintra.csrfToken`).
+      operationId: patchPreferences
+      security:
+        - sessionCookie: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferencesPatch'
+            example:
+              accent: teal
+              color_scheme: dark
+              tile_pinned: [42]
+              tile_order: [42, 17, 9]
+      responses:
+        '200':
+          description: Effective preferences after the merge.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+        '400':
+          description: Body is not a JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example: { error: Invalid payload }
+        '403':
+          description: Missing or invalid CSRF token (JSON), or route access denied (HTML).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example: { error: Invalid CSRF token }
+            text/html:
+              schema:
+                type: string
+
+  /admin/reports/mandatory-reads/csv:
+    get:
+      tags: [compliance]
+      summary: Download the mandatory-reading compliance report as CSV
+      description: |
+        One row per published node with `field_mandatory = 1`: title, bundle,
+        number of acknowledgements (any language), number of active
+        authenticated users, and the rounded percentage. Not cached.
+
+        Route: `aabenintra_compliance.report_csv`. Access:
+        `access content overview`.
+      operationId: downloadMandatoryReadsCsv
+      responses:
+        '200':
+          description: CSV attachment `mandatory-reads.csv`.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: attachment; filename="mandatory-reads.csv"
+          content:
+            text/csv:
+              schema:
+                type: string
+              example: |
+                Title,Type,Acknowledged,"Of users",Percent
+                "IT security policy 2026",document,41,57,72
+        '403':
+          $ref: '#/components/responses/ForbiddenHtml'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: SSESS
+      description: |
+        Drupal session cookie of a logged-in user. The real cookie name is
+        `SSESS<hash>` over HTTPS (`SESS<hash>` over plain HTTP); the hash is
+        derived from the site's hostname. `cookie_samesite: Lax` is set in
+        services.prod.yml. Browsers send it automatically with
+        `credentials: 'same-origin'`.
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: |
+        Drupal CSRF token minted with `\Drupal::csrfToken()->get('<key>')`
+        where `<key>` is specific to the endpoint (see each operation). The
+        token is per session and per key; a token for one endpoint does not
+        validate for another, and `/session/token` (empty key) does not work
+        here. Delivered to the page in `drupalSettings`.
+
+  parameters:
+    nodeId:
+      name: node
+      in: path
+      required: true
+      description: Numeric node id, upcast to the node entity (404 if missing).
+      schema:
+        type: integer
+        minimum: 1
+    taxonomyTermId:
+      name: taxonomy_term
+      in: path
+      required: true
+      description: Numeric taxonomy term id of a `topic` term, upcast to the entity (404 if missing).
+      schema:
+        type: integer
+        minimum: 1
+
+  responses:
+    ForbiddenHtml:
+      description: |
+        Access denied. Rendered as Drupal's standard HTML 403 page because the
+        route declares no `_format`; this is also what an invalid CSRF token
+        produces on the follow and react endpoints
+        (`AccessDeniedHttpException`).
+      content:
+        text/html:
+          schema:
+            type: string
+    NotFoundHtml:
+      description: Entity not found. Drupal's standard HTML 404 page.
+      content:
+        text/html:
+          schema:
+            type: string
+
+  schemas:
+    Error:
+      type: object
+      description: JSON error shape used by the acknowledge and preferences endpoints.
+      required: [error]
+      properties:
+        error:
+          type: string
+      additionalProperties: false
+
+    FollowState:
+      type: object
+      required: [following, followers]
+      properties:
+        following:
+          type: boolean
+          description: Whether the current user follows the channel after the toggle.
+        followers:
+          type: integer
+          minimum: 0
+          description: Total followers of the channel after the toggle.
+      additionalProperties: false
+
+    ReactionState:
+      type: object
+      required: [counts, mine]
+      properties:
+        counts:
+          type: object
+          description: Count per reaction key. Every key is always present.
+          required: [like, celebrate, insightful, support]
+          properties:
+            like: { type: integer, minimum: 0 }
+            celebrate: { type: integer, minimum: 0 }
+            insightful: { type: integer, minimum: 0 }
+            support: { type: integer, minimum: 0 }
+          additionalProperties: false
+        mine:
+          type: [string, 'null']
+          enum: [like, celebrate, insightful, support, null]
+          description: The current user's reaction after the toggle, or null.
+      additionalProperties: false
+
+    AcknowledgeResult:
+      type: object
+      required: [ok, nid]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        nid:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+
+    Preferences:
+      type: object
+      description: Effective per-user theme preferences (defaults merged with stored overrides).
+      required: [accent, accent_custom, color_scheme, density, nav_collapsed, tile_order, tile_pinned]
+      properties:
+        accent:
+          type: string
+          enum: [sky, clay, rust, gold, forest, teal, ocean, ink, plum, custom]
+          default: sky
+        accent_custom:
+          type: string
+          description: Lower-case `#rrggbb` when `accent` is `custom`, otherwise empty.
+          pattern: '^(#[0-9a-f]{6})?$'
+          default: ''
+        color_scheme:
+          type: string
+          enum: [light, dark, auto]
+          default: auto
+        density:
+          type: string
+          enum: [comfortable, compact]
+          default: comfortable
+        nav_collapsed:
+          type: boolean
+          default: false
+        tile_order:
+          type: array
+          description: Node ids of dashboard tiles in the user's chosen order.
+          items: { type: integer, minimum: 1 }
+          default: []
+        tile_pinned:
+          type: array
+          description: Node ids the user pinned to the top of the dashboard.
+          items: { type: integer, minimum: 1 }
+          default: []
+      additionalProperties: false
+
+    PreferencesPatch:
+      type: object
+      description: |
+        Partial preferences. Unknown keys are dropped. Invalid enum values are
+        dropped. `accent_custom` that is not `#rrggbb` is stored as empty.
+        Non-integer entries in the arrays are removed.
+      properties:
+        accent:
+          type: string
+          enum: [sky, clay, rust, gold, forest, teal, ocean, ink, plum, custom]
+        accent_custom:
+          type: string
+        color_scheme:
+          type: string
+          enum: [light, dark, auto]
+        density:
+          type: string
+          enum: [comfortable, compact]
+        nav_collapsed:
+          type: boolean
+        tile_order:
+          type: array
+          items: { type: integer }
+        tile_pinned:
+          type: array
+          items: { type: integer }
+      additionalProperties: true
