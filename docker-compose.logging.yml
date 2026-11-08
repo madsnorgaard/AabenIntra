@@ -1,0 +1,44 @@
+# Optional log shipping for self-hosters WITHOUT an existing Loki/promtail
+# stack on the host. Adds one Grafana Alloy sidecar that reads the logs of the
+# aabenintra_* containers through the Docker API and pushes them to LOKI_URL.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.logging.yml up -d
+#
+# Skip this file when the host already tails /var/lib/docker/containers (the
+# reference VPS2 setup does), otherwise every line is ingested twice.
+# Mounting the Docker socket grants the container read access to all container
+# metadata and logs on the host; keep this stack on hosts you control.
+# See docs/OBSERVABILITY.md.
+
+services:
+  aabenintra_alloy:
+    image: grafana/alloy:v1.21.3
+    container_name: aabenintra_alloy
+    restart: unless-stopped
+    command:
+      - run
+      - --storage.path=/var/lib/alloy/data
+      - --disable-reporting
+      - /etc/alloy/config.alloy
+    environment:
+      LOKI_URL: ${LOKI_URL:?set LOKI_URL in .env, e.g. http://loki:3100/loki/api/v1/push}
+      LOG_CONTAINER_FILTER: ${LOG_CONTAINER_FILTER:-aabenintra}
+      LOG_HOST_LABEL: ${LOG_HOST_LABEL:-aabenintra}
+    volumes:
+      - ./docker/observability/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    networks:
+      - internal
+      # Add the network your Loki lives on, e.g. `- web`, if it is not reachable
+      # through `internal`.
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    labels:
+      - "traefik.enable=false"
+
+volumes:
+  alloy_data:

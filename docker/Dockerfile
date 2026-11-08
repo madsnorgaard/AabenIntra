@@ -44,4 +44,9 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader
 RUN chown -R www-data:www-data /opt/drupal \
     && chmod -R 775 /opt/drupal/web/sites/default/files /opt/drupal/private
 
+# Release identifier for /health, the JSON logs and Sentry (docs/OBSERVABILITY.md).
+# Declared last so a new value only invalidates this layer.
+ARG APP_RELEASE=dev
+ENV APP_RELEASE=$APP_RELEASE
+
 CMD ["apache2-foreground"]
