@@ -17,9 +17,12 @@ None.
 
 ## Advisory findings (moderate/minor, reported but not failing the gate)
 
-None recorded yet. The first gate run on a pull request lists them under the
-`axe-*-advisory` attachments in the `axe-playwright` artifact; copy anything
-that is a real user problem into this table.
+None. The first full gate run (PR #171, 8 November 2026) reported no
+moderate or minor violations on any of the covered pages; the one serious
+finding (follow-button text at 4.39:1 on the raw accent seed) was fixed in the
+same pull request by using the `--accent-fill` token. Future runs list
+advisories under the `axe-*-advisory` attachments in the `axe-playwright`
+artifact; copy anything that is a real user problem into this table.
 
 | axe rule | Where | Impact | What a user experiences | Issue |
 |---|---|---|---|---|

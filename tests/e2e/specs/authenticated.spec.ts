@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectNoA11yViolations } from '../lib/axe';
-import { firstChannelPath, firstStoryPath } from '../lib/pages';
+import { firstChannelPath, firstStoryPath, firstTermPath } from '../lib/pages';
 
 /**
  * Every public-facing AabenIntra surface, as the logged-in demo user.
@@ -42,5 +42,14 @@ test.describe('authenticated', () => {
     await page.goto(path);
     await expect(page.locator('.ai-channel h1')).toBeVisible();
     await expectNoA11yViolations(page, testInfo, { label: 'auth-channel', lang: 'en' });
+  });
+
+  test('a taxonomy term landing page has no WCAG 2.2 AA violations', async ({ page }, testInfo) => {
+    const path = await firstTermPath(page);
+    await page.goto(path);
+    // The themed taxonomy_term view renders a hero with the term name as h1;
+    // an empty main here means the view is missing on this install.
+    await expect(page.locator('main h1').first()).toBeVisible();
+    await expectNoA11yViolations(page, testInfo, { label: 'auth-term-page', lang: 'en' });
   });
 });

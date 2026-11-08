@@ -110,6 +110,7 @@ jobs:
         with:
           name: axe-playwright
           if-no-files-found: ignore
+          include-hidden-files: true
           retention-days: 14
           path: |
             tests/e2e/axe-reports/
@@ -122,6 +123,8 @@ jobs:
         with:
           name: lighthouse
           if-no-files-found: ignore
+          # .lighthouseci/ is a dotdir; upload-artifact skips those by default.
+          include-hidden-files: true
           retention-days: 14
           path: |
             tests/e2e/lighthouse/anon/.lighthouseci/

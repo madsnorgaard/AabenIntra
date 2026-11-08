@@ -110,8 +110,10 @@ noisy. The rules:
 
 Notes log:
 
-- 2026-11-08: initial thresholds set equal to the #123 targets; adjust after
-  the first weeks of measurements if they prove unstable.
+- 2026-11-08: initial thresholds set equal to the #123 targets. The first CI
+  run on PR #171 passed all five assertions on `/user/login`, `/dashboard` and
+  `/news` with the desktop preset; keep watching the weekly runs before
+  trusting the margin.
 
 ## Running locally
 
