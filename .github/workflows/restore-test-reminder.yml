@@ -1,0 +1,70 @@
+name: Restore test reminder
+
+# Opens (or bumps) the "Monthly restore test due" issue on the first of
+# every month so the backup restore test in docs/BACKUPS.md actually
+# happens and is logged. Uses only the GitHub CLI and the workflow token.
+
+on:
+  schedule:
+    - cron: "0 7 1 * *"   # 07:00 UTC on the 1st
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: restore-test-reminder
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: restore-test
+    steps:
+      - name: Open or bump the reminder issue
+        shell: bash
+        run: |
+          set -euo pipefail
+          month=$(date -u +%Y-%m)
+          title="Monthly restore test due ($month)"
+          server="https://github.com/${GH_REPO}/blob/main"
+
+          gh label create "$LABEL" --color 0052CC \
+            --description "Monthly backup restore test" --force >/dev/null
+
+          body=$(cat <<EOT
+          Monthly backup restore test for **$month**. Procedure: [docs/BACKUPS.md]($server/docs/BACKUPS.md#monthly-restore-test).
+
+          Per tenant (copy the block for each one):
+
+          - [ ] Staging stack up (\`~/docker/<tenant>-staging\`, own \`.env\`, no outbound mail)
+          - [ ] Artifact chosen from the OFF-SITE copy (manifest timestamp: \`____\`)
+          - [ ] \`scripts/restore_tenant.sh --from-manifest ... --target-compose-dir ... --clean-db --clean-files --yes\` finished; wall-clock time: \`____\`
+          - [ ] \`drush aabenintra:validate\` exit 0
+          - [ ] Node count matches production (\`SELECT COUNT(*) FROM node_field_data\`)
+          - [ ] Browser: dashboard tiles, story with image, private document download, search, no new errors in \`/admin/reports/dblog\`
+          - [ ] Row added to the restore test log in \`docs/BACKUPS.md\` (PR linked here)
+          - [ ] Staging torn down or left in a known state
+
+          Also confirm for the month:
+
+          - [ ] \`aabenintra_backup_last_success_timestamp_seconds\` is fresh for every tenant (Grafana / \`cat backups/metrics/*.prom\`)
+          - [ ] Off-site copy present for yesterday's run
+          - [ ] Retention looks right (\`ls backups/db | wc -l\` roughly 30 + weekly)
+
+          A failed restore is a P1: fix, re-run, record both outcomes before closing.
+          EOT
+          )
+
+          existing=$(gh issue list --label "$LABEL" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "Open reminder #$existing exists - bumping"
+            gh issue comment "$existing" --body "A new month started ($month) and the previous restore test is still open. Finish it or record why it was skipped, then close."
+            gh issue edit "$existing" --title "$title"
+          else
+            gh issue create --title "$title" --label "$LABEL" --label security --body "$body"
+          fi

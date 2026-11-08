@@ -1,0 +1,138 @@
+# Edge hardening for an AabenIntra tenant behind Traefik v3.
+#
+# Usage (from the tenant's compose directory):
+#
+#   docker compose -f docker-compose.yml -f docker-compose.hardening.yml up -d
+#
+# This file only ADDS labels to the drupal service; it never changes images,
+# volumes or networks, so it is safe to drop for a rollback (bring the stack
+# up with docker-compose.yml alone and Traefik forgets the routers within
+# seconds). Everything tunable is read from the tenant .env, with the defaults
+# shown here, so operators override numbers without editing this file.
+#
+# Variables (all optional, see .env.example):
+#   TENANT             slug used in router/middleware names   (default aabenintra)
+#   TENANT_HOST        public hostname of the tenant           (default aabenintra.fenixnordic.solutions)
+#   RL_GENERAL_AVG     general rate: sustained requests/second per client IP (default 100)
+#   RL_GENERAL_BURST   general rate: burst per client IP                     (default 200)
+#   RL_LOGIN_AVG       login rate: sustained requests per minute per IP      (default 10)
+#   RL_LOGIN_BURST     login rate: burst per IP                              (default 20)
+#   RL_API_AVG         api/island rate: sustained requests/second per IP     (default 30)
+#   RL_API_BURST       api/island rate: burst per IP                         (default 60)
+#   INFLIGHT_MAX       concurrent in-flight requests per client IP           (default 100)
+#   UPLOAD_MAX_BYTES   request body cap at the edge, bytes                   (default 67108864 = 64 MiB)
+#
+# Middleware and router names MUST be unique across every container Traefik
+# sees on the shared `web` network. Two tenants on one host that both define
+# a middleware called "ratelimit-login" with different numbers make Traefik
+# reject both. Hence every name below carries the ${TENANT} prefix. The main
+# router keeps its historical name (aabenintra_drupal) because the base
+# compose file owns it; a second tenant on the same host must rename that
+# router in its own docker-compose.yml as well.
+#
+# Client IP and corporate NAT: all limits key on the client IP (Traefik's
+# default sourceCriterion). An intranet is typically reached from one or a
+# few office egress IPs, so "per IP" effectively means "per office". The
+# general defaults are therefore generous (100 r/s sustained, 200 burst per
+# IP is roughly 300 staff loading pages at the same moment) and the login
+# limit is a credential-stuffing brake, not a per-user quota: 20 attempts
+# then 10 per minute from one egress IP. Drupal's own flood control (5 failed
+# logins per account per 6 h, 50 per IP per hour) stays the second layer. If
+# an office is larger than that, raise RL_LOGIN_* in the tenant .env or move
+# staff login to SSO (/openid-connect/* is not matched by the login router).
+# If the tenant sits behind a CDN or another proxy, every request arrives
+# from the CDN's IP and the limits collapse onto that one address; set
+# ratelimit.sourcecriterion.ipstrategy.depth=1 on each ratelimit middleware
+# (documented in docs/TRAEFIK-HARDENING.md) before enabling.
+#
+# Response headers: deliberately NOT set here. HSTS, X-Content-Type-Options,
+# Referrer-Policy, Permissions-Policy and frame options are applied for the
+# whole host by the operator's entrypoint-level middleware
+# (security-headers@file in the Traefik stack), and the Content-Security-Policy
+# is owned by the aabenintra_security Drupal module, which needs per-request
+# nonces that an edge proxy cannot produce. Traefik's headers middleware
+# REPLACES any header of the same name coming from the application, so
+# setting CSP or HSTS here would silently override the module. If the
+# operator's Traefik has no global headers middleware, add HSTS at the
+# entrypoint (not here) so it also covers tenants that forgot this file.
+
+services:
+  drupal:
+    labels:
+      - "traefik.enable=true"
+
+      # ---------------------------------------------------------------------
+      # Main router (defined in docker-compose.yml; here we only attach
+      # middlewares and pin the priority below the two specialised routers).
+      # ---------------------------------------------------------------------
+      - "traefik.http.routers.aabenintra_drupal.priority=10"
+      - "traefik.http.routers.aabenintra_drupal.service=aabenintra_drupal"
+      - "traefik.http.routers.aabenintra_drupal.middlewares=${TENANT:-aabenintra}-ratelimit-general,${TENANT:-aabenintra}-inflight,${TENANT:-aabenintra}-buffering,${TENANT:-aabenintra}-compress"
+
+      # ---------------------------------------------------------------------
+      # Login router: tight limit on password login, reset and one-time login
+      # links. Matches the un-prefixed paths and the language-prefixed ones
+      # (/da/user/login) that URL-first language negotiation produces. Highest
+      # priority so it always wins over the main and API routers.
+      # ---------------------------------------------------------------------
+      - "traefik.http.routers.${TENANT:-aabenintra}-login.rule=Host(`${TENANT_HOST:-aabenintra.fenixnordic.solutions}`) && (Path(`/user/login`) || PathPrefix(`/user/password`) || PathPrefix(`/user/reset`) || PathRegexp(`^/[a-z]{2}(-[a-z]{2})?/user/(login|password|reset)`))"
+      - "traefik.http.routers.${TENANT:-aabenintra}-login.priority=30"
+      - "traefik.http.routers.${TENANT:-aabenintra}-login.service=aabenintra_drupal"
+      - "traefik.http.routers.${TENANT:-aabenintra}-login.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.${TENANT:-aabenintra}-login.middlewares=${TENANT:-aabenintra}-ratelimit-login,${TENANT:-aabenintra}-inflight,${TENANT:-aabenintra}-buffering,${TENANT:-aabenintra}-compress"
+
+      # ---------------------------------------------------------------------
+      # API / island router: the Vue islands call /aabenintra/* (preferences,
+      # reactions, follow, acknowledge); /jsonapi and /api are reserved for
+      # the JSON:API and the versioned API tracked in issue #124. Looser than
+      # login, tighter than the page router because these are POST/PATCH
+      # endpoints that write to the database.
+      # ---------------------------------------------------------------------
+      - "traefik.http.routers.${TENANT:-aabenintra}-api.rule=Host(`${TENANT_HOST:-aabenintra.fenixnordic.solutions}`) && (PathPrefix(`/api/`) || PathPrefix(`/jsonapi`) || PathPrefix(`/aabenintra/`) || PathRegexp(`^/[a-z]{2}(-[a-z]{2})?/(api|jsonapi|aabenintra)/`))"
+      - "traefik.http.routers.${TENANT:-aabenintra}-api.priority=20"
+      - "traefik.http.routers.${TENANT:-aabenintra}-api.service=aabenintra_drupal"
+      - "traefik.http.routers.${TENANT:-aabenintra}-api.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.${TENANT:-aabenintra}-api.middlewares=${TENANT:-aabenintra}-ratelimit-api,${TENANT:-aabenintra}-inflight,${TENANT:-aabenintra}-buffering,${TENANT:-aabenintra}-compress"
+
+      # ---------------------------------------------------------------------
+      # Rate limits. Traefik's rateLimit is a token bucket: `burst` tokens are
+      # available at once, refilled at `average` per `period`. Excess requests
+      # get HTTP 429 with no body, before they reach PHP.
+      # ---------------------------------------------------------------------
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-general.ratelimit.average=${RL_GENERAL_AVG:-100}"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-general.ratelimit.period=1s"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-general.ratelimit.burst=${RL_GENERAL_BURST:-200}"
+
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-login.ratelimit.average=${RL_LOGIN_AVG:-10}"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-login.ratelimit.period=1m"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-login.ratelimit.burst=${RL_LOGIN_BURST:-20}"
+
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-api.ratelimit.average=${RL_API_AVG:-30}"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-api.ratelimit.period=1s"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-ratelimit-api.ratelimit.burst=${RL_API_BURST:-60}"
+
+      # ---------------------------------------------------------------------
+      # Concurrency cap per client IP. Protects the PHP worker pool (Apache
+      # prefork in the drupal image) from one client holding every slot. Same
+      # NAT caveat as above: 100 concurrent requests from one office IP.
+      # ---------------------------------------------------------------------
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-inflight.inflightreq.amount=${INFLIGHT_MAX:-100}"
+
+      # ---------------------------------------------------------------------
+      # Request body cap. Oversized bodies are answered with 413 at the edge
+      # instead of tying up a PHP worker. The effective upload ceiling is the
+      # SMALLER of this value and PHP's post_max_size/upload_max_filesize in
+      # the drupal image (stock PHP defaults: 8M/2M), so raise both together;
+      # see docs/TRAEFIK-HARDENING.md "Upload limits". Bodies above
+      # memrequestbodybytes spill to disk inside the Traefik container.
+      # ---------------------------------------------------------------------
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-buffering.buffering.maxRequestBodyBytes=${UPLOAD_MAX_BYTES:-67108864}"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-buffering.buffering.memRequestBodyBytes=2097152"
+
+      # ---------------------------------------------------------------------
+      # Compression. Traefik skips responses that already carry a
+      # Content-Encoding (Apache mod_deflate in the drupal image handles
+      # text/html when enabled), so the two never double-compress.
+      # ---------------------------------------------------------------------
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-compress.compress=true"
+      - "traefik.http.middlewares.${TENANT:-aabenintra}-compress.compress.minResponseBodyBytes=1024"
