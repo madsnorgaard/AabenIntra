@@ -7,20 +7,18 @@ namespace Drupal\Tests\aabenintra_ops\Unit\Check;
 use Drupal\aabenintra_ops\Check\CheckResult;
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\aabenintra_ops\Check\CheckResult
- * @group aabenintra_ops
+ * Tests CheckResult.
  */
+#[CoversClass(CheckResult::class)]
+#[Group('aabenintra_ops')]
 final class CheckResultTest extends UnitTestCase {
 
   /**
-   * @covers ::ok
-   * @covers ::warn
-   * @covers ::fail
-   * @covers ::skipped
-   * @covers ::isFailure
-   * @covers ::isWarning
+   * Tests factories set status.
    */
   public function testFactoriesSetStatus(): void {
     self::assertSame(CheckStatus::Ok, CheckResult::ok('a')->status);
@@ -35,7 +33,7 @@ final class CheckResultTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::detailsLine
+   * Tests details line flattens values.
    */
   public function testDetailsLineFlattensValues(): void {
     $result = CheckResult::ok('msg', [
@@ -50,7 +48,7 @@ final class CheckResultTest extends UnitTestCase {
   }
 
   /**
-   * @covers \Drupal\aabenintra_ops\Check\CheckStatus::severity
+   * Tests severity ordering.
    */
   public function testSeverityOrdering(): void {
     self::assertGreaterThan(CheckStatus::Warn->severity(), CheckStatus::Fail->severity());

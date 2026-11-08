@@ -8,11 +8,15 @@ use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\aabenintra_ops\Check\HealthCheckInterface;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Drupal\aabenintra_ops\Check\Validate\ExpectedModulesCheck;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\aabenintra_ops\Check\Validate\ExpectedModulesCheck
- * @group aabenintra_ops
+ * Tests ExpectedModulesCheck.
  */
+#[CoversClass(ExpectedModulesCheck::class)]
+#[Group('aabenintra_ops')]
 #[RunTestsInSeparateProcesses]
 final class ExpectedModulesCheckTest extends KernelTestBase {
 
@@ -30,7 +34,7 @@ final class ExpectedModulesCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests passes when all expected modules are enabled.
    */
   public function testPassesWhenAllExpectedModulesAreEnabled(): void {
     $this->config('aabenintra_ops.settings')->set('expected_modules', ['system', 'user', 'aabenintra_ops'])->save();
@@ -39,7 +43,7 @@ final class ExpectedModulesCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests fails and lists missing modules.
    */
   public function testFailsAndListsMissingModules(): void {
     $this->config('aabenintra_ops.settings')->set('expected_modules', ['system', 'aabenintra_does_not_exist', 'node'])->save();
@@ -49,7 +53,7 @@ final class ExpectedModulesCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests skips when nothing is expected.
    */
   public function testSkipsWhenNothingIsExpected(): void {
     $this->config('aabenintra_ops.settings')->set('expected_modules', [])->save();
