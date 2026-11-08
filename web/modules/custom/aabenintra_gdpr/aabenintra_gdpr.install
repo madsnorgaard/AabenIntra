@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Install/schema for AabenIntra GDPR: export request ledger + erasure log.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_schema().
+ *
+ * @return array<string,array<string,mixed>>
+ */
+function aabenintra_gdpr_schema(): array {
+  // Self-service export requests. The download token is stored hashed; the
+  // clear-text token only ever travels in the notification e-mail.
+  $schema['aabenintra_gdpr_request'] = [
+    'description' => 'Data-subject export requests and their processing state.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE],
+      'status' => ['type' => 'varchar_ascii', 'length' => 16, 'not null' => TRUE, 'default' => 'pending'],
+      'token_hash' => ['type' => 'varchar_ascii', 'length' => 64, 'not null' => TRUE, 'default' => ''],
+      'uri' => ['type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''],
+      'message' => ['type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''],
+      'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'completed' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'downloaded' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'expires' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'uid_created' => ['uid', 'created'],
+      'status' => ['status'],
+      'token_hash' => ['token_hash'],
+    ],
+  ];
+
+  // Accountability record (Art. 5(2)) of every erasure. Holds no personal
+  // data: the subject is identified only by a salted hash of the uid.
+  $schema['aabenintra_gdpr_erasure'] = [
+    'description' => 'Audit log of anonymisation and erasure runs, keyed by a hashed subject id.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+      'subject_hash' => ['type' => 'varchar_ascii', 'length' => 64, 'not null' => TRUE],
+      'mode' => ['type' => 'varchar_ascii', 'length' => 16, 'not null' => TRUE],
+      'counts' => ['type' => 'text', 'size' => 'normal', 'not null' => TRUE],
+      'performed_by' => ['type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0],
+      'created' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'subject_hash' => ['subject_hash'],
+      'created' => ['created'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function aabenintra_gdpr_install(): void {
+  // Exports are written to the private file system. Fail loudly at install
+  // time rather than at the first export if it is not configured.
+  if (!\Drupal::service('stream_wrapper_manager')->isValidScheme('private')) {
+    \Drupal::messenger()->addWarning(t('AabenIntra GDPR: the private file system is not configured ($settings[\'file_private_path\']). Data exports cannot be written until it is.'));
+  }
+}

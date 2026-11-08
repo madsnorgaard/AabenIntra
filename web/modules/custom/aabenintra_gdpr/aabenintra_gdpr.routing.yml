@@ -1,0 +1,44 @@
+aabenintra_gdpr.export_request_create:
+  path: '/api/gdpr/export-requests'
+  defaults:
+    _controller: '\Drupal\aabenintra_gdpr\Controller\ExportRequestController::createRequest'
+  methods: [POST]
+  requirements:
+    _permission: 'request own gdpr export'
+    _user_is_logged_in: 'TRUE'
+    _csrf_request_header_token: 'TRUE'
+
+aabenintra_gdpr.export_request_list:
+  path: '/api/gdpr/export-requests'
+  defaults:
+    _controller: '\Drupal\aabenintra_gdpr\Controller\ExportRequestController::list'
+  methods: [GET]
+  requirements:
+    _permission: 'request own gdpr export'
+    _user_is_logged_in: 'TRUE'
+
+aabenintra_gdpr.export_download:
+  path: '/gdpr/export/{token}'
+  defaults:
+    _controller: '\Drupal\aabenintra_gdpr\Controller\ExportDownloadController::download'
+  methods: [GET]
+  requirements:
+    _permission: 'request own gdpr export'
+    _user_is_logged_in: 'TRUE'
+    token: '[A-Za-z0-9_-]{32,128}'
+
+aabenintra_gdpr.admin_requests:
+  path: '/admin/people/gdpr-requests'
+  defaults:
+    _controller: '\Drupal\aabenintra_gdpr\Controller\AdminRequestsController::page'
+    _title: 'GDPR requests'
+  requirements:
+    _permission: 'administer gdpr requests'
+
+aabenintra_gdpr.settings:
+  path: '/admin/config/people/gdpr'
+  defaults:
+    _form: '\Drupal\aabenintra_gdpr\Form\SettingsForm'
+    _title: 'GDPR settings'
+  requirements:
+    _permission: 'administer gdpr requests'

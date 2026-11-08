@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra GDPR: cron cleanup, notification mail and private-file guard.
+ */
+
+declare(strict_types=1);
+
+use Drupal\aabenintra_gdpr\GdprExporter;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_cron().
+ *
+ * Removes export files older than the configured retention and marks their
+ * requests expired. The export queue itself is drained by core's cron queue
+ * runner (see the aabenintra_gdpr_export QueueWorker).
+ */
+function aabenintra_gdpr_cron(): void {
+  /** @var \Drupal\aabenintra_gdpr\GdprExporter $exporter */
+  $exporter = \Drupal::service('aabenintra_gdpr.exporter');
+  $removed = $exporter->purgeExpired();
+  /** @var \Drupal\aabenintra_gdpr\ExportRequestStorage $requests */
+  $requests = \Drupal::service('aabenintra_gdpr.requests');
+  $expired = $requests->expireStale();
+  if ($removed > 0 || $expired > 0) {
+    \Drupal::logger('aabenintra_gdpr')->info('Cron removed @files expired export file(s) and expired @requests request(s).', [
+      '@files' => $removed,
+      '@requests' => $expired,
+    ]);
+  }
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * @param array<string,mixed> $message
+ * @param array<string,mixed> $params
+ */
+function aabenintra_gdpr_mail(string $key, array &$message, array $params): void {
+  if ($key !== 'export_ready') {
+    return;
+  }
+  $options = ['langcode' => $message['langcode']];
+  $site = \Drupal::config('system.site')->get('name');
+  $url = Url::fromRoute('aabenintra_gdpr.export_download', ['token' => $params['token']], ['absolute' => TRUE])->toString();
+  $message['subject'] = t('[@site] Your personal data export is ready', ['@site' => $site], $options);
+  $message['body'][] = t('Hello @name,', ['@name' => $params['name']], $options);
+  $message['body'][] = t('The export of your personal data that you requested is ready. Sign in and open the link below to download it. The link works once and expires on @date.', [
+    '@date' => \Drupal::service('date.formatter')->format($params['expires'], 'medium', '', NULL, $message['langcode']),
+  ], $options);
+  $message['body'][] = $url;
+  $message['body'][] = t('If you did not request this export, contact your administrator.', [], $options);
+}
+
+/**
+ * Implements hook_file_download().
+ *
+ * Export files live under private://gdpr-exports. They are never registered as
+ * managed files, so core would already refuse to serve them; this makes the
+ * refusal explicit so no other module can accidentally grant access.
+ */
+function aabenintra_gdpr_file_download(string $uri): int|null {
+  if (str_starts_with($uri, GdprExporter::EXPORT_DIR)) {
+    return -1;
+  }
+  return NULL;
+}

@@ -1,0 +1,116 @@
+services:
+  aabenintra_gdpr.collector_manager:
+    class: Drupal\aabenintra_gdpr\Collector\CollectorManager
+    tags:
+      - { name: service_collector, tag: aabenintra_gdpr.collector, call: addCollector }
+
+  aabenintra_gdpr.anonymizer:
+    class: Drupal\aabenintra_gdpr\Anonymizer
+
+  aabenintra_gdpr.subject_resolver:
+    class: Drupal\aabenintra_gdpr\SubjectResolver
+    arguments: ['@entity_type.manager']
+
+  aabenintra_gdpr.exporter:
+    class: Drupal\aabenintra_gdpr\GdprExporter
+    arguments:
+      - '@aabenintra_gdpr.collector_manager'
+      - '@file_system'
+      - '@datetime.time'
+      - '@config.factory'
+      - '@logger.channel.aabenintra_gdpr'
+
+  aabenintra_gdpr.eraser:
+    class: Drupal\aabenintra_gdpr\GdprEraser
+    arguments:
+      - '@aabenintra_gdpr.collector_manager'
+      - '@aabenintra_gdpr.anonymizer'
+      - '@entity_type.manager'
+      - '@user.data'
+      - '@database'
+      - '@datetime.time'
+      - '@config.factory'
+      - '@current_user'
+      - '@logger.channel.aabenintra_gdpr'
+
+  aabenintra_gdpr.requests:
+    class: Drupal\aabenintra_gdpr\ExportRequestStorage
+    arguments: ['@database', '@datetime.time']
+
+  logger.channel.aabenintra_gdpr:
+    parent: logger.channel_base
+    arguments: ['aabenintra_gdpr']
+
+  # Collectors. Each one declares the module that owns the data and is skipped
+  # when that module is not installed, so no other module depends on this one.
+  aabenintra_gdpr.collector.profile:
+    class: Drupal\aabenintra_gdpr\Collector\ProfileCollector
+    arguments: ['@module_handler', '@entity_field.manager', '@aabenintra_gdpr.anonymizer']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 100 }
+
+  aabenintra_gdpr.collector.content:
+    class: Drupal\aabenintra_gdpr\Collector\ContentCollector
+    arguments: ['@module_handler', '@entity_type.manager', '@config.factory']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 90 }
+
+  aabenintra_gdpr.collector.comments:
+    class: Drupal\aabenintra_gdpr\Collector\CommentCollector
+    arguments: ['@module_handler', '@entity_type.manager', '@config.factory']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 80 }
+
+  aabenintra_gdpr.collector.files:
+    class: Drupal\aabenintra_gdpr\Collector\FileCollector
+    arguments: ['@module_handler', '@entity_type.manager', '@config.factory']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 70 }
+
+  aabenintra_gdpr.collector.kudos:
+    class: Drupal\aabenintra_gdpr\Collector\KudosCollector
+    arguments: ['@module_handler', '@entity_type.manager']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 60 }
+
+  aabenintra_gdpr.collector.reactions:
+    class: Drupal\aabenintra_gdpr\Collector\ReactionCollector
+    arguments: ['@module_handler', '@database']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 50 }
+
+  aabenintra_gdpr.collector.follows:
+    class: Drupal\aabenintra_gdpr\Collector\FollowCollector
+    arguments: ['@module_handler', '@database']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 50 }
+
+  aabenintra_gdpr.collector.read_receipts:
+    class: Drupal\aabenintra_gdpr\Collector\ReadReceiptCollector
+    arguments: ['@module_handler', '@database']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 40 }
+
+  aabenintra_gdpr.collector.activity:
+    class: Drupal\aabenintra_gdpr\Collector\ActivityCollector
+    arguments: ['@module_handler', '@database']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 40 }
+
+  aabenintra_gdpr.collector.preferences:
+    class: Drupal\aabenintra_gdpr\Collector\PreferencesCollector
+    arguments: ['@module_handler', '@user.data']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 30 }
+
+  aabenintra_gdpr.collector.groups:
+    class: Drupal\aabenintra_gdpr\Collector\GroupCollector
+    arguments: ['@module_handler', '@entity_type.manager', '@config.factory']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 30 }
+
+  aabenintra_gdpr.collector.export_requests:
+    class: Drupal\aabenintra_gdpr\Collector\ExportRequestCollector
+    arguments: ['@module_handler', '@aabenintra_gdpr.requests', '@file_system']
+    tags:
+      - { name: aabenintra_gdpr.collector, priority: 10 }
