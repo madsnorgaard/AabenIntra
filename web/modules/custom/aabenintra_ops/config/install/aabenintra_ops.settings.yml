@@ -1,0 +1,71 @@
+# Modules that scripts/install_prod.sh enables (feature modules + the i18n and
+# group sets that are enabled via drush because recipe `install:` does not fully
+# register their service containers) plus the contrib the recipes install.
+expected_modules:
+  - aabenintra_ops
+  - aabenintra_theme
+  - aabenintra_dashboard
+  - aabenintra_compliance
+  - aabenintra_directory
+  - aabenintra_social
+  - aabenintra_kudos
+  - aabenintra_channels
+  - aabenintra_activity
+  - aabenintra_groups
+  - aabenintra_i18n
+  - language
+  - locale
+  - content_translation
+  - config_translation
+  - group
+  - gnode
+  - gin
+  - gin_toolbar
+  - admin_toolbar
+  - pathauto
+  - token
+  - media
+  - media_library
+  - focal_point
+  - easy_responsive_images
+  - layout_builder
+expected_theme: aabenintra
+expected_front_page: /dashboard
+# Config objects the recipes (web/recipes/*/config) and aabenintra_groups
+# hook_install must have created. A missing one means a recipe did not apply
+# (typically because it refused to overwrite differing pre-existing config).
+expected_config:
+  - node.type.story
+  - node.type.page
+  - node.type.event
+  - node.type.document
+  - node.type.tip
+  - media.type.image
+  - image.style.tile_small
+  - image.style.tile_medium
+  - image.style.tile_large
+  - taxonomy.vocabulary.department
+  - taxonomy.vocabulary.topic
+  - taxonomy.vocabulary.audience
+  - taxonomy.vocabulary.organisation
+  - taxonomy.vocabulary.location
+  - field.field.user.user.field_primary_org_unit
+  - field.field.user.user.field_location
+  - language.entity.da
+  - group.type.workspace
+  - group.type.community
+# Pages rendered through an HttpKernel sub-request; the response must be 200
+# and contain the marker string (a wrapper class from the page template).
+synthetic_pages:
+  - path: /dashboard
+    marker: ai-dashboard-wrap
+  - path: /directory
+    marker: ai-directory
+# Account the synthetic requests run as. uid 1 is used because it exists on
+# every install and holds 'access content'; no account is created or altered.
+synthetic_uid: 1
+# Seconds since the last cron run before the cron check warns.
+cron_max_age: 86400
+# Tenant slug for the isolation naming contract (DB name == DB user == slug,
+# DB host and Redis host start with "<slug>_"). Empty = derive from the DB name.
+tenant_slug: ''

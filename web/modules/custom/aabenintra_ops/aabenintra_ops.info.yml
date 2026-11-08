@@ -1,0 +1,8 @@
+name: 'AabenIntra Ops'
+type: module
+description: 'Operational tooling for a tenant: post-install validation and tenant-isolation verification (drush aabenintra:validate / aabenintra:verify-isolation).'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:user
