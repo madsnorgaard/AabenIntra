@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Drupal\Tests\aabenintra_security\Kernel;
 
 use Drupal\Core\Cache\CacheableResponse;
+use Drupal\aabenintra_security\Csp\PolicyBuilder;
+use Drupal\Core\PageCache\ResponsePolicyInterface;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -20,6 +23,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * schema, and that the headers coexist with core's FinishResponseSubscriber.
  */
 #[Group('aabenintra_security')]
+#[RunTestsInSeparateProcesses]
 final class SecurityHeadersTest extends KernelTestBase {
 
   /**
@@ -65,8 +69,18 @@ final class SecurityHeadersTest extends KernelTestBase {
 
     $this->assertFalse($h->has('Content-Security-Policy'));
     $csp = (string) $h->get('Content-Security-Policy-Report-Only');
-    $this->assertStringStartsWith("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; ", $csp);
-    $this->assertStringContainsString("frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests", $csp);
+    // Every baseline directive is present with exactly its baseline sources,
+    // in the builder's emission order, with nothing appended.
+    $directives = explode('; ', $csp);
+    $expected = [];
+    foreach (PolicyBuilder::DIRECTIVES as $directive) {
+      $expected[] = $directive . ' ' . implode(' ', PolicyBuilder::BASELINE[$directive]);
+    }
+    $expected[] = 'upgrade-insecure-requests';
+    $this->assertSame($expected, $directives);
+    $this->assertStringContainsString("style-src 'self' 'unsafe-inline'", $csp);
+    $this->assertStringContainsString("frame-ancestors 'self'", $csp);
+    $this->assertStringContainsString("object-src 'none'", $csp);
     $this->assertStringNotContainsString('nonce-', $csp);
 
     $this->assertInstanceOf(CacheableResponse::class, $response);
@@ -134,7 +148,8 @@ final class SecurityHeadersTest extends KernelTestBase {
     $response = $this->respond('https://intranet.example.dk/');
     $csp = (string) $response->headers->get('Content-Security-Policy-Report-Only');
     $this->assertStringContainsString("script-src 'self' 'nonce-" . $rendered['#plain_text'] . "'; ", $csp);
-    $this->assertSame('DENY', $this->container->get('page_cache_kill_switch')->check($response, Request::create('https://intranet.example.dk/')));
+    $killSwitch = $this->container->get('page_cache_kill_switch');
+    $this->assertSame(ResponsePolicyInterface::DENY, $killSwitch->check($response, Request::create('https://intranet.example.dk/')));
 
     // The Twig environment knows the function.
     $this->assertNotNull($this->container->get('twig')->getFunction('csp_nonce'));
