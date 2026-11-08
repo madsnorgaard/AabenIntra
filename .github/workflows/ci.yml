@@ -1,0 +1,198 @@
+name: CI
+
+# Quality gates for every pull request and for main. Each job is independent so
+# a red result points at one thing: tests, static analysis, dependencies,
+# secrets or a stale theme build. What each job enforces and how to run it
+# locally is documented in docs/QUALITY.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSER_NO_INTERACTION: "1"
+  PHP_VERSION: "8.4"
+
+jobs:
+  phpunit:
+    name: phpunit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: gd, mbstring, intl, zip, apcu, opcache, pdo_sqlite, sqlite3
+          coverage: pcov
+          # pcov only instruments the custom modules, which keeps the kernel
+          # suite fast and the Clover report scoped to what the gate measures.
+          ini-values: memory_limit=-1, pcov.directory=${{ github.workspace }}/web/modules/custom
+          tools: composer:v2
+
+      - name: Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Prepare writable test directories
+        run: |
+          mkdir -p web/sites/default/files web/sites/simpletest/browser_output build
+          chmod -R a+rwX web/sites/default/files web/sites/simpletest
+
+      - name: Start the PHP built-in web server for Functional tests
+        run: |
+          php -S 127.0.0.1:8888 -t web web/.ht.router.php > build/php-server.log 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -fsS -o /dev/null http://127.0.0.1:8888/core/COPYRIGHT.txt && exit 0
+            sleep 1
+          done
+          echo "web server did not start"; cat build/php-server.log; exit 1
+
+      - name: Unit, Kernel and Functional tests
+        env:
+          SIMPLETEST_BASE_URL: http://127.0.0.1:8888
+          SIMPLETEST_DB: sqlite://localhost/sites/default/files/.ht.sqlite
+          BROWSERTEST_OUTPUT_DIRECTORY: ${{ github.workspace }}/web/sites/simpletest/browser_output
+          BROWSERTEST_OUTPUT_VERBOSE: "false"
+        run: >
+          vendor/bin/phpunit
+          --testsuite unit,kernel,functional
+          --coverage-clover build/clover.xml
+          --log-junit build/junit.xml
+
+      # Gate on custom-module line coverage. The threshold is where the suite
+      # stands today so the gate is green from day one; raise it as tests land.
+      # TODO(#112): step up to 60% once the compliance, dashboard, channels and
+      # directory modules have Kernel coverage of their controllers.
+      - name: Coverage gate
+        run: php scripts/ci/coverage-gate.php build/clover.xml 10
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: phpunit-output
+          path: |
+            build/clover.xml
+            build/junit.xml
+            build/php-server.log
+            web/sites/simpletest/browser_output
+          if-no-files-found: ignore
+          retention-days: 7
+
+  phpstan:
+    name: phpstan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: gd, mbstring, intl, zip
+          coverage: none
+          ini-values: memory_limit=-1
+          tools: composer:v2
+
+      - name: Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Static analysis (level 6 + baseline, see phpstan.neon)
+        run: vendor/bin/phpstan analyse --no-progress --error-format=github
+
+  composer:
+    name: composer validate + audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+          tools: composer:v2
+
+      - name: composer.json is valid and composer.lock is in sync
+        run: composer validate --no-check-publish
+
+      # Fails on any known advisory in composer.lock. The response time for
+      # a red result is defined in SECURITY.md (summary in docs/QUALITY.md).
+      - name: No known vulnerabilities in locked dependencies
+        run: composer audit --locked
+
+  gitleaks:
+    name: secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history: a secret committed and later removed is still leaked.
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  theme-dist:
+    name: theme dist is current
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web/themes/custom/aabenintra
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/themes/custom/aabenintra/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+
+      - run: npm run build
+
+      # dist/ is the production asset transport (no node build in the image),
+      # so a source or dependency change without a rebuilt dist/ ships stale
+      # CSS/JS. The Vite config is deterministic (stable names, no hashes), so
+      # a byte-for-byte comparison is valid.
+      - name: dist/ matches the committed build
+        run: |
+          git status --porcelain -- dist | tee /tmp/dist-status
+          if [ -s /tmp/dist-status ]; then
+            echo "::error::web/themes/custom/aabenintra/dist is stale. Run 'npm ci && npm run build' in the theme and commit dist/."
+            git --no-pager diff --stat -- dist
+            exit 1
+          fi
