@@ -10,11 +10,13 @@ use Drupal\aabenintra_audit\AuditRepository;
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the optional suspicious-login rules end to end (event -> mail -> row).
  */
 #[Group('aabenintra_audit')]
+#[RunTestsInSeparateProcesses]
 final class SuspiciousLoginDetectorTest extends KernelTestBase {
 
   use AssertMailTrait;
