@@ -60,7 +60,7 @@ jobs:
 
       - name: Start the PHP built-in web server for Functional tests
         run: |
-          php -S 127.0.0.1:8888 -t web web/.ht.router.php > build/php-server.log 2>&1 &
+          php -S 127.0.0.1:8888 -t web "$GITHUB_WORKSPACE/web/.ht.router.php" > build/php-server.log 2>&1 &
           for _ in $(seq 1 30); do
             curl -fsS -o /dev/null http://127.0.0.1:8888/core/COPYRIGHT.txt && exit 0
             sleep 1

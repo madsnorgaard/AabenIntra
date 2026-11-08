@@ -44,7 +44,7 @@ SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite \
   vendor/bin/phpunit --testsuite kernel
 
 # Functional tests: a database and a web server serving web/.
-php -S 127.0.0.1:8888 -t web web/.ht.router.php &
+php -S 127.0.0.1:8888 -t web "$PWD/web/.ht.router.php" &   # absolute path: the server chdirs into web/
 SIMPLETEST_BASE_URL=http://127.0.0.1:8888 \
 SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite \
   vendor/bin/phpunit --testsuite functional
