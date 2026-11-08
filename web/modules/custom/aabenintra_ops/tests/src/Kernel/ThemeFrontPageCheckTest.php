@@ -7,11 +7,15 @@ namespace Drupal\Tests\aabenintra_ops\Kernel;
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Drupal\aabenintra_ops\Check\Validate\ThemeFrontPageCheck;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\aabenintra_ops\Check\Validate\ThemeFrontPageCheck
- * @group aabenintra_ops
+ * Tests ThemeFrontPageCheck.
  */
+#[CoversClass(ThemeFrontPageCheck::class)]
+#[Group('aabenintra_ops')]
 #[RunTestsInSeparateProcesses]
 final class ThemeFrontPageCheckTest extends KernelTestBase {
 
@@ -29,7 +33,7 @@ final class ThemeFrontPageCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests passes when theme and front page match.
    */
   public function testPassesWhenThemeAndFrontPageMatch(): void {
     $this->config('system.theme')->set('default', 'aabenintra')->save();
@@ -41,7 +45,7 @@ final class ThemeFrontPageCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests fails on wrong theme or front page.
    */
   public function testFailsOnWrongThemeOrFrontPage(): void {
     $this->config('system.theme')->set('default', 'stark')->save();
@@ -58,7 +62,7 @@ final class ThemeFrontPageCheckTest extends KernelTestBase {
   }
 
   /**
-   * @covers ::run
+   * Tests operator can change expectations.
    */
   public function testOperatorCanChangeExpectations(): void {
     $this->config('aabenintra_ops.settings')->set('expected_theme', 'stark')->set('expected_front_page', '/node')->save();

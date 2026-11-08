@@ -9,17 +9,18 @@ use Drupal\aabenintra_ops\Check\CheckRunner;
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\aabenintra_ops\Check\HealthCheckInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\aabenintra_ops\Check\CheckRunner
- * @group aabenintra_ops
+ * Tests CheckRunner.
  */
+#[CoversClass(CheckRunner::class)]
+#[Group('aabenintra_ops')]
 final class CheckRunnerTest extends UnitTestCase {
 
   /**
-   * @covers ::addCheck
-   * @covers ::checksFor
-   * @covers ::run
+   * Tests runs only checks of the group and catches exceptions.
    */
   public function testRunsOnlyChecksOfTheGroupAndCatchesExceptions(): void {
     $runner = new CheckRunner();

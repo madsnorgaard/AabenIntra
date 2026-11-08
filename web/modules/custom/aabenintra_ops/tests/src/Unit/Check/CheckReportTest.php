@@ -8,16 +8,18 @@ use Drupal\aabenintra_ops\Check\CheckReport;
 use Drupal\aabenintra_ops\Check\CheckResult;
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\aabenintra_ops\Check\CheckReport
- * @group aabenintra_ops
+ * Tests CheckReport.
  */
+#[CoversClass(CheckReport::class)]
+#[Group('aabenintra_ops')]
 final class CheckReportTest extends UnitTestCase {
 
   /**
-   * @covers ::exitCode
-   * @covers ::worstStatus
+   * Tests empty report passes.
    */
   public function testEmptyReportPasses(): void {
     $report = new CheckReport();
@@ -27,9 +29,7 @@ final class CheckReportTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::exitCode
-   * @covers ::hasFailures
-   * @covers ::hasWarnings
+   * Tests ok and skipped exit zero.
    */
   public function testOkAndSkippedExitZero(): void {
     $report = new CheckReport();
@@ -43,7 +43,7 @@ final class CheckReportTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::exitCode
+   * Tests warning fails only in strict mode.
    */
   public function testWarningFailsOnlyInStrictMode(): void {
     $report = new CheckReport();
@@ -56,7 +56,7 @@ final class CheckReportTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::exitCode
+   * Tests any failure exits one.
    */
   public function testAnyFailureExitsOne(): void {
     $report = new CheckReport();
@@ -71,9 +71,7 @@ final class CheckReportTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::counts
-   * @covers ::summary
-   * @covers ::count
+   * Tests counts and summary.
    */
   public function testCountsAndSummary(): void {
     $report = new CheckReport();
@@ -87,7 +85,7 @@ final class CheckReportTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::toRows
+   * Tests rows are keyed by check id.
    */
   public function testRowsAreKeyedByCheckId(): void {
     $report = new CheckReport();
