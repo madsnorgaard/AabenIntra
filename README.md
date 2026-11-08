@@ -91,7 +91,7 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md).
 | [docs/BACKUPS.md](docs/BACKUPS.md) | Per-tenant backups and restore tests |
 | [docs/TENANT-ISOLATION.md](docs/TENANT-ISOLATION.md) | Multi-tenant data isolation model |
 | [docs/SECURITY-HEADERS.md](docs/SECURITY-HEADERS.md) | CSP, HSTS and related headers |
-| [docs/TRAEFIK.md](docs/TRAEFIK.md) | Traefik rate limiting and WAF guidance for operators |
+| [docs/TRAEFIK-HARDENING.md](docs/TRAEFIK-HARDENING.md) | Traefik rate limiting and WAF guidance for operators |
 | [docs/GDPR.md](docs/GDPR.md) | Data export and right-to-erasure tooling |
 | [docs/AUDIT-LOG.md](docs/AUDIT-LOG.md), [docs/SESSION-POLICY.md](docs/SESSION-POLICY.md) | Authentication audit log, session and device policy |
 | [docs/QUALITY.md](docs/QUALITY.md) | phpstan, coding standards, tests and the CI gate |
