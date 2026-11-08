@@ -1,0 +1,9 @@
+name: 'AabenIntra Observability'
+type: module
+description: 'Structured JSON logging to stdout (ECS fields), env-driven Sentry/GlitchTip wiring and a /health endpoint for probes.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:system
+  - monolog:monolog
