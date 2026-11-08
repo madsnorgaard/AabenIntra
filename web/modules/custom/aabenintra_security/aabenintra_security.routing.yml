@@ -1,0 +1,7 @@
+aabenintra_security.settings:
+  path: '/admin/config/system/aabenintra-security'
+  defaults:
+    _form: '\Drupal\aabenintra_security\Form\SettingsForm'
+    _title: 'Security headers'
+  requirements:
+    _permission: 'administer site configuration'

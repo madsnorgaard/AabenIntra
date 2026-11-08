@@ -1,0 +1,9 @@
+name: 'AabenIntra Security'
+type: module
+description: 'Sets HTTP security response headers (Content-Security-Policy, Strict-Transport-Security, Referrer-Policy, Permissions-Policy) from configuration, with a report-only rollout mode.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+configure: aabenintra_security.settings
+dependencies:
+  - drupal:system
