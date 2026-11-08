@@ -67,8 +67,11 @@ jobs:
         run: scripts/install_ci.sh
 
       - name: Start the PHP built-in server
+        # Served from web/ as the working directory (like `drush runserver`):
+        # Drupal expects cwd == DRUPAL_ROOT, and with a relative docroot the
+        # router path stops resolving after the first request.
         run: |
-          PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 -t web web/.ht.router.php > php-server.log 2>&1 &
+          (cd web && PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 .ht.router.php > ../php-server.log 2>&1 &)
           for i in $(seq 1 30); do
             if curl -fsS -o /dev/null "$AI_BASE_URL/user/login"; then
               echo "server up after ${i}s"; exit 0

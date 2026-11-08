@@ -36,8 +36,8 @@ The job does, in order:
    script also sets a known password on the demo user `demo.anna` for the
    authenticated checks (she has an org unit and follows channels, so the
    dashboard cascade is exercised).
-3. `php -S 127.0.0.1:8080 -t web web/.ht.router.php` with
-   `PHP_CLI_SERVER_WORKERS=4`.
+3. `php -S 127.0.0.1:8080 .ht.router.php` run from `web/` (Drupal expects the
+   working directory to be its root) with `PHP_CLI_SERVER_WORKERS=4`.
 4. Playwright (`tests/e2e`): the global setup logs `demo.anna` in through the
    normal login form, stores the session for the authenticated project and
    writes the session cookie to `tests/e2e/.auth/cookie.txt` for Lighthouse.
@@ -122,7 +122,7 @@ Lighthouse uses the system Chrome or `CHROME_PATH`).
 ```bash
 composer install
 scripts/install_ci.sh                       # ~3-5 min; writes web/sites/default/settings.php
-PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t web web/.ht.router.php &
+(cd web && PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 .ht.router.php &)
 
 cd tests/e2e
 npm ci

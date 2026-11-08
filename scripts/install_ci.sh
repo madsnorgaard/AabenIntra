@@ -12,7 +12,7 @@
 # Usage (from the repository root, after `composer install`):
 #
 #   scripts/install_ci.sh
-#   PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t web web/.ht.router.php
+#   cd web && PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 .ht.router.php
 #
 # Environment:
 #   AI_CI_DB_URL     Database URL for drush site:install. Defaults to an SQLite
@@ -176,5 +176,5 @@ $DRUSH cr
 
 echo
 echo "==> CI site ready."
-echo "    Serve:  PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 -t web web/.ht.router.php"
+echo "    Serve:  cd web && PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 .ht.router.php"
 echo "    Login:  $AI_CI_USER_NAME / (AI_CI_USER_PASS)   admin / (AI_CI_ADMIN_PASS)"
