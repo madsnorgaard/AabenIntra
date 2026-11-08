@@ -44,7 +44,7 @@ jobs:
           parameters:
             level: 8
             paths:
-              - web/modules/custom/aabenintra_ops
+              - '%currentWorkingDirectory%/web/modules/custom/aabenintra_ops'
           NEON
           vendor/bin/phpstan analyse -c /tmp/phpstan-ops.neon --no-progress --memory-limit=1G
 
