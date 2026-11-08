@@ -60,6 +60,10 @@ final class GdprErasureKernelTest extends KernelTestBase {
     $this->installSchema('aabenintra_compliance', ['aabenintra_read_receipt']);
     $this->installSchema('aabenintra_gdpr', ['aabenintra_gdpr_request', 'aabenintra_gdpr_erasure']);
     $this->installConfig(['system', 'user', 'aabenintra_gdpr']);
+    // The first account saved in a kernel test gets uid 1, which the eraser
+    // refuses as the site owner. Occupy that slot so test subjects are
+    // ordinary accounts.
+    User::create(['name' => 'site-owner', 'mail' => 'owner@example.org', 'status' => 1])->save();
   }
 
   private function createSubject(string $name = 'jane'): UserInterface {
