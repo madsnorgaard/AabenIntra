@@ -1,0 +1,7 @@
+# Days an export file stays in private://gdpr-exports before cron removes it.
+retention_days: 7
+# User id that authored content is reassigned to when a subject is anonymised.
+# 0 = the anonymous user (matches core's user_cancel_reassign).
+reassign_uid: 0
+# Minimum hours between two self-service export requests from the same user.
+request_rate_limit_hours: 24

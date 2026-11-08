@@ -1,0 +1,8 @@
+request own gdpr export:
+  title: 'Request an export of own personal data'
+  description: 'Lets a signed-in user queue a machine-readable export of their own data (GDPR Art. 15/20) and download it once it is ready.'
+
+administer gdpr requests:
+  title: 'Administer GDPR requests'
+  description: 'View all export requests, the erasure log and change GDPR settings.'
+  restrict access: true
