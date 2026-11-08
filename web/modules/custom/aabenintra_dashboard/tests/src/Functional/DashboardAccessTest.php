@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\aabenintra_dashboard\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\user\RoleInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -30,7 +31,9 @@ final class DashboardAccessTest extends BrowserTestBase {
     $this->drupalCreateContentType(['type' => 'story', 'name' => 'Story']);
     $this->drupalCreateNode(['type' => 'story', 'title' => 'Velkommen til intranettet', 'status' => 1]);
 
-    // The testing profile grants anonymous nothing, so /dashboard is denied.
+    // An intranet has no public content: node_install() grants anonymous
+    // 'access content', the AabenIntra recipes take it away again. Mirror that.
+    user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['access content']);
     $this->drupalGet('/dashboard');
     $this->assertSession()->statusCodeEquals(403);
 

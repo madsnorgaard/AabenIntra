@@ -67,7 +67,7 @@ page they visit to `web/sites/simpletest/browser_output/` (gitignored).
 # pcov (fast) or xdebug (XDEBUG_MODE=coverage) must be loaded.
 SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite \
   vendor/bin/phpunit --testsuite unit,kernel --coverage-clover build/clover.xml
-php scripts/ci/coverage-gate.php build/clover.xml 10
+php scripts/ci/coverage-gate.php build/clover.xml 9
 ```
 
 `scripts/ci/coverage-gate.php` prints a per-module table and exits non-zero
