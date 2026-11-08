@@ -10,11 +10,13 @@ use Drupal\aabenintra_audit\AuditRepository;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the recorder, the repository and cron retention against a real DB.
  */
 #[Group('aabenintra_audit')]
+#[RunTestsInSeparateProcesses]
 final class AuditRecorderTest extends KernelTestBase {
 
   /**
@@ -48,9 +50,13 @@ final class AuditRecorderTest extends KernelTestBase {
     $this->assertSame(0, (int) $row['uid']);
     $this->assertSame('eve', $row['username_attempted']);
     $this->assertSame(RfcLogLevel::NOTICE, (int) $row['severity']);
-    // KernelTestBase requests come from 127.0.0.1 and carry no session.
+    // KernelTestBase requests come from 127.0.0.1 and carry a test session;
+    // only its sha256 may end up in the row, never the raw id.
     $this->assertSame('127.0.0.1', $row['ip']);
-    $this->assertSame('', $row['session_hash']);
+    $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $row['session_hash']);
+    $session_id = $this->container->get('request_stack')->getCurrentRequest()->getSession()->getId();
+    $this->assertSame(hash('sha256', $session_id), $row['session_hash']);
+    $this->assertStringNotContainsString($session_id, json_encode($row, JSON_THROW_ON_ERROR));
     $this->assertGreaterThan(0, (int) $row['created']);
     $details = json_decode((string) $row['details'], TRUE);
     $this->assertSame(['reason' => 'unknown_user'], $details, 'Secret-looking detail keys are dropped.');
@@ -100,7 +106,8 @@ final class AuditRecorderTest extends KernelTestBase {
 
   public function testRetentionPurgeAndAnonymise(): void {
     $db = $this->container->get('database');
-    $now = 1_800_000_000;
+    // Same clock as the retention service and cron, so relative ages hold.
+    $now = $this->container->get('datetime.time')->getRequestTime();
     $day = 86400;
     $make = function (string $ip, int $age_days) use ($db, $now, $day): int {
       $id = $this->recorder->record(AuditEvents::LOGIN_SUCCESS, 1);
@@ -139,8 +146,9 @@ final class AuditRecorderTest extends KernelTestBase {
     $this->assertSame(0, $retention->anonymise($now + 1000 * $day));
     $this->assertSame(0, $retention->purge($now + 1000 * $day));
 
-    // hook_cron() wires it up.
+    // hook_cron() wires it up: age every remaining row past a 1-day limit.
     $this->config('aabenintra_audit.settings')->set('retention_days', 1)->save();
+    $db->update('aabenintra_audit_event')->fields(['created' => $now - 2 * $day])->execute();
     $this->container->get('cron')->run();
     $this->assertSame(0, (int) $db->select('aabenintra_audit_event', 'a')->countQuery()->execute()->fetchField(), 'Cron purged everything older than one day.');
   }
