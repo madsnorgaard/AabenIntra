@@ -1,0 +1,479 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Function aabenintra_activity_schema\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_activity/aabenintra_activity.install
+
+		-
+			message: '#^Call to function method_exists\(\) with Drupal\\node\\NodeInterface and ''getOriginal'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: web/modules/custom/aabenintra_activity/aabenintra_activity.module
+
+		-
+			message: '#^Function aabenintra_activity_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_activity/aabenintra_activity.module
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: web/modules/custom/aabenintra_activity/src/ActivityService.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:getFileUri\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_activity/src/Controller/ActivityFeedController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_activity\\Controller\\ActivityFeedController\:\:page\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_activity/src/Controller/ActivityFeedController.php
+
+		-
+			message: '#^\\Drupal calls should be avoided in classes, use dependency injection instead$#'
+			identifier: globalDrupalDependencyInjection.useDependencyInjection
+			count: 2
+			path: web/modules/custom/aabenintra_activity/src/Controller/ActivityFeedController.php
+
+		-
+			message: '#^Function aabenintra_channels_schema\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_channels/aabenintra_channels.install
+
+		-
+			message: '#^Function aabenintra_channels_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_channels/aabenintra_channels.module
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemInterface\:\:\$summary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemInterface\:\:\$target_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemInterface\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:get\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:hasField\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_channels\\Controller\\ChannelsController\:\:channel\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_channels\\Controller\\ChannelsController\:\:directory\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_channels\\Controller\\ChannelsController\:\:news\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_channels/src/Controller/ChannelsController.php
+
+		-
+			message: '#^Function aabenintra_compliance_schema\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_compliance/aabenintra_compliance.install
+
+		-
+			message: '#^Function aabenintra_compliance_node_view\(\) has parameter \$build with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_compliance/aabenintra_compliance.module
+
+		-
+			message: '#^Method Drupal\\aabenintra_compliance\\Controller\\ReportController\:\:report\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_compliance/src/Controller/ReportController.php
+
+		-
+			message: '#^Function aabenintra_dashboard_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/aabenintra_dashboard.module
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemInterface\:\:\$summary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Drupal\\Core\\Field\\FieldItemInterface\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:get\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:hasField\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_dashboard\\Controller\\DashboardController\:\:page\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$term of method Drupal\\aabenintra_theme\\TermColor\:\:color\(\) expects Drupal\\taxonomy\\TermInterface\|null, Drupal\\Core\\Entity\\EntityInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$term of method Drupal\\aabenintra_theme\\TermColor\:\:icon\(\) expects Drupal\\taxonomy\\TermInterface\|null, Drupal\\Core\\Entity\\EntityInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^\\Drupal calls should be avoided in classes, use dependency injection instead$#'
+			identifier: globalDrupalDependencyInjection.useDependencyInjection
+			count: 2
+			path: web/modules/custom/aabenintra_dashboard/src/Controller/DashboardController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createImageMedia\(\) has parameter \$ledger with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createImageMedia\(\) has parameter \$rgb with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createTerms\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createTerms\(\) has parameter \$ledger with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createTerms\(\) has parameter \$names with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:createUsers\(\) has parameter \$ledger with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_demo\\DemoContentGenerator\:\:track\(\) has parameter \$ledger with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_demo/src/DemoContentGenerator.php
+
+		-
+			message: '#^Function aabenintra_directory_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_directory/aabenintra_directory.module
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:getFileUri\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/DirectoryController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\DirectoryController\:\:fieldValue\(\) has parameter \$entity with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/DirectoryController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\DirectoryController\:\:page\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/DirectoryController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\DirectoryController\:\:refLabel\(\) has parameter \$entity with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/DirectoryController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\DirectoryController\:\:refLabels\(\) has parameter \$entity with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/DirectoryController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:getFileUri\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\ExpertiseController\:\:fieldValue\(\) has parameter \$entity with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\ExpertiseController\:\:page\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\ExpertiseController\:\:refLabel\(\) has parameter \$entity with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Parameter \#1 \$array of function usort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function usort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/ExpertiseController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_directory\\Controller\\OrgChartController\:\:page\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_directory/src/Controller/OrgChartController.php
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityStorageInterface\:\:createFromPlugin\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_groups/aabenintra_groups.install
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityStorageInterface\:\:getRelationshipTypeId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_groups/aabenintra_groups.install
+
+		-
+			message: '#^Function _aabenintra_groups_types\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_groups/aabenintra_groups.install
+
+		-
+			message: '#^\\Drupal calls should be avoided in classes, use dependency injection instead$#'
+			identifier: globalDrupalDependencyInjection.useDependencyInjection
+			count: 1
+			path: web/modules/custom/aabenintra_groups/src/Drush/Commands/GroupsCommands.php
+
+		-
+			message: '#^Function _aabenintra_kudos_badges\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.install
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:getDisplayName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Form\\FormInterface\:\:getEntity\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Function aabenintra_kudos_form_node_form_alter\(\) has parameter \$form with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Function aabenintra_kudos_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Function aabenintra_kudos_title_builder\(\) has parameter \$form with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Parameter \#1 \$title of method Drupal\\node\\NodeInterface\:\:setTitle\(\) expects string, Drupal\\Core\\StringTranslation\\TranslatableMarkup given\.$#'
+			identifier: argument.type
+			count: 2
+			path: web/modules/custom/aabenintra_kudos/aabenintra_kudos.module
+
+		-
+			message: '#^Call to an undefined method Drupal\\Core\\Entity\\EntityInterface\:\:getDisplayName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/src/Controller/KudosController.php
+
+		-
+			message: '''
+				#^Call to deprecated function text_summary\(\)\:
+				in drupal\:11\.4\.0 and is removed from drupal\:13\.0\.0\. Use
+				  \\Drupal\:\:service\(TextSummary\:\:class\)\-\>generate\(\) instead\.$#
+			'''
+			identifier: function.deprecated
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/src/Controller/KudosController.php
+
+		-
+			message: '#^Method Drupal\\aabenintra_kudos\\Controller\\KudosController\:\:wall\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/src/Controller/KudosController.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: web/modules/custom/aabenintra_kudos/src/Controller/KudosController.php
+
+		-
+			message: '#^Function aabenintra_social_schema\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_social/aabenintra_social.install
+
+		-
+			message: '#^Function _aabenintra_social_bundles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_social/aabenintra_social.module
+
+		-
+			message: '#^Function aabenintra_social_node_view\(\) has parameter \$build with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_social/aabenintra_social.module
+
+		-
+			message: '#^Function aabenintra_social_node_view\(\) has parameter \$display with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: web/modules/custom/aabenintra_social/aabenintra_social.module
+
+		-
+			message: '#^Function aabenintra_social_theme\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_social/aabenintra_social.module
+
+		-
+			message: '#^Function _aabenintra_theme_default_menu_links\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_theme/aabenintra_theme.install
+
+		-
+			message: '#^Function aabenintra_theme_page_attachments\(\) has parameter \$attachments with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_theme/aabenintra_theme.module
+
+		-
+			message: '#^Function aabenintra_theme_preprocess_html\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/modules/custom/aabenintra_theme/aabenintra_theme.module
+
+		-
+			message: '#^\\Drupal calls should be avoided in classes, use dependency injection instead$#'
+			identifier: globalDrupalDependencyInjection.useDependencyInjection
+			count: 1
+			path: web/modules/custom/aabenintra_theme/src/Cache/UserGroupsHashContext.php
+
+		-
+			message: '#^Function _aabenintra_build_menu\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
+
+		-
+			message: '#^Function aabenintra_preprocess_group\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
+
+		-
+			message: '#^Function aabenintra_preprocess_image_widget\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
+
+		-
+			message: '#^Function aabenintra_preprocess_node\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
+
+		-
+			message: '#^Function aabenintra_preprocess_page\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
+
+		-
+			message: '#^Function aabenintra_preprocess_views_view\(\) has parameter \$variables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: web/themes/custom/aabenintra/aabenintra.theme
