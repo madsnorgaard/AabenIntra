@@ -7,11 +7,13 @@ namespace Drupal\Tests\aabenintra_ops\Kernel;
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\aabenintra_ops\Check\HealthCheckInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\aabenintra_ops\Check\Validate\ExpectedModulesCheck
  * @group aabenintra_ops
  */
+#[RunTestsInSeparateProcesses]
 final class ExpectedModulesCheckTest extends KernelTestBase {
 
   /**

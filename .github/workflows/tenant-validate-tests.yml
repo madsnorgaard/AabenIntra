@@ -56,4 +56,4 @@ jobs:
         run: |
           mkdir -p web/sites/default/files web/sites/simpletest /tmp/browser-output
           chmod -R 777 web/sites/default/files web/sites/simpletest
-          vendor/bin/phpunit -c web/core --testsuite unit,kernel --filter 'Drupal\\Tests\\aabenintra_ops' --display-deprecations
+          vendor/bin/phpunit -c web/core web/modules/custom/aabenintra_ops --display-deprecations

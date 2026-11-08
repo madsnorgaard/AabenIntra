@@ -6,11 +6,13 @@ namespace Drupal\Tests\aabenintra_ops\Kernel;
 
 use Drupal\aabenintra_ops\Check\CheckStatus;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\aabenintra_ops\Check\Validate\ThemeFrontPageCheck
  * @group aabenintra_ops
  */
+#[RunTestsInSeparateProcesses]
 final class ThemeFrontPageCheckTest extends KernelTestBase {
 
   /**
@@ -46,7 +48,7 @@ final class ThemeFrontPageCheckTest extends KernelTestBase {
     $this->config('system.site')->set('page.front', '/dashboard')->save();
     $result = $this->container->get('aabenintra_ops.check.theme_front_page')->run();
     self::assertSame(CheckStatus::Fail, $result->status);
-    self::assertStringContainsString('default theme is "stark"', $result->message);
+    self::assertStringContainsString('theme is "stark", expected "aabenintra"', $result->message);
 
     $this->config('system.theme')->set('default', 'aabenintra')->save();
     $this->config('system.site')->set('page.front', '/node')->save();
