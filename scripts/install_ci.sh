@@ -98,6 +98,19 @@ $DRUSH recipe "$RECIPES/aabenintra_content"
 echo "==> i18n (modules via drush, then recipe ships config + Danish .po)"
 $DRUSH en language locale content_translation config_translation
 $DRUSH language:add da || true
+# The recipe ships language.types with its own interface-negotiation order, but
+# `drush en language` has already created the default (url only). Recipes refuse
+# to overwrite differing config, so pre-set the exact values the recipe carries
+# and it is skipped as identical. The ordering below mirrors
+# web/recipes/aabenintra_i18n/config/language.types.yml.
+$DRUSH php:eval '
+  \Drupal::service("language_negotiator")->saveConfiguration("language_interface", [
+    "language-url" => -10,
+    "language-user" => -9,
+    "language-browser" => -8,
+    "language-selected" => -7,
+  ]);
+'
 $DRUSH recipe "$RECIPES/aabenintra_i18n"
 # Intentionally no `drush locale:update` here: it downloads core/contrib .po
 # files from localize.drupal.org, which is slow and flaky in CI. The recipe's
