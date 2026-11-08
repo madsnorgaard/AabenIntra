@@ -110,10 +110,13 @@ noisy. The rules:
 
 Notes log:
 
-- 2026-11-08: initial thresholds set equal to the #123 targets. The first CI
-  run on PR #171 passed all five assertions on `/user/login`, `/dashboard` and
-  `/news` with the desktop preset; keep watching the weekly runs before
-  trusting the margin.
+- 2026-11-08: initial thresholds set equal to the #123 targets. First CI run
+  on PR #171 (desktop preset, localhost, 3 runs each): all three pages scored
+  1.00 on performance, accessibility and best practices; LCP 323 ms
+  (`/user/login`), 602 ms (`/dashboard`), 586 ms (`/news`); CLS 0.000 /
+  0.045 / 0.025; TTFB 7-54 ms; 173-334 KB transferred. The margin is large
+  because the origin is local; the dashboard CLS (0.045) is the number to
+  watch - it comes from tile images without reserved dimensions.
 
 ## Running locally
 

@@ -36,6 +36,7 @@ artifact; copy anything that is a real user problem into this table.
 | Search island | Not yet covered by the automated pages; results list and facets need their own axe pass. | #118 (follow-up) |
 | Editor-uploaded content | Alternative text quality and PDF accessibility are the tenant's editorial responsibility; the gate only catches missing `alt`. Editoria11y for authors is planned. | #99 |
 | Admin UI (Gin) | Covered by Drupal core and the Gin theme's own accessibility work, not by this gate. | - |
+| Taxonomy term landing pages on a fresh install | `/taxonomy/term/N` (linked from the "Browse" and "Organisation" navigation) rendered an empty `main` with no heading on a fresh core 11.4 install: the `taxonomy_term` view had not been installed. The production site, installed on an older core, renders the hero correctly. `install_ci.sh` installs pending optional config to close the gap; `install_prod.sh` needs the same step for new tenants. | see PR #171 |
 
 ## Manual review log
 

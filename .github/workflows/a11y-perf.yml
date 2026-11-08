@@ -136,6 +136,7 @@ jobs:
           echo "::group::php-server.log"; tail -n 100 php-server.log || true; echo "::endgroup::"
           echo "::group::GET /user/login"; curl -sS -i "$AI_BASE_URL/user/login" | head -n 40 || true; echo "::endgroup::"
           echo "::group::watchdog"; vendor/bin/drush watchdog:show --count=30 --extended || true; echo "::endgroup::"
+          echo "::group::taxonomy_term view"; vendor/bin/drush config:get views.view.taxonomy_term status || true; echo "::endgroup::"
           echo "::group::display variants seen by drush"
           vendor/bin/drush php:eval 'print implode(", ", array_keys(\Drupal::service("plugin.manager.display_variant")->getDefinitions())) . PHP_EOL;' || true
           echo "::endgroup::"

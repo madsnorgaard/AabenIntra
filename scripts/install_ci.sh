@@ -142,6 +142,19 @@ $DRUSH en \
   aabenintra_channels \
   aabenintra_activity
 
+echo "==> Optional config whose dependencies are met by now"
+# Core installs a module's config/optional only while that module itself is
+# being installed. On a fresh install the taxonomy module lands before the
+# config its views.view.taxonomy_term depends on, so the term landing pages
+# (/taxonomy/term/N, linked from the navigation drawer) would render an empty
+# main. This re-runs that check for every installed module.
+$DRUSH php:eval '\Drupal::service("config.installer")->installOptionalConfig();'
+if drush config:get views.view.taxonomy_term id >/dev/null 2>&1; then
+  echo "    views.view.taxonomy_term present"
+else
+  echo "    WARNING: views.view.taxonomy_term still missing - term landing pages will be empty"
+fi
+
 echo "==> Theme: default = aabenintra, front page = /dashboard"
 $DRUSH theme:enable aabenintra
 $DRUSH config:set system.theme default aabenintra
