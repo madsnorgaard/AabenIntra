@@ -1,0 +1,91 @@
+services:
+  aabenintra_ops.check_runner:
+    class: Drupal\aabenintra_ops\Check\CheckRunner
+    tags:
+      - { name: service_collector, tag: aabenintra_ops.check, call: addCheck }
+
+  # --- validate group (drush aabenintra:validate) ---
+  aabenintra_ops.check.modules:
+    class: Drupal\aabenintra_ops\Check\Validate\ExpectedModulesCheck
+    arguments: ['@config.factory', '@module_handler']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.demo_module:
+    class: Drupal\aabenintra_ops\Check\Validate\DemoModuleCheck
+    arguments: ['@module_handler']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.db_updates:
+    class: Drupal\aabenintra_ops\Check\Validate\PendingUpdatesCheck
+    arguments: ['@module_handler', '@update.update_hook_registry']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.post_updates:
+    class: Drupal\aabenintra_ops\Check\Validate\PendingPostUpdatesCheck
+    arguments: ['@update.post_update_registry']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.theme_front_page:
+    class: Drupal\aabenintra_ops\Check\Validate\ThemeFrontPageCheck
+    arguments: ['@config.factory']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.recipe_config:
+    class: Drupal\aabenintra_ops\Check\Validate\RecipeConfigCheck
+    arguments: ['@config.factory']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.redis:
+    class: Drupal\aabenintra_ops\Check\Validate\RedisCheck
+    arguments: ['@settings']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.cron:
+    class: Drupal\aabenintra_ops\Check\Validate\CronCheck
+    arguments: ['@state', '@datetime.time', '@config.factory']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.search_index:
+    class: Drupal\aabenintra_ops\Check\Validate\SearchIndexCheck
+    arguments: ['@module_handler', '@entity_type.manager']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.mail:
+    class: Drupal\aabenintra_ops\Check\Validate\MailCheck
+    arguments: ['@config.factory', '@module_handler', '@plugin.manager.mail']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.synthetic_pages:
+    class: Drupal\aabenintra_ops\Check\Validate\SyntheticPageCheck
+    arguments: ['@http_kernel', '@request_stack', '@account_switcher', '@entity_type.manager', '@config.factory']
+    tags: [{ name: aabenintra_ops.check }]
+
+  # --- both groups ---
+  aabenintra_ops.check.trusted_hosts:
+    class: Drupal\aabenintra_ops\Check\Validate\TrustedHostsCheck
+    arguments: ['@settings']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.private_files:
+    class: Drupal\aabenintra_ops\Check\Validate\PrivateFilesCheck
+    arguments: ['@settings', '%app.root%']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.public_files:
+    class: Drupal\aabenintra_ops\Check\Validate\PublicFilesCheck
+    arguments: ['@file_system']
+    tags: [{ name: aabenintra_ops.check }]
+
+  # --- isolation group (drush aabenintra:verify-isolation) ---
+  aabenintra_ops.check.database:
+    class: Drupal\aabenintra_ops\Check\Isolation\DatabaseIsolationCheck
+    arguments: ['@database', '@config.factory']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.cache_prefix:
+    class: Drupal\aabenintra_ops\Check\Isolation\CachePrefixCheck
+    arguments: ['@settings']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.hash_salt:
+    class: Drupal\aabenintra_ops\Check\Isolation\HashSaltCheck
+    arguments: ['@settings']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.settings_local:
+    class: Drupal\aabenintra_ops\Check\Isolation\SettingsLocalCheck
+    arguments: ['%app.root%', '%site.path%']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.session_cookie:
+    class: Drupal\aabenintra_ops\Check\Isolation\SessionCookieCheck
+    arguments: ['@request_stack', '%session.storage.options%']
+    tags: [{ name: aabenintra_ops.check }]
+  aabenintra_ops.check.group_access:
+    class: Drupal\aabenintra_ops\Check\Isolation\GroupAccessCheck
+    arguments: ['@module_handler', '@entity_type.manager']
+    tags: [{ name: aabenintra_ops.check }]
