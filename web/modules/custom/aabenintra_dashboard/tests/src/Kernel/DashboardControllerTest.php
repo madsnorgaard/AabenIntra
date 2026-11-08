@@ -80,7 +80,7 @@ final class DashboardControllerTest extends KernelTestBase {
       'uid' => $this->reader->id(),
     ])->save();
 
-    $html = $this->render();
+    $html = $this->renderPage();
 
     $this->assertStringContainsString('data-ai-dashboard', $html);
     $this->assertStringContainsString('kirsten', $html, 'Greeting carries the display name.');
@@ -114,7 +114,7 @@ final class DashboardControllerTest extends KernelTestBase {
    * An empty intranet still renders, with the empty-state copy.
    */
   public function testEmptyState(): void {
-    $html = $this->render();
+    $html = $this->renderPage();
     $this->assertStringContainsString('No stories yet.', $html);
   }
 
@@ -130,7 +130,7 @@ final class DashboardControllerTest extends KernelTestBase {
     return $node;
   }
 
-  private function render(): string {
+  private function renderPage(): string {
     $build = DashboardController::create($this->container)->page();
     return (string) $this->container->get('renderer')->renderRoot($build);
   }
