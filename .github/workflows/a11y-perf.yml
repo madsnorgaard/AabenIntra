@@ -1,0 +1,142 @@
+name: Accessibility and performance
+
+# Stands up a real AabenIntra site (scripts/install_ci.sh, SQLite, demo content)
+# on the runner, serves it with PHP's built-in server and runs two gates:
+#   - axe-core via Playwright: WCAG 2.2 AA, fails on serious/critical (#118)
+#   - Lighthouse CI: performance / accessibility / best-practices budgets (#123)
+# How to read a failure and how to run it locally: docs/ACCESSIBILITY.md.
+
+on:
+  pull_request:
+    paths:
+      - 'web/themes/**'
+      - 'web/modules/**'
+      - 'web/recipes/**'
+      - 'tests/e2e/**'
+      - 'scripts/install_ci.sh'
+      - 'scripts/seed_*.php'
+      - 'composer.lock'
+      - '.github/workflows/a11y-perf.yml'
+  workflow_dispatch:
+  schedule:
+    # Weekly, Monday 05:00 UTC - catches drift from contrib/core updates that
+    # merged without touching the watched paths.
+    - cron: '0 5 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a11y-perf-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AI_BASE_URL: http://127.0.0.1:8080
+  AI_CI_USER_NAME: demo.anna
+  # Disposable credentials for the throwaway CI site only (see install_ci.sh).
+  AI_CI_USER_PASS: ci-tester-pass
+  AI_CI_ADMIN_PASS: admin-ci
+
+jobs:
+  gates:
+    name: axe + Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          # No apcu: the production image does not ship it, and in PHP's cli-server
+          # SAPI it would be active while it is off under drush (cli), so the two
+          # sides of the CI site would behave differently.
+          extensions: mbstring, xml, dom, gd, curl, intl, zip, opcache, pdo_sqlite, sqlite3
+          ini-values: memory_limit=512M, max_execution_time=0
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--no-dev --optimize-autoloader --no-progress'
+
+      - name: Install the site (recipes + demo content)
+        run: scripts/install_ci.sh
+
+      - name: Start the PHP built-in server
+        # Served from web/ as the working directory (like `drush runserver`):
+        # Drupal expects cwd == DRUPAL_ROOT, and with a relative docroot the
+        # router path stops resolving after the first request.
+        run: |
+          (cd web && PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 .ht.router.php > ../php-server.log 2>&1 &)
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$AI_BASE_URL/user/login"; then
+              echo "server up after ${i}s"; exit 0
+            fi
+            sleep 1
+          done
+          echo "server did not come up"; cat php-server.log; exit 1
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install test dependencies
+        working-directory: tests/e2e
+        run: |
+          npm ci --no-fund --no-audit
+          npx playwright install --with-deps chromium
+
+      - name: axe-core WCAG 2.2 AA gate (Playwright)
+        id: axe
+        working-directory: tests/e2e
+        run: npx playwright test
+
+      - name: Lighthouse CI budgets
+        id: lhci
+        if: always() && steps.axe.outcome != 'skipped'
+        working-directory: tests/e2e
+        run: npm run lhci
+
+      - name: Upload axe reports and Playwright traces
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: axe-playwright
+          if-no-files-found: ignore
+          include-hidden-files: true
+          retention-days: 14
+          path: |
+            tests/e2e/axe-reports/
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: lighthouse
+          if-no-files-found: ignore
+          # .lighthouseci/ is a dotdir; upload-artifact skips those by default.
+          include-hidden-files: true
+          retention-days: 14
+          path: |
+            tests/e2e/lighthouse/anon/.lighthouseci/
+            tests/e2e/lighthouse/auth/.lighthouseci/
+
+      - name: Diagnostics (on failure)
+        if: failure()
+        run: |
+          echo "::group::php-server.log"; tail -n 100 php-server.log || true; echo "::endgroup::"
+          echo "::group::GET /user/login"; curl -sS -i "$AI_BASE_URL/user/login" | head -n 40 || true; echo "::endgroup::"
+          echo "::group::watchdog"; vendor/bin/drush watchdog:show --count=30 --extended || true; echo "::endgroup::"
+          echo "::group::taxonomy_term view"; vendor/bin/drush config:get views.view.taxonomy_term status || true; echo "::endgroup::"
+          echo "::group::display variants seen by drush"
+          vendor/bin/drush php:eval 'print implode(", ", array_keys(\Drupal::service("plugin.manager.display_variant")->getDefinitions())) . PHP_EOL;' || true
+          echo "::endgroup::"
