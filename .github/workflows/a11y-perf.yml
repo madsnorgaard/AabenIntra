@@ -50,8 +50,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, xml, dom, gd, curl, intl, zip, opcache, apcu, pdo_sqlite, sqlite3
-          ini-values: memory_limit=512M, max_execution_time=0, opcache.enable_cli=1
+          # No apcu: the production image does not ship it, and in PHP's cli-server
+          # SAPI it would be active while it is off under drush (cli), so the two
+          # sides of the CI site would behave differently.
+          extensions: mbstring, xml, dom, gd, curl, intl, zip, opcache, pdo_sqlite, sqlite3
+          ini-values: memory_limit=512M, max_execution_time=0
           coverage: none
           tools: composer:v2
 
@@ -121,6 +124,12 @@ jobs:
             tests/e2e/lighthouse/anon/.lighthouseci/
             tests/e2e/lighthouse/auth/.lighthouseci/
 
-      - name: PHP server log (on failure)
+      - name: Diagnostics (on failure)
         if: failure()
-        run: tail -n 200 php-server.log || true
+        run: |
+          echo "::group::php-server.log"; tail -n 100 php-server.log || true; echo "::endgroup::"
+          echo "::group::GET /user/login"; curl -sS -i "$AI_BASE_URL/user/login" | head -n 40 || true; echo "::endgroup::"
+          echo "::group::watchdog"; vendor/bin/drush watchdog:show --count=30 --extended || true; echo "::endgroup::"
+          echo "::group::display variants seen by drush"
+          vendor/bin/drush php:eval 'print implode(", ", array_keys(\Drupal::service("plugin.manager.display_variant")->getDefinitions())) . PHP_EOL;' || true
+          echo "::endgroup::"
