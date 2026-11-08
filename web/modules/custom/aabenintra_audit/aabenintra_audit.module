@@ -1,0 +1,215 @@
+<?php
+
+/**
+ * @file
+ * AabenIntra Audit: hooks feeding the authentication audit log.
+ *
+ * Every hook here is thin: it works out what happened and hands a named event
+ * plus non-secret details to the aabenintra_audit.recorder service. See
+ * docs/AUDIT-LOG.md for the event catalogue.
+ */
+
+declare(strict_types=1);
+
+use Drupal\aabenintra_audit\AuditEvents;
+use Drupal\aabenintra_audit\AuditRecorder;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
+use Drupal\user\UserInterface;
+
+/**
+ * Returns the recorder service.
+ */
+function _aabenintra_audit_recorder(): AuditRecorder {
+  /** @var \Drupal\aabenintra_audit\AuditRecorder $recorder */
+  $recorder = \Drupal::service('aabenintra_audit.recorder');
+  return $recorder;
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function aabenintra_audit_user_login(UserInterface $account): void {
+  $route = \Drupal::routeMatch()->getRouteName();
+  $details = ['method' => $route === 'user.reset.login' ? 'password_reset' : 'password'];
+  _aabenintra_audit_recorder()->record(AuditEvents::LOGIN_SUCCESS, (int) $account->id(), $details);
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function aabenintra_audit_user_logout(AccountInterface $account): void {
+  _aabenintra_audit_recorder()->record(AuditEvents::LOGOUT, (int) $account->id());
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_login_form.
+ *
+ * Appends a validator after core's ::validateFinal so failed and flood-blocked
+ * attempts are recorded. Both the /user/login page and the login block use
+ * this form id.
+ *
+ * @param mixed[] $form
+ */
+function aabenintra_audit_form_user_login_form_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#validate'][] = 'aabenintra_audit_user_login_form_validate';
+}
+
+/**
+ * Validation handler: records failed logins (runs last, never sets errors).
+ *
+ * @param mixed[] $form
+ */
+function aabenintra_audit_user_login_form_validate(array &$form, FormStateInterface $form_state): void {
+  if ($form_state->get('uid')) {
+    // Authenticated: hook_user_login() records the success on submit.
+    return;
+  }
+  $name = trim((string) $form_state->getValue('name', ''));
+  if ($name === '' || $form_state->isValueEmpty('pass')) {
+    // Required-field errors, not an authentication attempt.
+    return;
+  }
+  $uid = 0;
+  $reason = 'invalid_credentials';
+  $accounts = \Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['name' => $name]);
+  $account = reset($accounts);
+  if ($account instanceof UserInterface) {
+    $uid = (int) $account->id();
+    if ($account->isBlocked()) {
+      $reason = 'account_blocked';
+    }
+  }
+  else {
+    $reason = 'unknown_user';
+  }
+  $flood = $form_state->get('flood_control_triggered');
+  if ($flood) {
+    _aabenintra_audit_recorder()->record(AuditEvents::LOGIN_BLOCKED_FLOOD, $uid, ['scope' => (string) $flood], $name);
+    return;
+  }
+  _aabenintra_audit_recorder()->record(AuditEvents::LOGIN_FAILED, $uid, ['reason' => $reason], $name);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for user_pass.
+ *
+ * @param mixed[] $form
+ */
+function aabenintra_audit_form_user_pass_alter(array &$form, FormStateInterface $form_state): void {
+  $form['#submit'][] = 'aabenintra_audit_user_pass_submit';
+}
+
+/**
+ * Submit handler: records a password-reset request.
+ *
+ * Core resolves the typed name/mail to an account during validation and only
+ * mails active accounts; we record the request either way so enumeration
+ * attempts (many unknown names) are visible.
+ *
+ * @param mixed[] $form
+ */
+function aabenintra_audit_user_pass_submit(array &$form, FormStateInterface $form_state): void {
+  $account = $form_state->getValue('account');
+  $uid = $account instanceof UserInterface ? (int) $account->id() : 0;
+  $typed = trim((string) $form_state->getValue('name', ''));
+  _aabenintra_audit_recorder()->record(AuditEvents::PASSWORD_RESET_REQUESTED, $uid, ['resolved' => $uid > 0], $typed);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for user.
+ */
+function aabenintra_audit_user_insert(UserInterface $account): void {
+  _aabenintra_audit_recorder()->record(AuditEvents::USER_CREATED, (int) $account->id(), [
+    'actor_uid' => (int) \Drupal::currentUser()->id(),
+    'roles' => $account->getRoles(TRUE),
+    'status' => $account->isActive() ? 'active' : 'blocked',
+  ]);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for user.
+ *
+ * Compares with the original entity and records one row per kind of change
+ * (password, mail, roles, status) so each can be filtered independently.
+ */
+function aabenintra_audit_user_update(UserInterface $account): void {
+  $original = $account->getOriginal();
+  if (!$original instanceof UserInterface) {
+    return;
+  }
+  $recorder = _aabenintra_audit_recorder();
+  $uid = (int) $account->id();
+  $actor = ['actor_uid' => (int) \Drupal::currentUser()->id()];
+
+  if ((string) $account->getPassword() !== (string) $original->getPassword()) {
+    // Core deletes the user's other sessions when the password changes.
+    $recorder->record(AuditEvents::PASSWORD_CHANGED, $uid, $actor + ['other_sessions_terminated' => TRUE]);
+  }
+  if ((string) $account->getEmail() !== (string) $original->getEmail()) {
+    $recorder->record(AuditEvents::MAIL_CHANGED, $uid, $actor + [
+      'from' => (string) $original->getEmail(),
+      'to' => (string) $account->getEmail(),
+    ]);
+  }
+  $added = array_values(array_diff($account->getRoles(TRUE), $original->getRoles(TRUE)));
+  $removed = array_values(array_diff($original->getRoles(TRUE), $account->getRoles(TRUE)));
+  if ($added !== [] || $removed !== []) {
+    $recorder->record(AuditEvents::ROLES_CHANGED, $uid, $actor + ['added' => $added, 'removed' => $removed]);
+  }
+  if ($account->isBlocked() !== $original->isBlocked()) {
+    // Core deletes all sessions of a user that gets blocked.
+    $recorder->record(
+      $account->isBlocked() ? AuditEvents::ACCOUNT_BLOCKED : AuditEvents::ACCOUNT_UNBLOCKED,
+      $uid,
+      $actor + ($account->isBlocked() ? ['sessions_terminated' => TRUE] : []),
+    );
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for user.
+ */
+function aabenintra_audit_user_delete(UserInterface $account): void {
+  _aabenintra_audit_recorder()->record(AuditEvents::USER_DELETED, (int) $account->id(), [
+    'actor_uid' => (int) \Drupal::currentUser()->id(),
+    'name' => $account->getAccountName(),
+  ]);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function aabenintra_audit_cron(): void {
+  /** @var \Drupal\aabenintra_audit\Retention $retention */
+  $retention = \Drupal::service('aabenintra_audit.retention');
+  $retention->run();
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * @param mixed[] $message
+ * @param mixed[] $params
+ */
+function aabenintra_audit_mail(string $key, array &$message, array $params): void {
+  if ($key !== 'suspicious_login') {
+    return;
+  }
+  $context = $params['context'] ?? [];
+  $site = \Drupal::config('system.site')->get('name');
+  $rule = (string) ($context['rule'] ?? '');
+  $message['subject'] = t('[@site] Suspicious login activity: @rule', ['@site' => $site, '@rule' => $rule]);
+  $lines = [
+    t('Rule: @rule', ['@rule' => $rule]),
+    t('Triggering event: @event (audit row #@id)', ['@event' => $context['trigger_event'] ?? '', '@id' => $context['trigger_id'] ?? '']),
+    t('User ID: @uid', ['@uid' => $context['uid'] ?? 0]),
+    t('Attempted name: @name', ['@name' => $context['username_attempted'] ?? '']),
+    t('IP address: @ip', ['@ip' => $context['ip'] ?? '']),
+    t('Time: @time', ['@time' => \Drupal::service('date.formatter')->format((int) ($context['created'] ?? 0), 'medium')]),
+    '',
+    t('Review the audit log: @url', ['@url' => Url::fromRoute('aabenintra_audit.report', [], ['absolute' => TRUE])->toString()]),
+  ];
+  $message['body'][] = implode("\n", array_map('strval', $lines));
+}

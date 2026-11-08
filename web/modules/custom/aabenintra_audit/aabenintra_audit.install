@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for AabenIntra Audit: the authentication audit event table.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_schema().
+ *
+ * @return array<string,mixed>
+ */
+function aabenintra_audit_schema(): array {
+  return [
+    'aabenintra_audit_event' => [
+      'description' => 'Authentication and account audit events (append-only, purged by cron).',
+      'fields' => [
+        'id' => ['type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE],
+        'event' => [
+          'description' => 'Event type, see AuditEvents constants.',
+          'type' => 'varchar_ascii',
+          'length' => 64,
+          'not null' => TRUE,
+        ],
+        'uid' => [
+          'description' => 'Subject user ID, 0 when unknown (e.g. failed login for an unknown name).',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ],
+        'username_attempted' => [
+          'description' => 'Name typed into the login or password form, for failed attempts.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+        ],
+        'ip' => [
+          'description' => 'Client IP (reverse-proxy aware), anonymised after anonymise_ip_after_days.',
+          'type' => 'varchar_ascii',
+          'length' => 45,
+          'not null' => TRUE,
+          'default' => '',
+        ],
+        'ip_anonymised' => [
+          'description' => '1 once the IP has been truncated for data minimisation.',
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ],
+        'user_agent' => [
+          'description' => 'User-Agent header, truncated to 512 characters.',
+          'type' => 'varchar',
+          'length' => 512,
+          'not null' => TRUE,
+          'default' => '',
+        ],
+        'session_hash' => [
+          'description' => 'sha256 of the session ID; the raw ID is never stored.',
+          'type' => 'varchar_ascii',
+          'length' => 64,
+          'not null' => TRUE,
+          'default' => '',
+        ],
+        'severity' => [
+          'description' => 'RFC 5424 severity (Drupal RfcLogLevel), 6 = info.',
+          'type' => 'int',
+          'size' => 'tiny',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 6,
+        ],
+        'details' => [
+          'description' => 'JSON object with event-specific, non-secret context.',
+          'type' => 'text',
+          'size' => 'normal',
+          'not null' => FALSE,
+        ],
+        'created' => [
+          'description' => 'Unix timestamp of the event.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'uid_created' => ['uid', 'created'],
+        'event_created' => ['event', 'created'],
+        'ip_created' => ['ip', 'created'],
+      ],
+    ],
+  ];
+}

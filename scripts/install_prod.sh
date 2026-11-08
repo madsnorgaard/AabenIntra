@@ -83,6 +83,7 @@ $DRUSH en \
   aabenintra_social \
   aabenintra_kudos \
   aabenintra_channels \
+  aabenintra_audit \
   aabenintra_activity
 
 echo "==> Theme: default = aabenintra, front page = /dashboard"
