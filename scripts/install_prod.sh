@@ -84,11 +84,11 @@ $DRUSH en \
   aabenintra_kudos \
   aabenintra_channels \
   aabenintra_activity \
-  aabenintra_security
+  aabenintra_security \
   aabenintra_audit \
-  aabenintra_activity
-  aabenintra_gdpr
-  aabenintra_observability
+  aabenintra_gdpr \
+  aabenintra_observability \
+  aabenintra_ops
 # Sentry/GlitchTip client: inert until SENTRY_DSN is set (docs/OBSERVABILITY.md).
 $DRUSH en raven
 
