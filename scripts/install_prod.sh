@@ -85,6 +85,8 @@ $DRUSH en \
   aabenintra_channels \
   aabenintra_activity \
   aabenintra_security
+  aabenintra_audit \
+  aabenintra_activity
 
 echo "==> Theme: default = aabenintra, front page = /dashboard"
 $DRUSH theme:enable aabenintra

@@ -1,0 +1,12 @@
+aabenintra_audit.report:
+  title: 'Authentication audit log'
+  description: 'Logins, failed attempts, password resets and account changes.'
+  parent: system.admin_reports
+  route_name: aabenintra_audit.report
+  weight: 10
+
+aabenintra_audit.settings:
+  title: 'Authentication audit log'
+  description: 'Retention, IP anonymisation and suspicious-login alerts.'
+  parent: system.admin_config_system
+  route_name: aabenintra_audit.settings

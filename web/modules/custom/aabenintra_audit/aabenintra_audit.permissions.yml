@@ -1,0 +1,8 @@
+view authentication audit log:
+  title: 'View the authentication audit log'
+  description: 'See who logged in, from where, failed attempts and account changes. Contains personal data (IP addresses, user agents).'
+  restrict access: true
+administer authentication audit log:
+  title: 'Administer the authentication audit log'
+  description: 'Change retention, IP anonymisation and alert settings.'
+  restrict access: true
