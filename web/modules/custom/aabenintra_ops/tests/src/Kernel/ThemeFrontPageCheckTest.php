@@ -54,7 +54,7 @@ final class ThemeFrontPageCheckTest extends KernelTestBase {
     $this->config('system.site')->set('page.front', '/node')->save();
     $result = $this->container->get('aabenintra_ops.check.theme_front_page')->run();
     self::assertSame(CheckStatus::Fail, $result->status);
-    self::assertStringContainsString('front page is "/node"', $result->message);
+    self::assertStringContainsString('page is "/node", expected "/dashboard"', $result->message);
   }
 
   /**
