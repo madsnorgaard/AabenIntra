@@ -1,0 +1,13 @@
+aabenintra_gdpr.admin_requests:
+  title: 'GDPR requests'
+  description: 'Export requests from data subjects and the erasure log.'
+  parent: user.admin_index
+  route_name: aabenintra_gdpr.admin_requests
+  weight: 20
+
+aabenintra_gdpr.settings:
+  title: 'GDPR settings'
+  description: 'Export retention, content reassignment target and request rate limit.'
+  parent: user.admin_index
+  route_name: aabenintra_gdpr.settings
+  weight: 21

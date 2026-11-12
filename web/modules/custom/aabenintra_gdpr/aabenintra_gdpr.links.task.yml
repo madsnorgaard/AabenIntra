@@ -1,0 +1,5 @@
+aabenintra_gdpr.admin_requests:
+  title: 'GDPR requests'
+  route_name: aabenintra_gdpr.admin_requests
+  base_route: entity.user.collection
+  weight: 30

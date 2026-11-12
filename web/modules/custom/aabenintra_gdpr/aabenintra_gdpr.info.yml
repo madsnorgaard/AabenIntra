@@ -1,0 +1,10 @@
+name: 'AabenIntra GDPR'
+type: module
+description: 'Data-subject tooling for the AabenIntra intranet: data export (GDPR Art. 15/20), anonymisation and erasure (Art. 17), self-service export requests and an erasure audit log.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+configure: aabenintra_gdpr.settings
+dependencies:
+  - drupal:user
+  - drupal:file
