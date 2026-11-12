@@ -1,0 +1,8 @@
+retention_days: 365
+anonymise_ip_after_days: 90
+alerts:
+  enabled: false
+  mail: ''
+  failed_threshold: 5
+  failed_window: 900
+  new_ip_days: 90

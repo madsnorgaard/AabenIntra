@@ -1,0 +1,29 @@
+aabenintra_audit.settings:
+  type: config_object
+  label: 'Authentication audit log settings'
+  mapping:
+    retention_days:
+      type: integer
+      label: 'Delete audit rows older than this many days (0 = keep forever)'
+    anonymise_ip_after_days:
+      type: integer
+      label: 'Anonymise IP addresses on rows older than this many days (0 = never)'
+    alerts:
+      type: mapping
+      label: 'Suspicious-login alerts'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Send alerts'
+        mail:
+          type: email
+          label: 'Recipient address'
+        failed_threshold:
+          type: integer
+          label: 'Failed attempts from one IP that trigger an alert'
+        failed_window:
+          type: integer
+          label: 'Window for counting failed attempts, in seconds'
+        new_ip_days:
+          type: integer
+          label: 'A login from an IP not seen for the user within this many days triggers an alert'
