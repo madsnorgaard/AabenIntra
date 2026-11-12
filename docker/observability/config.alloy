@@ -1,0 +1,65 @@
+// Grafana Alloy: ship the stdout/stderr of this compose project's containers
+// to a Loki endpoint. Used by docker-compose.logging.yml for self-hosters who
+// do not already run promtail/Alloy on the host. See docs/OBSERVABILITY.md.
+//
+// Environment:
+//   LOKI_URL              push endpoint, e.g. http://loki:3100/loki/api/v1/push
+//   LOG_CONTAINER_FILTER  substring matched against container names (default aabenintra)
+//   LOG_HOST_LABEL        value of the `host` label on every stream
+
+discovery.docker "compose" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "15s"
+
+  filter {
+    name   = "name"
+    values = [sys.env("LOG_CONTAINER_FILTER")]
+  }
+}
+
+discovery.relabel "compose" {
+  targets = discovery.docker.compose.targets
+
+  // "/aabenintra_drupal" -> "aabenintra_drupal"
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "compose_service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "compose_project"
+  }
+
+  // Same job label as a file-based promtail setup, so the Grafana dashboard
+  // works with either shipper.
+  rule {
+    target_label = "job"
+    replacement  = "containers"
+  }
+}
+
+loki.source.docker "compose" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.compose.output
+  labels     = { host = sys.env("LOG_HOST_LABEL") }
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+    // For Grafana Cloud or a Loki behind basic auth, add:
+    // basic_auth {
+    //   username = sys.env("LOKI_USERNAME")
+    //   password = sys.env("LOKI_PASSWORD")
+    // }
+  }
+}

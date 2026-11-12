@@ -1,0 +1,45 @@
+parameters:
+  # Minimum level written to stderr. Overridden at container compile time from
+  # the LOG_LEVEL environment variable (see the service provider).
+  aabenintra_observability.log_level: info
+
+services:
+  # One JSON line per log record on the container's stderr. Apache in the
+  # official Drupal image forwards stderr to the container log, so the docker
+  # json-file driver and then promtail/Alloy pick it up without any file I/O
+  # inside the container.
+  monolog.handler.aabenintra_stderr:
+    class: Monolog\Handler\StreamHandler
+    arguments: ['php://stderr', '%aabenintra_observability.log_level%']
+    shared: false
+
+  # ECS-shaped JSON. Service name, environment, tenant and release come from
+  # the environment (APP_ENV, TENANT/TRUSTED_HOSTS, APP_RELEASE).
+  monolog.formatter.aabenintra_ecs:
+    class: Drupal\aabenintra_observability\Logger\EcsFormatter
+    factory: ['Drupal\aabenintra_observability\Logger\EcsFormatter', 'fromEnvironment']
+    shared: false
+
+  # Human-readable lines when drush runs in a terminal (deploy scripts, cron),
+  # JSON for everything served by Apache.
+  monolog.formatter.aabenintra_ecs_or_drush:
+    class: Drupal\monolog\Logger\Formatter\ConditionalFormatter
+    arguments:
+      - '@monolog.formatter.drush'
+      - '@monolog.formatter.aabenintra_ecs'
+      - '@monolog.condition_resolver.cli'
+    shared: false
+
+  # Memory in bytes (not the "4 MB" string the stock processor emits).
+  monolog.processor.aabenintra_memory_bytes:
+    class: Monolog\Processor\MemoryUsageProcessor
+    arguments: [true, false]
+    shared: false
+
+  # Sentry/GlitchTip settings derived from SENTRY_* / APP_* environment
+  # variables. Returns nothing when SENTRY_DSN is empty, so the raven module
+  # stays inert until an operator sets a DSN.
+  aabenintra_observability.raven_overrides:
+    class: Drupal\aabenintra_observability\Config\RavenOverrides
+    tags:
+      - { name: config.factory.override, priority: 10 }

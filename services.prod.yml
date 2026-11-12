@@ -16,3 +16,22 @@ parameters:
     cookie_secure: true
   # AabenIntra is a server-rendered themed Drupal site (not headless), so no
   # cross-origin API access is configured.
+
+  # Logging (aabenintra_observability + monolog). Every channel goes to the
+  # container's stderr as one ECS-shaped JSON line, which the docker json-file
+  # driver stores and promtail/Alloy ships to Loki. The watchdog table (dblog)
+  # and Sentry are appended at compile time when LOG_DBLOG=1 / SENTRY_DSN is
+  # set - see docs/OBSERVABILITY.md. The handler level follows LOG_LEVEL.
+  monolog.channel_handlers:
+    default:
+      handlers:
+        - name: 'aabenintra_stderr'
+          formatter: 'aabenintra_ecs_or_drush'
+  monolog.processors:
+    - 'message_placeholder'
+    - 'current_user'
+    - 'request_uri'
+    - 'ip'
+    - 'referer'
+    - 'aabenintra_memory_bytes'
+    - 'filter_backtrace'

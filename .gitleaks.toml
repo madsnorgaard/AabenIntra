@@ -1,0 +1,20 @@
+# Secret scanning configuration (gitleaks). Extends the built-in rule set and
+# allowlists the one file that intentionally holds credential-shaped
+# placeholders: .env.example. Real .env files are gitignored and must never be
+# committed; the scan runs over the full history on every pull request.
+title = "AabenIntra"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholders and generated lock files"
+paths = [
+  '''^\.env\.example$''',
+  '''(^|/)composer\.lock$''',
+  '''(^|/)package-lock\.json$''',
+  '''^web/themes/custom/aabenintra/dist/''',
+]
+regexes = [
+  '''CHANGE_ME''',
+]
