@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHPUnit configuration for the AabenIntra custom modules.
+
+  Bootstraps Drupal core's test bootstrap so the Unit / Kernel / Functional
+  base classes from web/core are available, and discovers tests under
+  web/modules/custom/<module>/tests/src/{Unit,Kernel,Functional}.
+
+  Run (see docs/QUALITY.md for the full recipe):
+    vendor/bin/phpunit -\-testsuite unit
+    SIMPLETEST_DB=sqlite://localhost/sites/default/files/.ht.sqlite vendor/bin/phpunit -\-testsuite kernel
+    SIMPLETEST_BASE_URL=http://127.0.0.1:8888 SIMPLETEST_DB=... vendor/bin/phpunit -\-testsuite functional
+
+  Copy to phpunit.xml for local overrides (gitignored).
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="web/core/tests/bootstrap.php"
+         colors="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutChangesToGlobalState="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         failOnPhpunitWarning="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         cacheResult="false"
+         cacheDirectory=".phpunit.cache">
+  <php>
+    <ini name="error_reporting" value="32767"/>
+    <ini name="memory_limit" value="-1"/>
+    <!-- Functional tests only. Example: http://127.0.0.1:8888 -->
+    <env name="SIMPLETEST_BASE_URL" value=""/>
+    <!-- Kernel + Functional tests. Example: sqlite://localhost/sites/default/files/.ht.sqlite
+         or mysql://user:pass@127.0.0.1/aabenintra_test -->
+    <env name="SIMPLETEST_DB" value=""/>
+    <!-- Where Functional tests write the HTML of every page they visited. -->
+    <env name="BROWSERTEST_OUTPUT_DIRECTORY" value="web/sites/simpletest/browser_output"/>
+    <env name="BROWSERTEST_OUTPUT_BASE_URL" value=""/>
+    <!-- Deprecations are reported, not fatal: contrib and core trigger them on
+         every minor. Tighten per module once the baseline is clean. -->
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
+    <env name="MINK_DRIVER_CLASS" value=""/>
+    <env name="MINK_DRIVER_ARGS" value=""/>
+    <env name="MINK_DRIVER_ARGS_WEBDRIVER" value=""/>
+  </php>
+  <extensions>
+    <bootstrap class="Drupal\TestTools\Extension\HtmlLogging\HtmlOutputLogger">
+      <parameter name="outputDirectory" value="web/sites/simpletest/browser_output"/>
+      <parameter name="verbose" value="false"/>
+    </bootstrap>
+    <bootstrap class="Drupal\TestTools\Extension\Dump\DebugDump">
+      <parameter name="colors" value="true"/>
+      <parameter name="printCaller" value="true"/>
+    </bootstrap>
+  </extensions>
+  <testsuites>
+    <testsuite name="unit">
+      <directory>web/modules/custom/*/tests/src/Unit</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>web/modules/custom/*/tests/src/Kernel</directory>
+    </testsuite>
+    <testsuite name="functional">
+      <directory>web/modules/custom/*/tests/src/Functional</directory>
+    </testsuite>
+  </testsuites>
+  <!-- Coverage scope: the custom modules only, never core/contrib/tests. -->
+  <source ignoreSuppressionOfDeprecations="true">
+    <include>
+      <directory suffix=".php">web/modules/custom</directory>
+      <directory suffix=".module">web/modules/custom</directory>
+      <directory suffix=".install">web/modules/custom</directory>
+    </include>
+    <exclude>
+      <directory>web/modules/custom/*/tests</directory>
+    </exclude>
+  </source>
+</phpunit>

@@ -101,7 +101,9 @@ services:
       - aabenintra_redis
 
   aabenintra_redis:
-    image: library/redis:latest
+    # Pinned to a major so a `docker compose pull` cannot jump to an untested
+    # Redis release; Dependabot (docker-compose ecosystem) proposes bumps.
+    image: redis:8-alpine
     container_name: aabenintra_redis
     volumes:
       - ./data/redis:/data
