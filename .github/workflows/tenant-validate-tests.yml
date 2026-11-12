@@ -1,0 +1,59 @@
+name: Tenant validation tests
+
+# Unit + kernel tests of aabenintra_ops (the drush aabenintra:validate and
+# aabenintra:verify-isolation checks). Scoped to the module so it stays cheap;
+# the repository-wide PHPUnit job (ci.yml) can absorb it once it exists.
+
+on:
+  pull_request:
+    paths:
+      - 'web/modules/custom/aabenintra_ops/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/tenant-validate-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tenant-validate-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpunit:
+    name: phpunit / aabenintra_ops
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, pdo_sqlite, sqlite3, mbstring, xml, zip, opcache
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Static analysis (aabenintra_ops)
+        run: |
+          cat > /tmp/phpstan-ops.neon <<'NEON'
+          parameters:
+            level: 8
+            paths:
+              - '%currentWorkingDirectory%/web/modules/custom/aabenintra_ops'
+          NEON
+          vendor/bin/phpstan analyse -c /tmp/phpstan-ops.neon --no-progress --memory-limit=1G
+
+      - name: Unit and kernel tests
+        env:
+          SIMPLETEST_BASE_URL: http://localhost
+          SIMPLETEST_DB: sqlite://localhost/sites/default/files/.ht.sqlite
+          BROWSERTEST_OUTPUT_DIRECTORY: /tmp/browser-output
+        run: |
+          mkdir -p web/sites/default/files web/sites/simpletest /tmp/browser-output
+          chmod -R 777 web/sites/default/files web/sites/simpletest
+          vendor/bin/phpunit -c web/core web/modules/custom/aabenintra_ops --display-deprecations

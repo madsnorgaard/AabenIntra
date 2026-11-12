@@ -84,7 +84,8 @@ $DRUSH en \
   aabenintra_kudos \
   aabenintra_channels \
   aabenintra_activity \
-  aabenintra_observability
+  aabenintra_observability \
+  aabenintra_ops
 # Sentry/GlitchTip client: inert until SENTRY_DSN is set (docs/OBSERVABILITY.md).
 $DRUSH en raven
 
@@ -113,6 +114,11 @@ else
 fi
 
 $DRUSH cr
+
+# Post-install validation (aabenintra_ops). Fails the bootstrap (set -e) when a
+# check fails; warnings (demo module enabled, cron never run) do not.
+echo "==> Validating the tenant"
+$DRUSH aabenintra:validate
 
 echo
 echo "==> Done. One-time admin login link:"

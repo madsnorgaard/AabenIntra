@@ -1,0 +1,37 @@
+# Categories for GitHub's generated release notes (gh release create
+# --generate-notes). PRs are grouped by label; unlabelled PRs land in "Other".
+# Labels must match the repository's taxonomy (see CHANGELOG.md header).
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - invalid
+      - wontfix
+  categories:
+    - title: Security
+      labels:
+        - security
+    - title: Features
+      labels:
+        - feature
+        - enhancement
+    - title: Fixes
+      labels:
+        - bug
+    - title: Accessibility and compliance
+      labels:
+        - a11y
+        - compliance
+    - title: Tech debt and operations
+      labels:
+        - tech-debt
+        - cross-cutting
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Other
+      labels:
+        - "*"
