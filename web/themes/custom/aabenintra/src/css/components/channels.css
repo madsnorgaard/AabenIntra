@@ -59,12 +59,15 @@
 }
 .ai-follow:hover { background: var(--accent-tint, #f3e3d8); }
 .ai-follow:disabled { opacity: 0.6; cursor: default; }
-/* Following = filled accent. */
+/* Following = filled accent. Uses the --accent-fill token (not the raw
+   --accent seed): the seed is tuned as a hue, the fill is the lightness at
+   which --on-accent text passes WCAG AA (axe measured 4.39:1 on the seed). */
 .ai-follow.is-following {
-  background: var(--accent, #a8552f);
-  border-color: var(--accent, #a8552f);
+  background: var(--accent-fill, #8a4427);
+  border-color: var(--accent-fill, #8a4427);
   color: var(--on-accent, #fff);
 }
+.ai-follow.is-following:hover { background: var(--accent-fill-hover, #7a3a20); }
 .ai-follow__count {
   font-size: var(--fs-xs, 0.75rem);
   font-weight: var(--fw-semibold, 600);

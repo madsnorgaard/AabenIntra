@@ -1,0 +1,34 @@
+# Safe first-rollout defaults: every header is emitted, but the CSP is sent as
+# Content-Security-Policy-Report-Only so nothing is blocked until an operator
+# has watched the reports and flipped report_only off. See
+# docs/SECURITY-HEADERS.md for the rollout procedure.
+enabled: true
+hsts:
+  enabled: true
+  max_age: 31536000
+  include_subdomains: true
+  preload: false
+referrer_policy: 'strict-origin-when-cross-origin'
+permissions_policy: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
+csp:
+  enabled: true
+  report_only: true
+  report_uri: ''
+  use_nonce: false
+  style_unsafe_inline: true
+  upgrade_insecure_requests: true
+  extra:
+    default_src: {  }
+    script_src: {  }
+    style_src: {  }
+    img_src: {  }
+    font_src: {  }
+    connect_src: {  }
+    media_src: {  }
+    frame_src: {  }
+    frame_ancestors: {  }
+    worker_src: {  }
+    manifest_src: {  }
+    base_uri: {  }
+    form_action: {  }
+    object_src: {  }
