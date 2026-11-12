@@ -1,0 +1,26 @@
+services:
+  aabenintra_security.policy_builder:
+    class: Drupal\aabenintra_security\Csp\PolicyBuilder
+
+  # One nonce per request. Reset on TERMINATE so long-running runtimes never
+  # reuse it across requests.
+  aabenintra_security.nonce:
+    class: Drupal\aabenintra_security\Csp\NonceService
+
+  aabenintra_security.response_subscriber:
+    class: Drupal\aabenintra_security\EventSubscriber\SecurityHeadersSubscriber
+    arguments:
+      - '@config.factory'
+      - '@aabenintra_security.policy_builder'
+      - '@aabenintra_security.nonce'
+      - '@page_cache_request_policy'
+      - '@page_cache_response_policy'
+      - '@page_cache_kill_switch'
+    tags:
+      - { name: event_subscriber }
+
+  aabenintra_security.twig_extension:
+    class: Drupal\aabenintra_security\Twig\CspNonceExtension
+    arguments: ['@aabenintra_security.nonce']
+    tags:
+      - { name: twig.extension }

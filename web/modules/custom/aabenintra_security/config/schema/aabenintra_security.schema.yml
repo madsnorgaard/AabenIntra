@@ -1,0 +1,104 @@
+aabenintra_security.settings:
+  type: config_object
+  label: 'AabenIntra security headers settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Emit security headers'
+    hsts:
+      type: mapping
+      label: 'Strict-Transport-Security'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Send HSTS on HTTPS responses'
+        max_age:
+          type: integer
+          label: 'max-age in seconds'
+        include_subdomains:
+          type: boolean
+          label: 'includeSubDomains'
+        preload:
+          type: boolean
+          label: 'preload'
+    referrer_policy:
+      type: string
+      label: 'Referrer-Policy value (empty disables the header)'
+    permissions_policy:
+      type: string
+      label: 'Permissions-Policy value (empty disables the header)'
+    csp:
+      type: mapping
+      label: 'Content-Security-Policy'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Send a Content-Security-Policy header'
+        report_only:
+          type: boolean
+          label: 'Send as Content-Security-Policy-Report-Only'
+        report_uri:
+          type: string
+          label: 'Violation report endpoint (report-uri / report-to)'
+        use_nonce:
+          type: boolean
+          label: 'Add a per-request nonce to script-src'
+        style_unsafe_inline:
+          type: boolean
+          label: "Keep 'unsafe-inline' in style-src"
+        upgrade_insecure_requests:
+          type: boolean
+          label: 'Add upgrade-insecure-requests'
+        extra:
+          type: mapping
+          label: 'Extra sources per directive, appended to the baseline'
+          mapping:
+            default_src:
+              type: aabenintra_security.source_list
+              label: 'default-src'
+            script_src:
+              type: aabenintra_security.source_list
+              label: 'script-src'
+            style_src:
+              type: aabenintra_security.source_list
+              label: 'style-src'
+            img_src:
+              type: aabenintra_security.source_list
+              label: 'img-src'
+            font_src:
+              type: aabenintra_security.source_list
+              label: 'font-src'
+            connect_src:
+              type: aabenintra_security.source_list
+              label: 'connect-src'
+            media_src:
+              type: aabenintra_security.source_list
+              label: 'media-src'
+            frame_src:
+              type: aabenintra_security.source_list
+              label: 'frame-src'
+            frame_ancestors:
+              type: aabenintra_security.source_list
+              label: 'frame-ancestors'
+            worker_src:
+              type: aabenintra_security.source_list
+              label: 'worker-src'
+            manifest_src:
+              type: aabenintra_security.source_list
+              label: 'manifest-src'
+            base_uri:
+              type: aabenintra_security.source_list
+              label: 'base-uri'
+            form_action:
+              type: aabenintra_security.source_list
+              label: 'form-action'
+            object_src:
+              type: aabenintra_security.source_list
+              label: 'object-src'
+
+aabenintra_security.source_list:
+  type: sequence
+  label: 'CSP source expressions'
+  sequence:
+    type: string
+    label: 'Source expression'
