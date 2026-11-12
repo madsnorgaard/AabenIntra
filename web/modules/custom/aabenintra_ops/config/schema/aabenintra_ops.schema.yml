@@ -1,0 +1,41 @@
+aabenintra_ops.settings:
+  type: config_object
+  label: 'AabenIntra Ops settings'
+  mapping:
+    expected_modules:
+      type: sequence
+      label: 'Modules that must be enabled'
+      sequence:
+        type: string
+    expected_theme:
+      type: string
+      label: 'Expected default theme'
+    expected_front_page:
+      type: string
+      label: 'Expected front page path'
+    expected_config:
+      type: sequence
+      label: 'Config objects that must exist'
+      sequence:
+        type: string
+    synthetic_pages:
+      type: sequence
+      label: 'Pages rendered by the synthetic request check'
+      sequence:
+        type: mapping
+        mapping:
+          path:
+            type: string
+            label: 'Path'
+          marker:
+            type: string
+            label: 'Marker string expected in the response body'
+    synthetic_uid:
+      type: integer
+      label: 'Account the synthetic requests run as'
+    cron_max_age:
+      type: integer
+      label: 'Maximum age of the last cron run in seconds'
+    tenant_slug:
+      type: string
+      label: 'Tenant slug for the naming contract'

@@ -13,3 +13,8 @@ cd /opt/drupal
 drush cr
 drush updb --yes
 drush cr
+# Tenants installed before aabenintra_ops existed need it enabled once; the
+# call is a cheap no-op afterwards. Then validate the deploy: a failing check
+# fails the post-deploy (set -e). See docs/DEPLOYMENT.md.
+drush pm:install aabenintra_ops --yes
+drush aabenintra:validate
