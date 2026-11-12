@@ -1,0 +1,40 @@
+services:
+  logger.channel.aabenintra_audit:
+    parent: logger.channel_base
+    arguments: ['aabenintra_audit']
+
+  aabenintra_audit.repository:
+    class: Drupal\aabenintra_audit\AuditRepository
+    arguments: ['@database']
+
+  aabenintra_audit.recorder:
+    class: Drupal\aabenintra_audit\AuditRecorder
+    arguments:
+      - '@database'
+      - '@datetime.time'
+      - '@request_stack'
+      - '@event_dispatcher'
+      - '@logger.channel.aabenintra_audit'
+
+  aabenintra_audit.retention:
+    class: Drupal\aabenintra_audit\Retention
+    arguments: ['@database', '@config.factory', '@datetime.time', '@logger.channel.aabenintra_audit']
+
+  aabenintra_audit.suspicious_login_detector:
+    class: Drupal\aabenintra_audit\SuspiciousLoginDetector
+    arguments:
+      - '@aabenintra_audit.repository'
+      - '@aabenintra_audit.recorder'
+      - '@config.factory'
+      - '@datetime.time'
+      - '@plugin.manager.mail'
+      - '@language_manager'
+      - '@logger.channel.aabenintra_audit'
+    tags:
+      - { name: event_subscriber }
+
+  aabenintra_audit.password_reset_subscriber:
+    class: Drupal\aabenintra_audit\EventSubscriber\PasswordResetSubscriber
+    arguments: ['@aabenintra_audit.recorder', '@current_user']
+    tags:
+      - { name: event_subscriber }

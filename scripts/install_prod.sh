@@ -83,6 +83,7 @@ $DRUSH en \
   aabenintra_social \
   aabenintra_kudos \
   aabenintra_channels \
+  aabenintra_audit \
   aabenintra_activity \
   aabenintra_observability \
   aabenintra_ops

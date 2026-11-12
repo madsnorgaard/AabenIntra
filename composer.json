@@ -50,7 +50,7 @@
             "symfony/runtime": true
         },
         "audit": {
-            "block-insecure": false
+            "block-insecure": true
         },
         "sort-packages": true
     },

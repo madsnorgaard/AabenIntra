@@ -1,10 +1,19 @@
 parameters:
+  # Session policy - see docs/SESSION-POLICY.md before changing.
   session.storage.options:
     gc_probability: 1
     gc_divisor: 100
-    gc_maxlifetime: 200000
-    cookie_lifetime: 2000000
+    # Server-side idle lifetime: 8 hours (a working day). A session that is
+    # not used for 8 h is garbage-collected and the next request must log in.
+    gc_maxlifetime: 28800
+    # Session cookie, not persistent: it is discarded when the browser closes.
+    # There is no "remember me"; shared municipal PCs must not keep a login.
+    cookie_lifetime: 0
     cookie_samesite: Lax
+    # Core overrides this from the request scheme (Request::isSecure()), which
+    # is HTTPS via Traefik's X-Forwarded-Proto with reverse_proxy enabled in
+    # settings.php. Kept explicit so the intended value is documented.
+    cookie_secure: true
   # AabenIntra is a server-rendered themed Drupal site (not headless), so no
   # cross-origin API access is configured.
 

@@ -1,0 +1,20 @@
+# Static analysis for the AabenIntra custom code.
+#
+# Drupal-aware rules come from mglaman/phpstan-drupal and the deprecation
+# rules from phpstan/phpstan-deprecation-rules; both ship with drupal/core-dev
+# and register themselves through phpstan/extension-installer, so they are not
+# listed under includes.
+#
+# Level 6 is enforced for everything the baseline does not cover. The baseline
+# holds the findings that existed when the gate was introduced; shrink it, never
+# grow it (see docs/QUALITY.md for the path to level 9).
+includes:
+  - phpstan-baseline.neon
+parameters:
+  level: 6
+  paths:
+    - web/modules/custom
+    - web/themes/custom/aabenintra/aabenintra.theme
+  excludePaths:
+    - web/modules/custom/*/tests/*
+  tmpDir: .phpstan.cache

@@ -1,4 +1,8 @@
-FROM drupal:11-php8.4-apache
+# Pinned to the multi-arch index digest of drupal:11-php8.4-apache so a build
+# always gets the image that was reviewed, not whatever the tag points at today.
+# Dependabot (docker ecosystem, .github/dependabot.yml) proposes digest bumps
+# and moves the tag when upstream retags; do not edit the digest by hand.
+FROM drupal:11-php8.4-apache@sha256:3c7283ee0df1228e880470e6d204a2d930b34bf6990adab6275e78c4485db191
 
 # Tools needed at build/runtime: git for the on-VPS code checkout, the mysql
 # client for drush sql commands, unzip for composer package extraction.
