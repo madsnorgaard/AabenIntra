@@ -216,20 +216,37 @@ final class DemoContentGenerator {
     $dir = 'public://aabenintra-demo';
     $this->fileSystem->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY);
 
-    $width = 1200;
-    $height = 800;
+    $width = 1600;
+    $height = 900;
     $image = imagecreatetruecolor($width, $height);
-    $base = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
-    $dark = imagecolorallocate($image, (int) ($rgb[0] * 0.6), (int) ($rgb[1] * 0.6), (int) ($rgb[2] * 0.6));
-    $white = imagecolorallocate($image, 255, 255, 255);
-    imagefilledrectangle($image, 0, 0, $width, $height, $base);
-    imagefilledrectangle($image, 0, (int) ($height * 0.62), $width, $height, $dark);
-    // Title text using the built-in large font.
-    imagestring($image, 5, 48, (int) ($height * 0.7), substr($title, 0, 60), $white);
-    imagestring($image, 3, 48, (int) ($height * 0.7) + 24, 'AabenIntra demo', $white);
+
+    // Text-free composition: the story title is rendered by the template
+    // right below the hero, and GD's built-in bitmap fonts (max 9x15 px) turn
+    // to mush as soon as an image style or the browser rescales the image.
+    // A vertical gradient plus a few large translucent discs stays crisp at
+    // every derivative size.
+    for ($y = 0; $y < $height; $y++) {
+      // 1.0 at the top edge, 0.62 at the bottom edge.
+      $shade = 1 - 0.38 * ($y / ($height - 1));
+      $line = imagecolorallocate($image, (int) ($rgb[0] * $shade), (int) ($rgb[1] * $shade), (int) ($rgb[2] * $shade));
+      imageline($image, 0, $y, $width - 1, $y, $line);
+    }
+
+    // Disc positions and sizes derive from the title, so every story gets its
+    // own, reproducible composition.
+    imagealphablending($image, TRUE);
+    $seed = hexdec(substr(md5($title), 0, 7));
+    $light = imagecolorallocatealpha($image, 255, 255, 255, 112);
+    $shadow = imagecolorallocatealpha($image, 0, 0, 0, 114);
+    for ($i = 0; $i < 5; $i++) {
+      $cx = (int) ((($seed >> ($i * 3)) % 100) / 100 * $width);
+      $cy = (int) ((($seed >> ($i * 4 + 1)) % 100) / 100 * $height);
+      $diameter = 420 + (($seed >> ($i * 2)) % 6) * 130;
+      imagefilledellipse($image, $cx, $cy, $diameter, $diameter, $i % 2 ? $shadow : $light);
+    }
 
     $tmp = $this->fileSystem->tempnam('temporary://', 'aidemo') . '.jpg';
-    imagejpeg($image, $this->fileSystem->realpath($tmp), 85);
+    imagejpeg($image, $this->fileSystem->realpath($tmp), 90);
     imagedestroy($image);
 
     $data = file_get_contents($this->fileSystem->realpath($tmp));
