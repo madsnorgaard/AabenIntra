@@ -1,0 +1,12 @@
+aabenintra_observability.health:
+  path: '/health'
+  defaults:
+    _controller: '\Drupal\aabenintra_observability\Controller\HealthController::check'
+  requirements:
+    # Anonymous on purpose: probes (Traefik, blackbox, Uptime Kuma) carry no
+    # credentials, and the response holds no information worth protecting.
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+    # Probes must keep answering while the site is in maintenance mode.
+    _maintenance_access: TRUE
