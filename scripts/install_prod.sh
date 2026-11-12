@@ -83,9 +83,13 @@ $DRUSH en \
   aabenintra_social \
   aabenintra_kudos \
   aabenintra_channels \
+  aabenintra_audit \
   aabenintra_activity \
   aabenintra_gdpr \
+  aabenintra_observability \
   aabenintra_ops
+# Sentry/GlitchTip client: inert until SENTRY_DSN is set (docs/OBSERVABILITY.md).
+$DRUSH en raven
 
 echo "==> Theme: default = aabenintra, front page = /dashboard"
 $DRUSH theme:enable aabenintra

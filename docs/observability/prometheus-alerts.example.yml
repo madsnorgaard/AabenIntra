@@ -1,0 +1,66 @@
+# Suggested Prometheus alert rules for an AabenIntra tenant. Copy into your
+# rule_files and adjust the service/container regexes and thresholds.
+# Loki-based rules (error log burst) are expressed as Loki ruler rules below.
+# See docs/OBSERVABILITY.md for the reasoning behind each threshold.
+
+groups:
+  - name: aabenintra
+    rules:
+      # Traefik: more than 5 % of responses are 5xx for 5 minutes. Needs some
+      # traffic to be meaningful; clamp_min stops a single failing request on
+      # an idle night from firing.
+      - alert: AabenIntra5xxRate
+        expr: |
+          100 * sum by (service) (rate(traefik_service_requests_total{service=~"aabenintra.*", code=~"5.."}[5m]))
+            / clamp_min(sum by (service) (rate(traefik_service_requests_total{service=~"aabenintra.*"}[5m])), 0.05)
+          > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }}: {{ $value | printf \"%.1f\" }} % of responses are 5xx"
+          description: "Check the Recent errors panel of the AabenIntra dashboard and Sentry/GlitchTip."
+
+      # Traefik: p95 above 3 s for 10 minutes.
+      - alert: AabenIntraSlow
+        expr: |
+          histogram_quantile(0.95, sum by (service, le) (rate(traefik_service_request_duration_seconds_bucket{service=~"aabenintra.*"}[5m]))) > 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }}: p95 latency {{ $value | printf \"%.1f\" }} s"
+
+      # Blackbox: /health answers 503 or not at all. /health is 503 when the
+      # database or the cache backend does not answer.
+      - alert: AabenIntraHealthDown
+        expr: probe_success{instance=~".*aabenintra.*/health"} == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} is failing"
+          description: "GET /health returned non-200 for 3 minutes (db or cache check failed, or the container is down)."
+
+      # cAdvisor: MariaDB (or any tenant container) restarted.
+      - alert: AabenIntraContainerRestarted
+        expr: changes(container_start_time_seconds{name=~"aabenintra_.*"}[15m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.name }} restarted"
+          description: "Look at `docker logs {{ $labels.name }}` and the Container (re)starts panel; an OOM kill shows in dmesg."
+
+# --- Loki ruler (loki.yml: ruler.storage + ruler.rule_path) -------------------
+# groups:
+#   - name: aabenintra-logs
+#     rules:
+#       # More than 20 error-or-worse lines in 5 minutes from the Drupal logs.
+#       - alert: AabenIntraErrorLogBurst
+#         expr: |
+#           sum(count_over_time({job="containers"} | json | service_name="aabenintra" | log_level=~"error|critical|alert|emergency" [5m])) > 20
+#         for: 2m
+#         labels:
+#           severity: warning
+#         annotations:
+#           summary: "AabenIntra logged {{ $value }} errors in 5 minutes"

@@ -30,3 +30,10 @@ web/themes/custom/*/node_modules/
 
 # DDEV-generated site settings (provided per environment)
 /web/sites/*/settings.php
+
+# Test and analysis artefacts
+/phpunit.xml
+/.phpunit.cache/
+/web/sites/simpletest/
+/build/
+/.phpstan.cache/

@@ -1,0 +1,22 @@
+aabenintra_audit.report:
+  path: '/admin/reports/auth-audit'
+  defaults:
+    _controller: '\Drupal\aabenintra_audit\Controller\AuditLogController::report'
+    _title: 'Authentication audit log'
+  requirements:
+    _permission: 'view authentication audit log'
+
+aabenintra_audit.report_csv:
+  path: '/admin/reports/auth-audit/csv'
+  defaults:
+    _controller: '\Drupal\aabenintra_audit\Controller\AuditLogController::csv'
+  requirements:
+    _permission: 'view authentication audit log'
+
+aabenintra_audit.settings:
+  path: '/admin/config/system/auth-audit'
+  defaults:
+    _form: '\Drupal\aabenintra_audit\Form\SettingsForm'
+    _title: 'Authentication audit log settings'
+  requirements:
+    _permission: 'administer authentication audit log'

@@ -21,6 +21,11 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: "1"
     volumes:
       - ./data/mysql:/var/lib/mysql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
     labels:
       - "traefik.enable=false"
     networks:
@@ -33,6 +38,11 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      args:
+        # Release identifier shown by /health and attached to logs and Sentry
+        # events; pass the git sha at build time, e.g.
+        #   APP_RELEASE=$(git rev-parse --short HEAD) docker compose build
+        APP_RELEASE: ${APP_RELEASE:-dev}
     restart: always
     working_dir: /opt/drupal
     volumes:
@@ -61,6 +71,22 @@ services:
       SMTP_USER: ${SMTP_USER:-mads@madsnorgaard.net}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM:-mads@madsnorgaard.net}
+      # Observability (docs/OBSERVABILITY.md). Empty SENTRY_DSN = tracking off.
+      APP_ENV: ${APP_ENV:-production}
+      TENANT: ${TENANT:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_DBLOG: ${LOG_DBLOG:-0}
+      LOG_ANONYMIZE_IP: ${LOG_ANONYMIZE_IP:-1}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
+    # Bounded json-file logs: promtail/Alloy tail these, so the host never
+    # needs the files for longer than it takes to ship them.
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aabenintra_drupal.rule=Host(`aabenintra.fenixnordic.solutions`)"
@@ -75,7 +101,9 @@ services:
       - aabenintra_redis
 
   aabenintra_redis:
-    image: library/redis:latest
+    # Pinned to a major so a `docker compose pull` cannot jump to an untested
+    # Redis release; Dependabot (docker-compose ecosystem) proposes bumps.
+    image: redis:8-alpine
     container_name: aabenintra_redis
     volumes:
       - ./data/redis:/data

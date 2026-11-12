@@ -1,0 +1,9 @@
+name: 'AabenIntra Audit'
+type: module
+description: 'Authentication audit log: login, logout, password reset, account and role changes with IP and user agent, retention + GDPR IP minimisation, optional suspicious-login alerts.'
+package: 'AabenIntra'
+core_version_requirement: ^11
+php: ^8.3
+dependencies:
+  - drupal:user
+configure: aabenintra_audit.settings
