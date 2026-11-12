@@ -1,0 +1,22 @@
+{
+  "name": "aabenintra-e2e",
+  "private": true,
+  "description": "Accessibility (axe-core) and performance (Lighthouse CI) gates for AabenIntra. Runs against a site built by scripts/install_ci.sh.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "lhci": "npm run lhci:anon && npm run lhci:auth",
+    "lhci:anon": "cd lighthouse/anon && lhci autorun",
+    "lhci:auth": "cd lighthouse/auth && lhci autorun"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@lhci/cli": "0.16.0",
+    "@playwright/test": "1.65.0",
+    "@types/node": "24.10.1"
+  }
+}
