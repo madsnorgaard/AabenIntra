@@ -11,4 +11,7 @@ install:
   - link
 # Apply AFTER aabenintra_media: Story's lead image references the Image media
 # type. Config in this recipe's config/ directory is imported automatically.
-# Reuses the core body field storage provided by the Standard recipe (base).
+# Ships its own copy of core's field.storage.node.body (identical to the one in
+# core/recipes/page_content_type): the Standard recipe stopped creating any
+# content type, so a fresh install has no body storage for Story/Event/Document
+# to attach to. Identical config is skipped on sites that already have it.
