@@ -2,7 +2,7 @@
 # always gets the image that was reviewed, not whatever the tag points at today.
 # Dependabot (docker ecosystem, .github/dependabot.yml) proposes digest bumps
 # and moves the tag when upstream retags; do not edit the digest by hand.
-FROM drupal:11-php8.4-apache@sha256:3c7283ee0df1228e880470e6d204a2d930b34bf6990adab6275e78c4485db191
+FROM drupal:11-php8.4-apache@sha256:b12e064f943b1cf7e0e6fb02a81b58e8dcf9add6550e82f59b2dbb63a4f46003
 
 # Tools needed at build/runtime: git for the on-VPS code checkout, the mysql
 # client for drush sql commands, unzip for composer package extraction.
