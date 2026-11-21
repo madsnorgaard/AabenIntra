@@ -81,7 +81,7 @@ jobs:
           echo "server did not come up"; cat php-server.log; exit 1
 
       - name: Set up Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
           cache: npm
