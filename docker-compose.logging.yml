@@ -12,7 +12,7 @@
 
 services:
   aabenintra_alloy:
-    image: grafana/alloy:v1.21.3
+    image: grafana/alloy:v1.22.0
     container_name: aabenintra_alloy
     restart: unless-stopped
     command:
