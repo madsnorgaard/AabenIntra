@@ -49,4 +49,8 @@ RUN chown -R www-data:www-data /opt/drupal \
 ARG APP_RELEASE=dev
 ENV APP_RELEASE=$APP_RELEASE
 
+RUN printf '%s\n' '<LocationMatch "^/(core/)?(install|rebuild)\.php">' '    Require all denied' '</LocationMatch>' \
+      > /etc/apache2/conf-available/block-installer.conf \
+    && a2enconf block-installer
+
 CMD ["apache2-foreground"]
